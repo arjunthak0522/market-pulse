@@ -1,16 +1,17 @@
 {
-  "generated_at": "2026-08-30T19:57:47.474271+00:00",
+  "generated_at": "2026-08-30T20:02:39.785184+00:00",
   "market_date": "2026-08-28",
   "breadth": {
     "above_5d": 33.2,
-    "above_20d": 42.34,
-    "above_50d": 52.88,
-    "above_200d": 68.78,
-    "advancers": null,
-    "decliners": null,
-    "new_highs_52w": null,
-    "new_lows_52w": null,
-    "source": "Barchart"
+    "above_20d": 42.43,
+    "above_50d": 52.99,
+    "above_200d": 69.14,
+    "advancers": 229,
+    "decliners": 273,
+    "unchanged": 1,
+    "new_highs_52w": 6,
+    "new_lows_52w": 2,
+    "source": "S&P 500 constituent closes via Yahoo Finance"
   },
   "vix": {
     "value": 14.43,
