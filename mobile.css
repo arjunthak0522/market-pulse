@@ -1,0 +1,58 @@
+/* Market Pulse mobile-first UX layer */
+button,.view-option,.asset-tab,.alert-permission,.refresh-btn,summary{min-height:44px}
+@media(max-width:720px){
+  .app-shell{padding-left:14px;padding-right:14px}
+  .simplified-header{padding-top:14px;padding-bottom:10px}
+  .brand-block h1{font-size:clamp(22px,7vw,30px);line-height:1.05;max-width:280px}
+  .header-actions{gap:8px;align-items:center}
+  .view-toggle{flex:1;max-width:260px}
+  .view-option{font-size:10px;padding:8px 7px}
+  .premium-hero{padding:20px 16px 18px;margin-top:8px}
+  .premium-hero .hero-grid{grid-template-columns:1fr}
+  .premium-hero .hero-chart{display:none}
+  .regime-display{font-size:clamp(30px,10vw,42px);line-height:1.02}
+  .regime-thesis{font-size:15px;line-height:1.55;margin-top:10px}
+  .regime-evidence{grid-template-columns:1fr!important;gap:6px!important;margin-top:12px!important}
+  .regime-evidence .evidence-item{padding:9px 10px!important}
+  .market-state-strip{display:grid!important;grid-template-columns:repeat(5,minmax(92px,1fr))!important;overflow-x:auto;scroll-snap-type:x proximity;gap:0!important;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+  .market-state-strip::-webkit-scrollbar{display:none}
+  .market-state-strip .state-cell{min-width:92px;padding:12px 9px;scroll-snap-align:start}
+  .reading-path{margin:10px 0 2px;padding:10px 11px;border-radius:12px;gap:6px}
+  .path-item{font-size:10px}.path-item b{width:20px;height:20px}.path-arrow{font-size:10px}
+  .guide-section{margin-top:22px}
+  .guide-heading{margin-bottom:10px}.guide-heading h2{font-size:21px;line-height:1.15}.guide-heading p{font-size:12px;line-height:1.45}
+  .health-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;scrollbar-width:none}
+  .health-grid::-webkit-scrollbar{display:none}
+  .health-cell{min-width:72%;max-width:72%;border-top:0!important;border-right:1px solid var(--border)!important;padding:14px;scroll-snap-align:start}
+  .health-cell:last-child{border-right:0!important;grid-column:auto!important}
+  .health-cell strong{font-size:16px}.health-cell p{font-size:12px;margin-top:5px}
+  .trend-brief{padding:15px;margin-top:10px}.trend-brief h3{font-size:17px}.trend-brief>p{font-size:13px;line-height:1.5;margin-bottom:10px}
+  .trend-table-wrap{overflow:visible}.trend-table{table-layout:fixed;font-size:11px}.trend-table th,.trend-table td{padding:9px 5px;white-space:nowrap}.trend-table th:first-child,.trend-table td:first-child{width:22%}
+  .intelligence-section{margin-top:22px}.intelligence-heading h2{font-size:21px}.intelligence-grid{grid-template-columns:1fr!important;gap:10px}.intel-card{padding:15px}
+  .guide-watch{padding:16px}.guide-watch h3{font-size:19px;line-height:1.2}.guide-watch p{font-size:13px;line-height:1.55}
+  .daily-read-grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:22px!important}.daily-read-card{padding:16px!important}.daily-read-card h3{font-size:18px!important}.daily-read-card p{font-size:13px!important;line-height:1.55!important}
+  .breadth-module,.shared-context,.stress-module,.alerts-module,.asset-module{padding:16px!important;margin-top:22px!important}
+  .module-header h2{font-size:21px;line-height:1.18}.module-header p{font-size:12px;line-height:1.5}
+  .breadth-premium-grid{grid-template-columns:1fr!important}.breadth-viz{margin-top:10px}
+  .leadership-guide{padding:16px;gap:10px}.leadership-value strong{font-size:21px}.leadership-copy p{font-size:13px;line-height:1.55}
+  .asset-switcher-wrap{position:sticky;top:0;z-index:20;background:rgba(246,248,251,.96);backdrop-filter:blur(12px);padding:10px 0 8px;margin-top:18px;border-bottom:1px solid var(--border)}
+  .asset-switcher-wrap>div:first-child h2{font-size:18px;margin:3px 0 8px}.asset-switcher{width:100%;display:grid;grid-template-columns:1fr 1fr}.asset-tab{min-width:0;padding:9px}.tab-copy small:last-child{display:none}.tab-code{font-size:16px}.tab-move{font-size:11px}
+  .index-snapshot{grid-template-columns:1fr!important}.index-mini-chart{display:none}.index-meta{grid-template-columns:1fr 1fr!important}.index-meta>div:last-child{grid-column:1/-1}
+  .technical-details{margin-top:12px}.technical-details[open] .indicator-grid{grid-template-columns:1fr!important}.technical-details summary{display:flex;align-items:center;padding:10px 0;font-size:13px;font-weight:800}
+  .indicator-grid,.context-grid,.alerts-grid{grid-template-columns:1fr!important}
+  .card{padding:14px!important}.card p{font-size:12px!important;line-height:1.45!important}
+  .live-pulse{padding:15px!important;margin-top:10px!important}.live-head{display:block!important}.live-badge{display:inline-flex;margin-top:8px}.live-grid{grid-template-columns:1fr 1fr!important}.live-take{font-size:13px!important;line-height:1.5!important}
+  .session-bar{padding:10px 12px!important;gap:8px!important}.session-copy span{font-size:10px!important}.session-clock{font-size:10px!important;white-space:nowrap}
+  .analog-box{padding:15px!important}.analog-box h3{font-size:18px!important}.analog-box p{font-size:12px!important;line-height:1.55!important}
+  footer{font-size:10px;line-height:1.5;padding:24px 4px}
+  dialog .modal{width:min(94vw,520px);max-height:88vh;overflow:auto;padding:18px}.modal h2{font-size:22px}.plain-box p{font-size:13px;line-height:1.55}
+}
+@media(max-width:430px){
+  .app-shell{padding-left:11px;padding-right:11px}
+  .premium-hero{margin-left:0;margin-right:0;padding-left:14px;padding-right:14px}
+  .health-cell{min-width:84%;max-width:84%}
+  .trend-table{font-size:10px}.trend-table th,.trend-table td{padding:8px 3px}
+  .read-meta{gap:5px!important;flex-wrap:wrap}.read-pill{font-size:9px!important}
+  .live-grid{grid-template-columns:1fr 1fr!important;gap:7px!important}.live-metric{padding:10px!important}
+  .index-meta{gap:7px!important}
+}
