@@ -1,5 +1,5 @@
-const CACHE='market-pulse-v13';
-const ASSETS=['./','./index.html','./styles.css?v=13','./enhancements.css?v=13','./premium.css?v=13','./clarity.css?v=13','./daily.css?v=13','./guide.css?v=13','./mobile.css?v=13','./app.js?v=13','./premium.js?v=13','./daily.js?v=13','./strategist.js?v=13','./strategist-daily.js?v=13','./indicator-commentary.js?v=12','./guide.js?v=13','./mobile.js?v=13','./manifest.webmanifest?v=13','./data/market_context.json','./data/history.json'];
+const CACHE='market-pulse-v15';
+const ASSETS=['./','./index.html','./styles.css?v=15','./enhancements.css?v=15','./premium.css?v=15','./clarity.css?v=15','./daily.css?v=15','./guide.css?v=15','./mobile.css?v=15','./app.js?v=15','./premium.js?v=15','./daily.js?v=15','./strategist.js?v=15','./strategist-daily.js?v=15','./indicator-commentary.js?v=12','./guide.js?v=15','./mobile.js?v=15','./manifest.webmanifest?v=15','./data/market_context.json','./data/history.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
 self.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const isNav=e.request.mode==='navigate';e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>isNav?caches.match('./index.html'):caches.match(e.request)))})
