@@ -29,7 +29,7 @@
 </section>
 <section class="asset-workspace">
   <div class="asset-switcher-wrap">
-    <div><div class="eyebrow">INDEX TECHNICALS</div><h2>Momentum, stretch &amp; trend</h2></div>
+    <div><div class="eyebrow">INDEX COCKPIT</div><h2>Momentum, trend &amp; market context</h2></div>
     <div class="asset-switcher" role="tablist" aria-label="Choose market index">
       <button id="tabSPY" class="asset-tab active" type="button" role="tab" aria-selected="true" aria-controls="panelSPY"><span>SPY</span><small>S&amp;P 500</small></button>
       <button id="tabQQQ" class="asset-tab" type="button" role="tab" aria-selected="false" aria-controls="panelQQQ"><span>QQQ</span><small>Nasdaq 100</small></button>
@@ -37,18 +37,18 @@
   </div>
   <article id="panelSPY" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabSPY">
     <div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge">SPY</span><span>S&amp;P 500</span></div><h2>Momentum &amp; trend</h2></div><div id="spyPrice" class="asset-price">--</div></div>
-    <div class="asset-take"><div class="eyebrow">WHAT THIS MEANS</div><p id="spySummary">Loading interpretation...</p></div>
+    <div class="asset-take"><div class="eyebrow">MARKET READ</div><p id="spySummary">Loading interpretation...</p></div>
     <div id="spy" class="indicator-grid asset-grid"></div>
   </article>
   <article id="panelQQQ" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabQQQ" hidden>
     <div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge qqq">QQQ</span><span>Nasdaq 100</span></div><h2>Momentum &amp; trend</h2></div><div id="qqqPrice" class="asset-price">--</div></div>
-    <div class="asset-take"><div class="eyebrow">WHAT THIS MEANS</div><p id="qqqSummary">Loading interpretation...</p></div>
+    <div class="asset-take"><div class="eyebrow">MARKET READ</div><p id="qqqSummary">Loading interpretation...</p></div>
     <div id="qqq" class="indicator-grid asset-grid"></div>
   </article>
-</section>
-<section class="module fear-module">
-  <div class="module-header"><div><div class="eyebrow">FEAR &amp; POSITIONING</div><h2>Are investors calm, cautious, or panicking?</h2><p>Volatility, options positioning, and internal market participation.</p></div><a class="source-link" href="https://www.cboe.com/markets/us/options/market-statistics/daily/" target="_blank" rel="noopener">Cboe <span>↗</span></a></div>
-  <div id="fear" class="indicator-grid fear-grid"></div>
+  <aside class="module shared-context">
+    <div class="module-header"><div><div class="eyebrow">SHARED MARKET CONTEXT</div><h2>Fear &amp; positioning</h2><p>These apply to both SPY and QQQ, so they stay visible whichever index you select.</p></div><a class="source-link" href="https://www.cboe.com/markets/us/options/market-statistics/daily/" target="_blank" rel="noopener">Cboe <span>↗</span></a></div>
+    <div id="marketContext" class="indicator-grid context-grid"></div>
+  </aside>
 </section>
 </main>
 <footer>Personal market dashboard. Indicators describe conditions, not future returns. Data freshness is shown above.</footer>
