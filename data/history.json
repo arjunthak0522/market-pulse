@@ -1,0 +1,1771 @@
+{
+  "generated_at": "2026-08-30T19:57:47.474271+00:00",
+  "market_date": "2026-08-28",
+  "breadth": [],
+  "market": [
+    {
+      "date": "2025-08-28",
+      "spy": 648.92,
+      "qqq": 577.08,
+      "relative_strength_20d": -0.514,
+      "vix": 14.43
+    },
+    {
+      "date": "2025-08-29",
+      "spy": 645.05,
+      "qqq": 570.4,
+      "relative_strength_20d": -0.742,
+      "vix": 15.36
+    },
+    {
+      "date": "2025-09-02",
+      "spy": 640.27,
+      "qqq": 565.62,
+      "relative_strength_20d": -1.156,
+      "vix": 17.17
+    },
+    {
+      "date": "2025-09-03",
+      "spy": 643.74,
+      "qqq": 570.07,
+      "relative_strength_20d": -0.743,
+      "vix": 16.35
+    },
+    {
+      "date": "2025-09-04",
+      "spy": 649.12,
+      "qqq": 575.23,
+      "relative_strength_20d": -1.158,
+      "vix": 15.3
+    },
+    {
+      "date": "2025-09-05",
+      "spy": 647.24,
+      "qqq": 576.06,
+      "relative_strength_20d": -1.146,
+      "vix": 15.18
+    },
+    {
+      "date": "2025-09-08",
+      "spy": 648.83,
+      "qqq": 578.87,
+      "relative_strength_20d": -1.057,
+      "vix": 15.11
+    },
+    {
+      "date": "2025-09-09",
+      "spy": 650.33,
+      "qqq": 580.51,
+      "relative_strength_20d": -0.908,
+      "vix": 15.04
+    },
+    {
+      "date": "2025-09-10",
+      "spy": 652.21,
+      "qqq": 580.7,
+      "relative_strength_20d": -1.349,
+      "vix": 15.35
+    },
+    {
+      "date": "2025-09-11",
+      "spy": 657.63,
+      "qqq": 584.08,
+      "relative_strength_20d": -1.305,
+      "vix": 14.71
+    },
+    {
+      "date": "2025-09-12",
+      "spy": 657.41,
+      "qqq": 586.66,
+      "relative_strength_20d": -0.75,
+      "vix": 14.76
+    },
+    {
+      "date": "2025-09-15",
+      "spy": 660.91,
+      "qqq": 591.68,
+      "relative_strength_20d": -0.225,
+      "vix": 15.69
+    },
+    {
+      "date": "2025-09-16",
+      "spy": 660.0,
+      "qqq": 591.18,
+      "relative_strength_20d": -0.154,
+      "vix": 16.36
+    },
+    {
+      "date": "2025-09-17",
+      "spy": 659.18,
+      "qqq": 590.0,
+      "relative_strength_20d": 0.594,
+      "vix": 15.72
+    },
+    {
+      "date": "2025-09-18",
+      "spy": 662.26,
+      "qqq": 595.32,
+      "relative_strength_20d": 1.363,
+      "vix": 15.7
+    },
+    {
+      "date": "2025-09-19",
+      "spy": 663.7,
+      "qqq": 599.35,
+      "relative_strength_20d": 1.891,
+      "vix": 15.45
+    },
+    {
+      "date": "2025-09-22",
+      "spy": 666.84,
+      "qqq": 602.2,
+      "relative_strength_20d": 1.886,
+      "vix": 16.1
+    },
+    {
+      "date": "2025-09-23",
+      "spy": 663.21,
+      "qqq": 598.2,
+      "relative_strength_20d": 1.608,
+      "vix": 16.64
+    },
+    {
+      "date": "2025-09-24",
+      "spy": 661.1,
+      "qqq": 596.1,
+      "relative_strength_20d": 1.592,
+      "vix": 16.18
+    },
+    {
+      "date": "2025-09-25",
+      "spy": 658.05,
+      "qqq": 593.53,
+      "relative_strength_20d": 1.698,
+      "vix": 16.74
+    },
+    {
+      "date": "2025-09-26",
+      "spy": 661.82,
+      "qqq": 595.97,
+      "relative_strength_20d": 1.26,
+      "vix": 15.29
+    },
+    {
+      "date": "2025-09-29",
+      "spy": 663.68,
+      "qqq": 598.73,
+      "relative_strength_20d": 2.02,
+      "vix": 16.12
+    },
+    {
+      "date": "2025-09-30",
+      "spy": 666.18,
+      "qqq": 600.37,
+      "relative_strength_20d": 2.015,
+      "vix": 16.28
+    },
+    {
+      "date": "2025-10-01",
+      "spy": 668.45,
+      "qqq": 603.25,
+      "relative_strength_20d": 1.909,
+      "vix": 16.29
+    },
+    {
+      "date": "2025-10-02",
+      "spy": 669.22,
+      "qqq": 605.73,
+      "relative_strength_20d": 2.139,
+      "vix": 16.63
+    },
+    {
+      "date": "2025-10-03",
+      "spy": 669.21,
+      "qqq": 603.18,
+      "relative_strength_20d": 1.27,
+      "vix": 16.65
+    },
+    {
+      "date": "2025-10-06",
+      "spy": 671.61,
+      "qqq": 607.71,
+      "relative_strength_20d": 1.421,
+      "vix": 16.37
+    },
+    {
+      "date": "2025-10-07",
+      "spy": 669.12,
+      "qqq": 604.51,
+      "relative_strength_20d": 1.21,
+      "vix": 17.24
+    },
+    {
+      "date": "2025-10-08",
+      "spy": 673.11,
+      "qqq": 611.44,
+      "relative_strength_20d": 2.024,
+      "vix": 16.3
+    },
+    {
+      "date": "2025-10-09",
+      "spy": 671.16,
+      "qqq": 610.7,
+      "relative_strength_20d": 2.45,
+      "vix": 16.43
+    },
+    {
+      "date": "2025-10-10",
+      "spy": 653.02,
+      "qqq": 589.5,
+      "relative_strength_20d": 1.16,
+      "vix": 21.66
+    },
+    {
+      "date": "2025-10-13",
+      "spy": 663.04,
+      "qqq": 602.01,
+      "relative_strength_20d": 1.419,
+      "vix": 19.03
+    },
+    {
+      "date": "2025-10-14",
+      "spy": 662.23,
+      "qqq": 598.0,
+      "relative_strength_20d": 0.813,
+      "vix": 20.81
+    },
+    {
+      "date": "2025-10-15",
+      "spy": 665.17,
+      "qqq": 602.22,
+      "relative_strength_20d": 1.152,
+      "vix": 20.64
+    },
+    {
+      "date": "2025-10-16",
+      "spy": 660.64,
+      "qqq": 599.99,
+      "relative_strength_20d": 1.032,
+      "vix": 25.31
+    },
+    {
+      "date": "2025-10-17",
+      "spy": 664.39,
+      "qqq": 603.93,
+      "relative_strength_20d": 0.66,
+      "vix": 20.78
+    },
+    {
+      "date": "2025-10-20",
+      "spy": 671.3,
+      "qqq": 611.54,
+      "relative_strength_20d": 0.876,
+      "vix": 18.23
+    },
+    {
+      "date": "2025-10-21",
+      "spy": 671.29,
+      "qqq": 611.38,
+      "relative_strength_20d": 0.973,
+      "vix": 17.87
+    },
+    {
+      "date": "2025-10-22",
+      "spy": 667.8,
+      "qqq": 605.49,
+      "relative_strength_20d": 0.556,
+      "vix": 18.6
+    },
+    {
+      "date": "2025-10-23",
+      "spy": 671.76,
+      "qqq": 610.58,
+      "relative_strength_20d": 0.773,
+      "vix": 17.3
+    },
+    {
+      "date": "2025-10-24",
+      "spy": 677.25,
+      "qqq": 617.1,
+      "relative_strength_20d": 1.186,
+      "vix": 16.37
+    },
+    {
+      "date": "2025-10-27",
+      "spy": 685.24,
+      "qqq": 628.09,
+      "relative_strength_20d": 1.603,
+      "vix": 15.79
+    },
+    {
+      "date": "2025-10-28",
+      "spy": 687.06,
+      "qqq": 632.92,
+      "relative_strength_20d": 2.218,
+      "vix": 16.42
+    },
+    {
+      "date": "2025-10-29",
+      "spy": 687.39,
+      "qqq": 635.77,
+      "relative_strength_20d": 2.487,
+      "vix": 16.92
+    },
+    {
+      "date": "2025-10-30",
+      "spy": 679.83,
+      "qqq": 626.05,
+      "relative_strength_20d": 1.742,
+      "vix": 16.91
+    },
+    {
+      "date": "2025-10-31",
+      "spy": 682.06,
+      "qqq": 629.07,
+      "relative_strength_20d": 2.327,
+      "vix": 17.44
+    },
+    {
+      "date": "2025-11-03",
+      "spy": 683.34,
+      "qqq": 632.08,
+      "relative_strength_20d": 2.225,
+      "vix": 17.17
+    },
+    {
+      "date": "2025-11-04",
+      "spy": 675.24,
+      "qqq": 619.25,
+      "relative_strength_20d": 1.51,
+      "vix": 19.0
+    },
+    {
+      "date": "2025-11-05",
+      "spy": 677.58,
+      "qqq": 623.28,
+      "relative_strength_20d": 1.264,
+      "vix": 18.01
+    },
+    {
+      "date": "2025-11-06",
+      "spy": 670.31,
+      "qqq": 611.67,
+      "relative_strength_20d": 0.286,
+      "vix": 19.5
+    },
+    {
+      "date": "2025-11-07",
+      "spy": 670.97,
+      "qqq": 609.74,
+      "relative_strength_20d": 0.666,
+      "vix": 19.08
+    },
+    {
+      "date": "2025-11-10",
+      "spy": 681.44,
+      "qqq": 623.23,
+      "relative_strength_20d": 0.73,
+      "vix": 17.6
+    },
+    {
+      "date": "2025-11-11",
+      "spy": 683.0,
+      "qqq": 621.57,
+      "relative_strength_20d": 0.781,
+      "vix": 17.28
+    },
+    {
+      "date": "2025-11-12",
+      "spy": 683.38,
+      "qqq": 621.08,
+      "relative_strength_20d": 0.384,
+      "vix": 17.51
+    },
+    {
+      "date": "2025-11-13",
+      "spy": 672.04,
+      "qqq": 608.4,
+      "relative_strength_20d": -0.318,
+      "vix": 20.0
+    },
+    {
+      "date": "2025-11-14",
+      "spy": 671.93,
+      "qqq": 608.86,
+      "relative_strength_20d": -0.315,
+      "vix": 19.83
+    },
+    {
+      "date": "2025-11-17",
+      "spy": 665.67,
+      "qqq": 603.66,
+      "relative_strength_20d": -0.454,
+      "vix": 22.38
+    },
+    {
+      "date": "2025-11-18",
+      "spy": 660.08,
+      "qqq": 596.31,
+      "relative_strength_20d": -0.809,
+      "vix": 24.69
+    },
+    {
+      "date": "2025-11-19",
+      "spy": 662.63,
+      "qqq": 599.87,
+      "relative_strength_20d": -0.155,
+      "vix": 23.66
+    },
+    {
+      "date": "2025-11-20",
+      "spy": 652.53,
+      "qqq": 585.67,
+      "relative_strength_20d": -1.253,
+      "vix": 26.42
+    },
+    {
+      "date": "2025-11-21",
+      "spy": 659.03,
+      "qqq": 590.07,
+      "relative_strength_20d": -1.737,
+      "vix": 23.43
+    },
+    {
+      "date": "2025-11-24",
+      "spy": 668.73,
+      "qqq": 605.16,
+      "relative_strength_20d": -1.272,
+      "vix": 20.52
+    },
+    {
+      "date": "2025-11-25",
+      "spy": 675.02,
+      "qqq": 608.89,
+      "relative_strength_20d": -2.081,
+      "vix": 18.56
+    },
+    {
+      "date": "2025-11-26",
+      "spy": 679.68,
+      "qqq": 614.27,
+      "relative_strength_20d": -2.286,
+      "vix": 17.19
+    },
+    {
+      "date": "2025-11-28",
+      "spy": 683.39,
+      "qqq": 619.25,
+      "relative_strength_20d": -1.601,
+      "vix": 16.35
+    },
+    {
+      "date": "2025-12-01",
+      "spy": 680.27,
+      "qqq": 617.17,
+      "relative_strength_20d": -1.634,
+      "vix": 17.24
+    },
+    {
+      "date": "2025-12-02",
+      "spy": 681.53,
+      "qqq": 622.0,
+      "relative_strength_20d": -1.333,
+      "vix": 16.59
+    },
+    {
+      "date": "2025-12-03",
+      "spy": 683.89,
+      "qqq": 623.52,
+      "relative_strength_20d": -0.584,
+      "vix": 16.08
+    },
+    {
+      "date": "2025-12-04",
+      "spy": 684.39,
+      "qqq": 622.94,
+      "relative_strength_20d": -1.049,
+      "vix": 15.78
+    },
+    {
+      "date": "2025-12-05",
+      "spy": 685.69,
+      "qqq": 625.48,
+      "relative_strength_20d": -0.036,
+      "vix": 15.41
+    },
+    {
+      "date": "2025-12-08",
+      "spy": 683.63,
+      "qqq": 624.28,
+      "relative_strength_20d": 0.489,
+      "vix": 16.66
+    },
+    {
+      "date": "2025-12-09",
+      "spy": 683.04,
+      "qqq": 625.05,
+      "relative_strength_20d": 0.057,
+      "vix": 16.93
+    },
+    {
+      "date": "2025-12-10",
+      "spy": 687.57,
+      "qqq": 627.61,
+      "relative_strength_20d": 0.301,
+      "vix": 15.77
+    },
+    {
+      "date": "2025-12-11",
+      "spy": 689.17,
+      "qqq": 625.58,
+      "relative_strength_20d": -0.122,
+      "vix": 14.85
+    },
+    {
+      "date": "2025-12-12",
+      "spy": 681.76,
+      "qqq": 613.62,
+      "relative_strength_20d": -0.58,
+      "vix": 15.74
+    },
+    {
+      "date": "2025-12-15",
+      "spy": 680.73,
+      "qqq": 610.54,
+      "relative_strength_20d": -1.02,
+      "vix": 16.5
+    },
+    {
+      "date": "2025-12-16",
+      "spy": 678.87,
+      "qqq": 611.75,
+      "relative_strength_20d": -0.63,
+      "vix": 16.48
+    },
+    {
+      "date": "2025-12-17",
+      "spy": 671.4,
+      "qqq": 600.41,
+      "relative_strength_20d": -1.01,
+      "vix": 17.62
+    },
+    {
+      "date": "2025-12-18",
+      "spy": 676.47,
+      "qqq": 609.11,
+      "relative_strength_20d": -0.537,
+      "vix": 16.87
+    },
+    {
+      "date": "2025-12-19",
+      "spy": 680.59,
+      "qqq": 617.05,
+      "relative_strength_20d": 1.014,
+      "vix": 14.91
+    },
+    {
+      "date": "2025-12-22",
+      "spy": 684.83,
+      "qqq": 619.21,
+      "relative_strength_20d": 0.985,
+      "vix": 14.08
+    },
+    {
+      "date": "2025-12-23",
+      "spy": 687.96,
+      "qqq": 622.11,
+      "relative_strength_20d": -0.073,
+      "vix": 14.0
+    },
+    {
+      "date": "2025-12-24",
+      "spy": 690.38,
+      "qqq": 623.93,
+      "relative_strength_20d": 0.19,
+      "vix": 13.47
+    },
+    {
+      "date": "2025-12-26",
+      "spy": 690.31,
+      "qqq": 623.89,
+      "relative_strength_20d": 0.002,
+      "vix": 13.6
+    },
+    {
+      "date": "2025-12-29",
+      "spy": 687.85,
+      "qqq": 620.87,
+      "relative_strength_20d": -0.388,
+      "vix": 14.2
+    },
+    {
+      "date": "2025-12-30",
+      "spy": 687.01,
+      "qqq": 619.43,
+      "relative_strength_20d": -0.618,
+      "vix": 14.33
+    },
+    {
+      "date": "2025-12-31",
+      "spy": 681.92,
+      "qqq": 614.31,
+      "relative_strength_20d": -1.293,
+      "vix": 14.95
+    },
+    {
+      "date": "2026-01-02",
+      "spy": 683.17,
+      "qqq": 613.12,
+      "relative_strength_20d": -1.564,
+      "vix": 14.51
+    },
+    {
+      "date": "2026-01-05",
+      "spy": 687.72,
+      "qqq": 617.99,
+      "relative_strength_20d": -1.275,
+      "vix": 14.9
+    },
+    {
+      "date": "2026-01-06",
+      "spy": 691.81,
+      "qqq": 623.42,
+      "relative_strength_20d": -1.211,
+      "vix": 14.75
+    },
+    {
+      "date": "2026-01-07",
+      "spy": 689.58,
+      "qqq": 624.02,
+      "relative_strength_20d": -0.904,
+      "vix": 15.38
+    },
+    {
+      "date": "2026-01-08",
+      "spy": 689.51,
+      "qqq": 620.47,
+      "relative_strength_20d": -1.664,
+      "vix": 15.45
+    },
+    {
+      "date": "2026-01-09",
+      "spy": 694.07,
+      "qqq": 626.65,
+      "relative_strength_20d": -1.088,
+      "vix": 14.49
+    },
+    {
+      "date": "2026-01-12",
+      "spy": 695.16,
+      "qqq": 627.17,
+      "relative_strength_20d": -0.61,
+      "vix": 15.12
+    },
+    {
+      "date": "2026-01-13",
+      "spy": 693.77,
+      "qqq": 626.24,
+      "relative_strength_20d": 0.29,
+      "vix": 15.98
+    },
+    {
+      "date": "2026-01-14",
+      "spy": 690.36,
+      "qqq": 619.55,
+      "relative_strength_20d": 0.06,
+      "vix": 16.75
+    },
+    {
+      "date": "2026-01-15",
+      "spy": 692.24,
+      "qqq": 621.78,
+      "relative_strength_20d": -0.324,
+      "vix": 15.84
+    },
+    {
+      "date": "2026-01-16",
+      "spy": 691.66,
+      "qqq": 621.26,
+      "relative_strength_20d": 0.442,
+      "vix": 15.86
+    },
+    {
+      "date": "2026-01-20",
+      "spy": 677.58,
+      "qqq": 608.06,
+      "relative_strength_20d": -0.336,
+      "vix": 20.09
+    },
+    {
+      "date": "2026-01-21",
+      "spy": 685.4,
+      "qqq": 616.28,
+      "relative_strength_20d": -0.826,
+      "vix": 16.9
+    },
+    {
+      "date": "2026-01-22",
+      "spy": 688.98,
+      "qqq": 620.76,
+      "relative_strength_20d": -0.354,
+      "vix": 15.64
+    },
+    {
+      "date": "2026-01-23",
+      "spy": 689.23,
+      "qqq": 622.72,
+      "relative_strength_20d": -0.086,
+      "vix": 16.09
+    },
+    {
+      "date": "2026-01-26",
+      "spy": 692.73,
+      "qqq": 625.46,
+      "relative_strength_20d": -0.095,
+      "vix": 16.15
+    },
+    {
+      "date": "2026-01-27",
+      "spy": 695.49,
+      "qqq": 631.13,
+      "relative_strength_20d": 0.407,
+      "vix": 16.35
+    },
+    {
+      "date": "2026-01-28",
+      "spy": 695.42,
+      "qqq": 633.22,
+      "relative_strength_20d": 0.879,
+      "vix": 16.35
+    },
+    {
+      "date": "2026-01-29",
+      "spy": 694.04,
+      "qqq": 629.43,
+      "relative_strength_20d": 0.585,
+      "vix": 16.88
+    },
+    {
+      "date": "2026-01-30",
+      "spy": 691.97,
+      "qqq": 621.87,
+      "relative_strength_20d": -0.24,
+      "vix": 17.44
+    },
+    {
+      "date": "2026-02-02",
+      "spy": 695.41,
+      "qqq": 626.14,
+      "relative_strength_20d": 0.326,
+      "vix": 16.34
+    },
+    {
+      "date": "2026-02-03",
+      "spy": 689.53,
+      "qqq": 616.52,
+      "relative_strength_20d": -0.5,
+      "vix": 18.0
+    },
+    {
+      "date": "2026-02-04",
+      "spy": 686.19,
+      "qqq": 605.75,
+      "relative_strength_20d": -2.039,
+      "vix": 18.64
+    },
+    {
+      "date": "2026-02-05",
+      "spy": 677.62,
+      "qqq": 597.03,
+      "relative_strength_20d": -2.637,
+      "vix": 21.77
+    },
+    {
+      "date": "2026-02-06",
+      "spy": 690.62,
+      "qqq": 609.65,
+      "relative_strength_20d": -1.902,
+      "vix": 20.37
+    },
+    {
+      "date": "2026-02-09",
+      "spy": 693.95,
+      "qqq": 614.32,
+      "relative_strength_20d": -1.951,
+      "vix": 17.36
+    },
+    {
+      "date": "2026-02-10",
+      "spy": 692.12,
+      "qqq": 611.47,
+      "relative_strength_20d": -2.075,
+      "vix": 17.79
+    },
+    {
+      "date": "2026-02-11",
+      "spy": 691.96,
+      "qqq": 613.11,
+      "relative_strength_20d": -1.841,
+      "vix": 17.65
+    },
+    {
+      "date": "2026-02-12",
+      "spy": 681.27,
+      "qqq": 600.64,
+      "relative_strength_20d": -1.759,
+      "vix": 20.82
+    },
+    {
+      "date": "2026-02-13",
+      "spy": 681.75,
+      "qqq": 601.92,
+      "relative_strength_20d": -1.705,
+      "vix": 20.6
+    },
+    {
+      "date": "2026-02-17",
+      "spy": 682.85,
+      "qqq": 601.3,
+      "relative_strength_20d": -1.964,
+      "vix": 20.29
+    },
+    {
+      "date": "2026-02-18",
+      "spy": 686.29,
+      "qqq": 605.79,
+      "relative_strength_20d": -1.638,
+      "vix": 19.62
+    },
+    {
+      "date": "2026-02-19",
+      "spy": 684.48,
+      "qqq": 603.47,
+      "relative_strength_20d": -1.947,
+      "vix": 20.23
+    },
+    {
+      "date": "2026-02-20",
+      "spy": 689.43,
+      "qqq": 608.81,
+      "relative_strength_20d": -1.989,
+      "vix": 19.09
+    },
+    {
+      "date": "2026-02-23",
+      "spy": 682.39,
+      "qqq": 601.41,
+      "relative_strength_20d": -2.454,
+      "vix": 21.01
+    },
+    {
+      "date": "2026-02-24",
+      "spy": 687.35,
+      "qqq": 607.87,
+      "relative_strength_20d": -2.052,
+      "vix": 19.55
+    },
+    {
+      "date": "2026-02-25",
+      "spy": 693.15,
+      "qqq": 616.68,
+      "relative_strength_20d": -1.96,
+      "vix": 17.93
+    },
+    {
+      "date": "2026-02-26",
+      "spy": 689.3,
+      "qqq": 609.24,
+      "relative_strength_20d": -2.933,
+      "vix": 18.63
+    },
+    {
+      "date": "2026-02-27",
+      "spy": 685.99,
+      "qqq": 607.29,
+      "relative_strength_20d": -2.385,
+      "vix": 19.86
+    },
+    {
+      "date": "2026-03-02",
+      "spy": 686.38,
+      "qqq": 608.09,
+      "relative_strength_20d": -1.42,
+      "vix": 21.44
+    },
+    {
+      "date": "2026-03-03",
+      "spy": 680.33,
+      "qqq": 601.58,
+      "relative_strength_20d": -1.793,
+      "vix": 23.57
+    },
+    {
+      "date": "2026-03-04",
+      "spy": 685.13,
+      "qqq": 610.75,
+      "relative_strength_20d": -0.3,
+      "vix": 21.15
+    },
+    {
+      "date": "2026-03-05",
+      "spy": 681.31,
+      "qqq": 608.91,
+      "relative_strength_20d": 1.242,
+      "vix": 23.75
+    },
+    {
+      "date": "2026-03-06",
+      "spy": 672.38,
+      "qqq": 599.75,
+      "relative_strength_20d": 1.238,
+      "vix": 29.49
+    },
+    {
+      "date": "2026-03-09",
+      "spy": 678.27,
+      "qqq": 607.76,
+      "relative_strength_20d": 1.505,
+      "vix": 25.5
+    },
+    {
+      "date": "2026-03-10",
+      "spy": 677.18,
+      "qqq": 607.77,
+      "relative_strength_20d": 1.384,
+      "vix": 24.93
+    },
+    {
+      "date": "2026-03-11",
+      "spy": 676.33,
+      "qqq": 607.69,
+      "relative_strength_20d": 1.702,
+      "vix": 24.23
+    },
+    {
+      "date": "2026-03-12",
+      "spy": 666.06,
+      "qqq": 597.26,
+      "relative_strength_20d": 1.203,
+      "vix": 27.29
+    },
+    {
+      "date": "2026-03-13",
+      "spy": 662.29,
+      "qqq": 593.72,
+      "relative_strength_20d": 1.681,
+      "vix": 27.19
+    },
+    {
+      "date": "2026-03-16",
+      "spy": 669.03,
+      "qqq": 600.38,
+      "relative_strength_20d": 1.641,
+      "vix": 23.51
+    },
+    {
+      "date": "2026-03-17",
+      "spy": 670.79,
+      "qqq": 603.31,
+      "relative_strength_20d": 2.138,
+      "vix": 22.37
+    },
+    {
+      "date": "2026-03-18",
+      "spy": 661.43,
+      "qqq": 594.9,
+      "relative_strength_20d": 1.893,
+      "vix": 25.09
+    },
+    {
+      "date": "2026-03-19",
+      "spy": 659.8,
+      "qqq": 593.02,
+      "relative_strength_20d": 1.944,
+      "vix": 24.06
+    },
+    {
+      "date": "2026-03-20",
+      "spy": 648.57,
+      "qqq": 582.06,
+      "relative_strength_20d": 1.629,
+      "vix": 26.78
+    },
+    {
+      "date": "2026-03-23",
+      "spy": 655.38,
+      "qqq": 588.0,
+      "relative_strength_20d": 1.8,
+      "vix": 26.15
+    },
+    {
+      "date": "2026-03-24",
+      "spy": 653.18,
+      "qqq": 583.98,
+      "relative_strength_20d": 1.096,
+      "vix": 26.95
+    },
+    {
+      "date": "2026-03-25",
+      "spy": 656.82,
+      "qqq": 587.82,
+      "relative_strength_20d": 0.592,
+      "vix": 25.33
+    },
+    {
+      "date": "2026-03-26",
+      "spy": 645.09,
+      "qqq": 573.79,
+      "relative_strength_20d": 0.636,
+      "vix": 27.44
+    },
+    {
+      "date": "2026-03-27",
+      "spy": 634.09,
+      "qqq": 562.58,
+      "relative_strength_20d": 0.22,
+      "vix": 31.05
+    },
+    {
+      "date": "2026-03-30",
+      "spy": 631.97,
+      "qqq": 558.28,
+      "relative_strength_20d": -0.287,
+      "vix": 30.61
+    },
+    {
+      "date": "2026-03-31",
+      "spy": 650.34,
+      "qqq": 577.18,
+      "relative_strength_20d": 0.368,
+      "vix": 25.25
+    },
+    {
+      "date": "2026-04-01",
+      "spy": 655.24,
+      "qqq": 584.31,
+      "relative_strength_20d": 0.035,
+      "vix": 24.54
+    },
+    {
+      "date": "2026-04-02",
+      "spy": 655.83,
+      "qqq": 584.98,
+      "relative_strength_20d": -0.198,
+      "vix": 23.87
+    },
+    {
+      "date": "2026-04-06",
+      "spy": 658.93,
+      "qqq": 588.5,
+      "relative_strength_20d": 0.127,
+      "vix": 24.17
+    },
+    {
+      "date": "2026-04-07",
+      "spy": 659.22,
+      "qqq": 588.59,
+      "relative_strength_20d": -0.356,
+      "vix": 25.78
+    },
+    {
+      "date": "2026-04-08",
+      "spy": 676.01,
+      "qqq": 606.09,
+      "relative_strength_20d": -0.104,
+      "vix": 21.04
+    },
+    {
+      "date": "2026-04-09",
+      "spy": 679.91,
+      "qqq": 610.19,
+      "relative_strength_20d": -0.117,
+      "vix": 19.49
+    },
+    {
+      "date": "2026-04-10",
+      "spy": 679.46,
+      "qqq": 611.07,
+      "relative_strength_20d": 0.294,
+      "vix": 19.23
+    },
+    {
+      "date": "2026-04-13",
+      "spy": 686.1,
+      "qqq": 617.39,
+      "relative_strength_20d": 0.378,
+      "vix": 19.12
+    },
+    {
+      "date": "2026-04-14",
+      "spy": 694.46,
+      "qqq": 628.6,
+      "relative_strength_20d": 0.866,
+      "vix": 18.36
+    },
+    {
+      "date": "2026-04-15",
+      "spy": 699.94,
+      "qqq": 637.4,
+      "relative_strength_20d": 1.251,
+      "vix": 18.17
+    },
+    {
+      "date": "2026-04-16",
+      "spy": 701.66,
+      "qqq": 640.47,
+      "relative_strength_20d": 1.487,
+      "vix": 17.94
+    },
+    {
+      "date": "2026-04-17",
+      "spy": 710.14,
+      "qqq": 648.85,
+      "relative_strength_20d": 1.658,
+      "vix": 17.48
+    },
+    {
+      "date": "2026-04-20",
+      "spy": 708.72,
+      "qqq": 646.79,
+      "relative_strength_20d": 1.69,
+      "vix": 18.87
+    },
+    {
+      "date": "2026-04-21",
+      "spy": 704.08,
+      "qqq": 644.33,
+      "relative_strength_20d": 2.0,
+      "vix": 19.5
+    },
+    {
+      "date": "2026-04-22",
+      "spy": 711.21,
+      "qqq": 655.11,
+      "relative_strength_20d": 3.027,
+      "vix": 18.92
+    },
+    {
+      "date": "2026-04-23",
+      "spy": 708.45,
+      "qqq": 651.42,
+      "relative_strength_20d": 2.743,
+      "vix": 19.31
+    },
+    {
+      "date": "2026-04-24",
+      "spy": 713.94,
+      "qqq": 663.88,
+      "relative_strength_20d": 4.543,
+      "vix": 18.71
+    },
+    {
+      "date": "2026-04-27",
+      "spy": 715.17,
+      "qqq": 664.23,
+      "relative_strength_20d": 4.683,
+      "vix": 18.02
+    },
+    {
+      "date": "2026-04-28",
+      "spy": 711.69,
+      "qqq": 657.55,
+      "relative_strength_20d": 4.588,
+      "vix": 17.83
+    },
+    {
+      "date": "2026-04-29",
+      "spy": 711.58,
+      "qqq": 661.57,
+      "relative_strength_20d": 4.757,
+      "vix": 18.81
+    },
+    {
+      "date": "2026-04-30",
+      "spy": 718.66,
+      "qqq": 667.74,
+      "relative_strength_20d": 4.194,
+      "vix": 16.89
+    },
+    {
+      "date": "2026-05-01",
+      "spy": 720.65,
+      "qqq": 674.15,
+      "relative_strength_20d": 4.878,
+      "vix": 16.99
+    },
+    {
+      "date": "2026-05-04",
+      "spy": 718.01,
+      "qqq": 672.88,
+      "relative_strength_20d": 4.93,
+      "vix": 18.29
+    },
+    {
+      "date": "2026-05-05",
+      "spy": 723.77,
+      "qqq": 681.61,
+      "relative_strength_20d": 5.476,
+      "vix": 17.38
+    },
+    {
+      "date": "2026-05-06",
+      "spy": 733.83,
+      "qqq": 695.77,
+      "relative_strength_20d": 5.751,
+      "vix": 17.39
+    },
+    {
+      "date": "2026-05-07",
+      "spy": 731.58,
+      "qqq": 694.94,
+      "relative_strength_20d": 5.845,
+      "vix": 17.08
+    },
+    {
+      "date": "2026-05-08",
+      "spy": 737.62,
+      "qqq": 711.23,
+      "relative_strength_20d": 7.214,
+      "vix": 17.19
+    },
+    {
+      "date": "2026-05-11",
+      "spy": 739.3,
+      "qqq": 713.29,
+      "relative_strength_20d": 7.219,
+      "vix": 18.38
+    },
+    {
+      "date": "2026-05-12",
+      "spy": 738.18,
+      "qqq": 707.24,
+      "relative_strength_20d": 5.847,
+      "vix": 17.99
+    },
+    {
+      "date": "2026-05-13",
+      "spy": 742.31,
+      "qqq": 714.71,
+      "relative_strength_20d": 5.729,
+      "vix": 17.87
+    },
+    {
+      "date": "2026-05-14",
+      "spy": 748.17,
+      "qqq": 719.79,
+      "relative_strength_20d": 5.398,
+      "vix": 17.26
+    },
+    {
+      "date": "2026-05-15",
+      "spy": 739.17,
+      "qqq": 708.93,
+      "relative_strength_20d": 4.968,
+      "vix": 18.43
+    },
+    {
+      "date": "2026-05-18",
+      "spy": 738.65,
+      "qqq": 705.88,
+      "relative_strength_20d": 4.714,
+      "vix": 17.82
+    },
+    {
+      "date": "2026-05-19",
+      "spy": 733.73,
+      "qqq": 701.53,
+      "relative_strength_20d": 4.478,
+      "vix": 18.06
+    },
+    {
+      "date": "2026-05-20",
+      "spy": 741.25,
+      "qqq": 713.15,
+      "relative_strength_20d": 4.448,
+      "vix": 17.44
+    },
+    {
+      "date": "2026-05-21",
+      "spy": 742.72,
+      "qqq": 714.51,
+      "relative_strength_20d": 4.624,
+      "vix": 16.76
+    },
+    {
+      "date": "2026-05-22",
+      "spy": 745.64,
+      "qqq": 717.54,
+      "relative_strength_20d": 3.488,
+      "vix": 16.7
+    },
+    {
+      "date": "2026-05-26",
+      "spy": 750.59,
+      "qqq": 730.28,
+      "relative_strength_20d": 4.756,
+      "vix": 17.01
+    },
+    {
+      "date": "2026-05-27",
+      "spy": 750.46,
+      "qqq": 729.45,
+      "relative_strength_20d": 5.203,
+      "vix": 16.29
+    },
+    {
+      "date": "2026-05-28",
+      "spy": 754.6,
+      "qqq": 735.6,
+      "relative_strength_20d": 4.851,
+      "vix": 15.74
+    },
+    {
+      "date": "2026-05-29",
+      "spy": 756.48,
+      "qqq": 738.31,
+      "relative_strength_20d": 5.041,
+      "vix": 15.32
+    },
+    {
+      "date": "2026-06-01",
+      "spy": 758.54,
+      "qqq": 742.74,
+      "relative_strength_20d": 4.671,
+      "vix": 16.05
+    },
+    {
+      "date": "2026-06-02",
+      "spy": 759.57,
+      "qqq": 746.16,
+      "relative_strength_20d": 4.823,
+      "vix": 15.77
+    },
+    {
+      "date": "2026-06-03",
+      "spy": 754.24,
+      "qqq": 744.21,
+      "relative_strength_20d": 4.773,
+      "vix": 16.06
+    },
+    {
+      "date": "2026-06-04",
+      "spy": 757.09,
+      "qqq": 740.61,
+      "relative_strength_20d": 3.174,
+      "vix": 15.4
+    },
+    {
+      "date": "2026-06-05",
+      "spy": 737.55,
+      "qqq": 705.06,
+      "relative_strength_20d": 0.635,
+      "vix": 21.51
+    },
+    {
+      "date": "2026-06-08",
+      "spy": 739.22,
+      "qqq": 716.07,
+      "relative_strength_20d": 0.463,
+      "vix": 18.92
+    },
+    {
+      "date": "2026-06-09",
+      "spy": 737.05,
+      "qqq": 707.83,
+      "relative_strength_20d": -0.463,
+      "vix": 19.87
+    },
+    {
+      "date": "2026-06-10",
+      "spy": 725.43,
+      "qqq": 693.69,
+      "relative_strength_20d": -0.192,
+      "vix": 22.22
+    },
+    {
+      "date": "2026-06-11",
+      "spy": 737.76,
+      "qqq": 717.12,
+      "relative_strength_20d": 0.956,
+      "vix": 19.44
+    },
+    {
+      "date": "2026-06-12",
+      "spy": 741.75,
+      "qqq": 721.34,
+      "relative_strength_20d": 1.083,
+      "vix": 17.68
+    },
+    {
+      "date": "2026-06-15",
+      "spy": 754.83,
+      "qqq": 744.0,
+      "relative_strength_20d": 2.77,
+      "vix": 16.2
+    },
+    {
+      "date": "2026-06-16",
+      "spy": 750.33,
+      "qqq": 729.86,
+      "relative_strength_20d": 1.788,
+      "vix": 16.41
+    },
+    {
+      "date": "2026-06-17",
+      "spy": 740.96,
+      "qqq": 722.51,
+      "relative_strength_20d": 1.986,
+      "vix": 18.44
+    },
+    {
+      "date": "2026-06-18",
+      "spy": 746.74,
+      "qqq": 740.62,
+      "relative_strength_20d": 3.088,
+      "vix": 16.4
+    },
+    {
+      "date": "2026-06-22",
+      "spy": 744.39,
+      "qqq": 737.95,
+      "relative_strength_20d": 3.049,
+      "vix": 17.28
+    },
+    {
+      "date": "2026-06-23",
+      "spy": 733.58,
+      "qqq": 713.65,
+      "relative_strength_20d": 1.093,
+      "vix": 19.49
+    },
+    {
+      "date": "2026-06-24",
+      "spy": 733.24,
+      "qqq": 710.62,
+      "relative_strength_20d": -0.39,
+      "vix": 18.63
+    },
+    {
+      "date": "2026-06-25",
+      "spy": 734.3,
+      "qqq": 716.38,
+      "relative_strength_20d": 0.37,
+      "vix": 18.89
+    },
+    {
+      "date": "2026-06-26",
+      "spy": 728.99,
+      "qqq": 706.52,
+      "relative_strength_20d": -0.579,
+      "vix": 18.41
+    },
+    {
+      "date": "2026-06-29",
+      "spy": 741.0,
+      "qqq": 724.08,
+      "relative_strength_20d": 0.121,
+      "vix": 17.65
+    },
+    {
+      "date": "2026-06-30",
+      "spy": 746.77,
+      "qqq": 736.4,
+      "relative_strength_20d": 0.709,
+      "vix": 16.45
+    },
+    {
+      "date": "2026-07-01",
+      "spy": 745.76,
+      "qqq": 725.17,
+      "relative_strength_20d": -1.013,
+      "vix": 16.59
+    },
+    {
+      "date": "2026-07-02",
+      "spy": 744.78,
+      "qqq": 712.6,
+      "relative_strength_20d": -3.031,
+      "vix": 16.15
+    },
+    {
+      "date": "2026-07-06",
+      "spy": 751.28,
+      "qqq": 722.82,
+      "relative_strength_20d": -1.647,
+      "vix": 15.57
+    },
+    {
+      "date": "2026-07-07",
+      "spy": 747.71,
+      "qqq": 709.43,
+      "relative_strength_20d": -0.747,
+      "vix": 16.13
+    },
+    {
+      "date": "2026-07-08",
+      "spy": 745.4,
+      "qqq": 711.44,
+      "relative_strength_20d": -1.47,
+      "vix": 16.9
+    },
+    {
+      "date": "2026-07-09",
+      "spy": 751.71,
+      "qqq": 723.28,
+      "relative_strength_20d": 0.19,
+      "vix": 15.84
+    },
+    {
+      "date": "2026-07-10",
+      "spy": 754.95,
+      "qqq": 725.51,
+      "relative_strength_20d": 0.498,
+      "vix": 15.03
+    },
+    {
+      "date": "2026-07-13",
+      "spy": 749.17,
+      "qqq": 711.74,
+      "relative_strength_20d": -2.262,
+      "vix": 17.16
+    },
+    {
+      "date": "2026-07-14",
+      "spy": 751.83,
+      "qqq": 719.69,
+      "relative_strength_20d": -1.566,
+      "vix": 16.5
+    },
+    {
+      "date": "2026-07-15",
+      "spy": 754.81,
+      "qqq": 717.74,
+      "relative_strength_20d": -3.527,
+      "vix": 15.67
+    },
+    {
+      "date": "2026-07-16",
+      "spy": 750.72,
+      "qqq": 705.94,
+      "relative_strength_20d": -3.328,
+      "vix": 16.73
+    },
+    {
+      "date": "2026-07-17",
+      "spy": 743.29,
+      "qqq": 695.33,
+      "relative_strength_20d": -4.064,
+      "vix": 18.77
+    },
+    {
+      "date": "2026-07-20",
+      "spy": 742.09,
+      "qqq": 696.06,
+      "relative_strength_20d": -5.428,
+      "vix": 18.65
+    },
+    {
+      "date": "2026-07-21",
+      "spy": 748.28,
+      "qqq": 708.97,
+      "relative_strength_20d": -4.427,
+      "vix": 17.05
+    },
+    {
+      "date": "2026-07-22",
+      "spy": 747.41,
+      "qqq": 705.35,
+      "relative_strength_20d": -2.992,
+      "vix": 16.64
+    },
+    {
+      "date": "2026-07-23",
+      "spy": 738.18,
+      "qqq": 691.96,
+      "relative_strength_20d": -3.278,
+      "vix": 18.7
+    },
+    {
+      "date": "2026-07-24",
+      "spy": 738.93,
+      "qqq": 684.23,
+      "relative_strength_20d": -5.086,
+      "vix": 18.58
+    },
+    {
+      "date": "2026-07-27",
+      "spy": 739.09,
+      "qqq": 682.12,
+      "relative_strength_20d": -4.773,
+      "vix": 18.67
+    },
+    {
+      "date": "2026-07-28",
+      "spy": 740.86,
+      "qqq": 675.49,
+      "relative_strength_20d": -6.693,
+      "vix": 18.21
+    },
+    {
+      "date": "2026-07-29",
+      "spy": 729.46,
+      "qqq": 661.73,
+      "relative_strength_20d": -8.008,
+      "vix": 20.66
+    },
+    {
+      "date": "2026-07-30",
+      "spy": 741.69,
+      "qqq": 683.55,
+      "relative_strength_20d": -5.222,
+      "vix": 17.09
+    },
+    {
+      "date": "2026-07-31",
+      "spy": 747.03,
+      "qqq": 687.99,
+      "relative_strength_20d": -3.744,
+      "vix": 15.99
+    },
+    {
+      "date": "2026-08-03",
+      "spy": 757.67,
+      "qqq": 700.07,
+      "relative_strength_20d": -3.964,
+      "vix": 15.86
+    },
+    {
+      "date": "2026-08-04",
+      "spy": 771.33,
+      "qqq": 723.85,
+      "relative_strength_20d": -1.092,
+      "vix": 16.5
+    },
+    {
+      "date": "2026-08-05",
+      "spy": 769.79,
+      "qqq": 717.3,
+      "relative_strength_20d": -2.371,
+      "vix": 15.81
+    },
+    {
+      "date": "2026-08-06",
+      "spy": 768.56,
+      "qqq": 714.65,
+      "relative_strength_20d": -3.359,
+      "vix": 15.15
+    },
+    {
+      "date": "2026-08-07",
+      "spy": 773.26,
+      "qqq": 723.03,
+      "relative_strength_20d": -2.702,
+      "vix": 14.9
+    },
+    {
+      "date": "2026-08-10",
+      "spy": 773.03,
+      "qqq": 720.87,
+      "relative_strength_20d": -1.843,
+      "vix": 15.46
+    },
+    {
+      "date": "2026-08-11",
+      "spy": 770.56,
+      "qqq": 718.45,
+      "relative_strength_20d": -2.599,
+      "vix": 15.28
+    },
+    {
+      "date": "2026-08-12",
+      "spy": 772.49,
+      "qqq": 723.7,
+      "relative_strength_20d": -1.477,
+      "vix": 14.55
+    },
+    {
+      "date": "2026-08-13",
+      "spy": 777.88,
+      "qqq": 732.07,
+      "relative_strength_20d": 0.081,
+      "vix": 14.63
+    },
+    {
+      "date": "2026-08-14",
+      "spy": 776.34,
+      "qqq": 731.07,
+      "relative_strength_20d": 0.664,
+      "vix": 14.25
+    },
+    {
+      "date": "2026-08-17",
+      "spy": 772.67,
+      "qqq": 729.87,
+      "relative_strength_20d": 0.707,
+      "vix": 15.19
+    },
+    {
+      "date": "2026-08-18",
+      "spy": 767.45,
+      "qqq": 717.51,
+      "relative_strength_20d": -1.323,
+      "vix": 15.84
+    },
+    {
+      "date": "2026-08-19",
+      "spy": 769.06,
+      "qqq": 716.08,
+      "relative_strength_20d": -1.337,
+      "vix": 14.89
+    },
+    {
+      "date": "2026-08-20",
+      "spy": 762.6,
+      "qqq": 710.93,
+      "relative_strength_20d": -0.549,
+      "vix": 16.01
+    },
+    {
+      "date": "2026-08-21",
+      "spy": 765.72,
+      "qqq": 713.44,
+      "relative_strength_20d": 0.621,
+      "vix": 15.13
+    },
+    {
+      "date": "2026-08-24",
+      "spy": 763.47,
+      "qqq": 706.32,
+      "relative_strength_20d": 0.241,
+      "vix": 15.85
+    },
+    {
+      "date": "2026-08-25",
+      "spy": 765.91,
+      "qqq": 710.72,
+      "relative_strength_20d": 1.774,
+      "vix": 15.45
+    },
+    {
+      "date": "2026-08-26",
+      "spy": 766.08,
+      "qqq": 711.37,
+      "relative_strength_20d": 2.363,
+      "vix": 15.21
+    },
+    {
+      "date": "2026-08-27",
+      "spy": 771.1,
+      "qqq": 721.11,
+      "relative_strength_20d": 1.471,
+      "vix": 14.51
+    },
+    {
+      "date": "2026-08-28",
+      "spy": 769.35,
+      "qqq": 716.43,
+      "relative_strength_20d": 1.113,
+      "vix": 14.43
+    }
+  ]
+}
