@@ -2,6 +2,7 @@ const $=id=>document.getElementById(id);
 const n=v=>Number.isFinite(Number(v))?Number(v):null;
 const f=(v,d=2)=>n(v)==null?'—':n(v).toFixed(d);
 const pct=(v,d=1)=>n(v)==null?'—':n(v).toFixed(d)+'%';
+let currentData=null,currentHistory=null,activeIndex='SPY';
 
 const I={
  b5:['% above 5-day MA','BREADTH · VERY SHORT TERM','How many S&P 500 stocks are above their own 5-day average.','Very low means selling is hitting almost everything, not just a few stocks.',['70%+|Broad strength','50-70%|Healthy','30-50%|Weakening','15-30%|Broadly oversold','Below 15%|Significant washout'],'https://www.barchart.com/stocks/quotes/$S5FD'],
@@ -16,12 +17,14 @@ const I={
  ma20:['Distance from 20-day MA','SHORT-TERM TREND','How far is price from its short-term trend?','Positive means above trend. Large distances can also mean price is stretched.',['Above 0%|Above trend','Near 0%|Testing trend','Below 0%|Below trend'],'https://www.fidelity.com/viewpoints/active-investor/moving-averages'],
  ma50:['Distance from 50-day MA','INTERMEDIATE TREND','Is the index above or below its intermediate trend?','The 50-day average is one of the most watched intermediate support gauges.',['Above 0%|Trend intact','Near 0%|Testing support','Below 0%|Deteriorating'],'https://www.fidelity.com/viewpoints/active-investor/moving-averages'],
  ma200:['Distance from 200-day MA','LONG-TERM TREND','Is the index still in a long-term uptrend?','A break below matters much more when long-term breadth is also deteriorating.',['Above 0%|Trend intact','Near 0%|Major test','Below 0%|Warning'],'https://www.fidelity.com/viewpoints/active-investor/moving-averages'],
+ high52:['Distance from 52-week high','PULLBACK DEPTH','How far the index has pulled back from its highest close of the past year.','This gives immediate context for whether weakness is a shallow dip or a deeper drawdown.',['0 to -3%|Near highs','-3 to -7%|Normal pullback','-7 to -12%|Meaningful correction','Below -12%|Deep drawdown'],'https://finance.yahoo.com/'],
+ rel:['QQQ vs SPY · 20D','RELATIVE LEADERSHIP','Is growth and technology outperforming or lagging the broader market over the past 20 sessions?','Positive means QQQ is outperforming SPY. Negative means broader-market leadership is stronger.',['Above +1%|QQQ leadership','-1% to +1%|Balanced','Below -1%|SPY leadership'],'https://finance.yahoo.com/'],
  vix:['VIX','FEAR','How much near-term volatility is the options market pricing?','Low VIX means calm, not necessarily safety. A spike plus collapsing breadth is more meaningful.',['Below 15|Very calm','15-20|Normal','20-30|Fear rising','30-40|High stress','40+|Panic'],'https://www.cboe.com/tradable-products/vix/'],
  pc:['Equity Put/Call Ratio','POSITIONING','Are traders buying more stock-option puts for protection or calls for upside?','Higher means more protection and caution. Lower means more call activity and optimism.',['Below ~0.60|Optimistic / complacent','0.60-0.80|Normal-ish','0.80-1.00|Caution rising','Above 1.00|Heavy hedging','Above ~1.20|Potential extreme'],'https://www.cboe.com/markets/us/options/market-statistics/daily/']
 };
 
 function st(k,v){
- v=n(v); if(v==null)return['Unavailable','neutral'];
+ v=n(v);if(v==null)return['Unavailable','neutral'];
  if(k==='b5')return v<15?['Significant washout','bad']:v<30?['Broadly oversold','warn']:v<50?['Short-term weakness','warn']:['Healthy participation','good'];
  if(k==='b20')return v<25?['Oversold','bad']:v<50?['Weakening','warn']:['Healthy','good'];
  if(k==='b50')return v<30?['Broad damage','bad']:v<40?['Weak','warn']:v<60?['Mixed','neutral']:['Healthy','good'];
@@ -30,80 +33,67 @@ function st(k,v){
  if(k==='wr')return v<-80?['Oversold','bad']:v>-20?['Overbought','warn']:['Normal','neutral'];
  if(k==='bb')return v<0?['Below lower band','bad']:v>1?['Above upper band','warn']:v<.2?['Near lower band','warn']:v>.8?['Near upper band','warn']:['Normal','neutral'];
  if(k==='adx')return v>=25?['Meaningful trend','good']:v>=20?['Trend developing','neutral']:['Weak trend','neutral'];
+ if(k==='high52')return v>=-3?['Near highs','good']:v>=-7?['Normal pullback','neutral']:v>=-12?['Correction','warn']:['Deep drawdown','bad'];
+ if(k==='rel')return v>1?['QQQ leading','good']:v<-1?['SPY leading','neutral']:['Balanced leadership','neutral'];
  if(k==='vix')return v<15?['Very calm','good']:v<20?['Normal','good']:v<30?['Fear rising','warn']:v<40?['High stress','bad']:['Panic','bad'];
  if(k==='pc')return v<.6?['Optimistic / complacent','warn']:v<.8?['Normal-ish','good']:v<1?['Caution rising','warn']:['Heavy hedging / fear','bad'];
  if(k.startsWith('ma'))return v>1?['Above trend','good']:v>=0?['Testing trend','neutral']:['Below trend','warn'];
  return['Neutral','neutral'];
 }
 
-function detail(k,val,s,t){
- const i=I[k]; $('dk').textContent=i[1]; $('dt').textContent=i[0]; $('dv').textContent=val; $('ds').textContent=s; $('ds').className='status-pill '+t; $('dm').textContent=i[3];
- $('th').innerHTML=i[4].map(x=>{const[a,b]=x.split('|');return `<div class="threshold"><b>${a}</b><span>${b}</span></div>`}).join(''); $('src').href=i[5]; $('detail').showModal();
-}
-function card(k,name,val,copy,s,t){
- const b=document.createElement('button'); b.type='button'; b.className='card';
- b.innerHTML=`<div class="card-top"><div class="name">${name}</div><span class="card-arrow" aria-hidden="true">›</span></div><div class="value">${val}</div><div class="status-pill ${t}">${s}</div><p>${copy}</p>`;
- b.onclick=()=>detail(k,val,s,t); return b;
+function detail(k,val,s,t){const i=I[k];$('dk').textContent=i[1];$('dt').textContent=i[0];$('dv').textContent=val;$('ds').textContent=s;$('ds').className='status-pill '+t;$('dm').textContent=i[3];$('th').innerHTML=i[4].map(x=>{const[a,b]=x.split('|');return `<div class="threshold"><b>${a}</b><span>${b}</span></div>`}).join('');$('src').href=i[5];$('detail').showModal()}
+function card(k,name,val,copy,s,t){const b=document.createElement('button');b.type='button';b.className='card';b.innerHTML=`<div class="card-top"><div class="name">${name}</div><span class="card-arrow" aria-hidden="true">›</span></div><div class="value">${val}</div><div class="status-pill ${t}">${s}</div><p>${copy}</p>`;b.onclick=()=>detail(k,val,s,t);return b}
+
+function regime(d){
+ const b=d.breadth||{},spy=d.etfs?.SPY||{},qqq=d.etfs?.QQQ||{};const b5=n(b.above_5d),b50=n(b.above_50d),b200=n(b.above_200d),s20=n(spy.distance_ma20),q20=n(qqq.distance_ma20),s50=n(spy.distance_ma50),q50=n(qqq.distance_ma50),s200=n(spy.distance_ma200),q200=n(qqq.distance_ma200),v=n(d.vix?.value),pc=n(d.equity_put_call?.value);
+ const primaryHealthy=(b200==null||b200>=60)&&(s200==null||s200>=0)&&(q200==null||q200>=0);const structural=(b200!=null&&b200<40)||((s200!=null&&s200<0)&&(q200!=null&&q200<0));const stress=(v!=null&&v>=25)||(pc!=null&&pc>=1);const trendPressure=(b50!=null&&b50<40)||(s50!=null&&s50<0)||(q50!=null&&q50<0);
+ if(structural&&stress)return{name:'Risk-off / structural weakness',tone:'bad',why:'The primary trend is damaged and market stress is elevated. Weakness is no longer just tactical.'};
+ if(structural)return{name:'Primary trend damage',tone:'bad',why:'Long-term trend evidence has deteriorated. Price and breadth need to repair before the market can be treated as healthy.'};
+ if(b5!=null&&b5<15&&stress)return{name:'Broad washout',tone:'bad',why:'Short-term breadth is extremely compressed while fear or hedging is elevated. This is genuine capitulation territory, not ordinary weakness.'};
+ if(b5!=null&&b5<25&&primaryHealthy)return{name:'Washout developing',tone:'warn',why:'Selling is becoming unusually broad, but the primary trend is still intact. This is a tactical stress event unless longer-term measures break down.'};
+ if(trendPressure&&primaryHealthy)return{name:'Trend deterioration',tone:'warn',why:'The long-term structure is still alive, but intermediate support or participation is weakening enough to deserve attention.'};
+ if(primaryHealthy&&((b5!=null&&b5<45)||(s20!=null&&s20<0)||(q20!=null&&q20<0)))return{name:'Healthy pullback',tone:'good',why:'The primary trend remains intact while short-term momentum and participation have cooled. So far this looks like a reset inside an uptrend.'};
+ if(primaryHealthy&&b50!=null&&b50<50)return{name:'Narrow / fragile rally',tone:'warn',why:'Headline indexes are holding up better than the broader market. Narrow participation makes the advance more vulnerable.'};
+ if(primaryHealthy)return{name:'Healthy uptrend',tone:'good',why:'Long-term trend and participation remain supportive, with no broad evidence of market stress.'};
+ return{name:'Mixed / transitional market',tone:'neutral',why:'Trend, breadth, and stress signals are not aligned strongly enough to call a clean risk-on or risk-off regime.'};
 }
 
-function indexSummary(sym,x,d){
- const r=n(x.rsi14), w=n(x.williams_r14), m20=n(x.distance_ma20), m50=n(x.distance_ma50), m200=n(x.distance_ma200), adx=n(x.adx14), v=n(d.vix?.value), pc=n(d.equity_put_call?.value);
- const parts=[];
- if(w!=null&&w<-80) parts.push('short-term momentum is oversold'); else if(r!=null&&r<45) parts.push('momentum is soft'); else if(r!=null&&r>60) parts.push('momentum remains firm'); else parts.push('momentum is neutral');
- if(m50!=null&&m200!=null){
-   if(m50>=0&&m200>=0) parts.push('the intermediate and primary trends remain intact');
-   else if(m200>=0) parts.push('the long-term trend is intact but shorter-term support is under pressure');
-   else parts.push('the primary trend has deteriorated');
- }
- if(adx!=null&&adx>=25) parts.push('trend strength is meaningful rather than just noise');
- let context='';
- if(v!=null&&pc!=null){
-   if(v<20&&pc<.8) context='Options markets are still relatively calm, so this reads more like a positioning reset than broad capitulation.';
-   else if(v>=30||pc>=1) context='Fear and hedging are elevated, which makes the weakness more significant.';
-   else context='Fear is rising, but not yet at panic levels.';
- }
- const lead=sym==='QQQ'?'Nasdaq 100':'S&P 500';
- return `${lead}: ${parts.join(', ')}. ${context}`;
+function tacticalState(x){const r=n(x.rsi14),w=n(x.williams_r14),m20=n(x.distance_ma20);if((w!=null&&w<-80)||(r!=null&&r<35))return'Oversold';if((w!=null&&w>-20)||(r!=null&&r>70))return'Overbought';if(m20!=null&&m20<0)return'Soft';if(r!=null&&r>60)return'Firm';return'Neutral'}
+function indexSummary(sym,x,d){const w=n(x.williams_r14),r=n(x.rsi14),m50=n(x.distance_ma50),m200=n(x.distance_ma200),v=n(d.vix?.value),pc=n(d.equity_put_call?.value),hi=n(x.distance_52w_high);const lead=sym==='QQQ'?'Nasdaq 100':'S&P 500';let a=(w!=null&&w<-80)||(r!=null&&r<35)?'short-term momentum is oversold':r!=null&&r<45?'momentum is soft':r!=null&&r>60?'momentum is firm':'momentum is neutral';let b=m200!=null&&m200<0?'the primary trend is damaged':m50!=null&&m50<0?'the primary trend is intact but intermediate support is under pressure':'the intermediate and primary trends remain intact';let c=hi!=null&&hi>-3?'Price is still close to its 52-week high.':hi!=null&&hi>-7?'The pullback is still within a normal range.':hi!=null?'The drawdown is becoming meaningful.':'';let s=v!=null&&pc!=null&&v<20&&pc<.8?'Fear remains contained.':v!=null&&v>=30?'Volatility is signaling material stress.':'Options positioning is not yet at panic levels.';return `${lead}: ${a}; ${b}. ${c} ${s}`}
+function indexWatch(x,d){const m50=n(x.distance_ma50),m200=n(x.distance_ma200),b50=n(d.breadth?.above_50d);if(m200!=null&&m200<0)return'Reclaiming the 200-day average, followed by improving 50-day breadth, would be the first meaningful repair signal.';if(m50!=null&&m50<0)return'A sustained reclaim of the 50-day average would improve the read. A break of the 200-day average would turn this into a primary-trend warning.';return `A decisive break below the 50-day average, especially with 50-day breadth falling below 40%${b50!=null&&b50<45?' again':''} and VIX moving above 20, would make the pullback materially more concerning.`}
+
+function percentile(v,arr){v=n(v);const a=arr.map(n).filter(x=>x!=null);if(v==null||a.length<20)return null;return 100*a.filter(x=>x<=v).length/a.length}
+function pctLabel(p){if(p==null)return null;const x=Math.round(p);return x<=10?'bottom 10%':x<=20?'bottom 20%':x>=90?'top 10%':x>=80?'top 20%':`${x}th percentile`}
+
+function renderHistory(d,h){
+ const market=h?.market||[],breadth=h?.breadth||[],v=n(d.vix?.value),rel=n(d.relative_strength?.qqq_vs_spy_20d),b5=n(d.breadth?.above_5d);const vp=percentile(v,market.map(x=>x.vix)),rp=percentile(rel,market.map(x=>x.relative_strength_20d)),bp=percentile(b5,breadth.map(x=>x.above_5d));let lines=[];
+ if(bp!=null)lines.push(`5-day breadth sits in the ${pctLabel(bp)} of the past year.`);else lines.push(`Current 5-day breadth is ${pct(b5,1)}; breadth percentile history is still being built.`);
+ if(vp!=null)lines.push(`VIX is in the ${pctLabel(vp)}, so fear is ${vp<25?'historically subdued':vp>80?'historically elevated':'within a normal range'}.`);
+ if(rp!=null)lines.push(`QQQ vs SPY leadership is in the ${pctLabel(rp)} of its one-year range.`);
+ $('historyHeadline').textContent=bp!=null&&bp<20?'Short-term participation is unusually weak':vp!=null&&vp<20?'Fear remains historically subdued':'Conditions are within familiar ranges';$('historyContext').textContent=lines.join(' ');
 }
 
-function renderIndex(sym,d){
- const x=d.etfs?.[sym]||{}, box=$(sym.toLowerCase()), pr=$(sym.toLowerCase()+'Price'); const change=n(x.change_pct);
- pr.textContent=n(x.price)==null?'--':`$${f(x.price,2)}  ${change>=0?'+':''}${pct(change,2)}`; box.innerHTML='';
- let s,t; [s,t]=st('rsi',x.rsi14); box.appendChild(card('rsi','RSI (14)',f(x.rsi14,1),'Is momentum stretched?',s,t));
- [s,t]=st('wr',x.williams_r14); box.appendChild(card('wr','Williams %R',f(x.williams_r14,1),'Fast short-term overbought/oversold gauge.',s,t));
- [s,t]=st('bb',x.bollinger_pct_b); box.appendChild(card('bb','Bollinger %B',f(x.bollinger_pct_b,2),'Where price sits inside its volatility bands.',s,t));
- const m=n(x.macd),ms=n(x.macd_signal),q=m==null?['Unavailable','neutral']:ms==null?['Positive momentum','good']:m>=ms?['Momentum improving','good']:['Momentum weakening','warn'];
- box.appendChild(card('macd','MACD',f(m,2),'Medium-term momentum confirmation.',q[0],q[1]));
- [s,t]=st('adx',x.adx14); box.appendChild(card('adx','ADX (14)',f(x.adx14,1),'How strong the current trend is.',s,t));
- for(const h of [20,50,200]){const k='ma'+h,v=x['distance_ma'+h]; [s,t]=st(k,v); box.appendChild(card(k,`Distance from ${h}-day MA`,pct(v,2),h===20?'Short-term trend.':h===50?'Intermediate trend.':'Long-term trend.',s,t));}
- $(sym.toLowerCase()+'Summary').textContent=indexSummary(sym,x,d);
+function renderChanges(d,h){
+ const items=[];const spy=n(d.etfs?.SPY?.change_pct),qqq=n(d.etfs?.QQQ?.change_pct);if(spy!=null&&qqq!=null){const diff=qqq-spy;if(Math.abs(diff)>=.2)items.push(`QQQ ${diff<0?'lagged':'outperformed'} SPY by ${Math.abs(diff).toFixed(2)} percentage points today.`);else items.push('SPY and QQQ moved broadly in line today.')}
+ const m=h?.market||[],prevM=[...m].reverse().find(x=>x.date!==d.market_date);const v=n(d.vix?.value),pv=n(prevM?.vix);if(v!=null&&pv!=null&&Math.abs(v-pv)>=.25)items.push(`VIX ${v>pv?'rose':'fell'} ${Math.abs(v-pv).toFixed(2)} points versus the prior close.`);
+ const bh=h?.breadth||[],prevB=[...bh].reverse().find(x=>x.date!==d.market_date),b5=n(d.breadth?.above_5d),pb5=n(prevB?.above_5d);if(b5!=null&&pb5!=null&&Math.abs(b5-pb5)>=3)items.push(`5-day breadth ${b5>pb5?'improved':'weakened'} ${Math.abs(b5-pb5).toFixed(1)} points since the prior close.`);
+ const rel=n(d.relative_strength?.qqq_vs_spy_20d),pr=n(prevM?.relative_strength_20d);if(items.length<3&&rel!=null&&pr!=null&&Math.abs(rel-pr)>=.2)items.push(`20-day QQQ leadership ${rel>pr?'strengthened':'faded'} to ${rel>0?'+':''}${rel.toFixed(2)}%.`);
+ if(!items.length)items.push('No major cross-market condition changed enough to alter the read.');$('changes').innerHTML=items.slice(0,3).map(x=>`<li>${x}</li>`).join('');
 }
 
-function render(d){
- const b=d.breadth||{}; const B=[['b5','5-day',b.above_5d],['b20','20-day',b.above_20d],['b50','50-day',b.above_50d],['b200','200-day',b.above_200d]];
- $('ladder').innerHTML=B.map(([k,label,v])=>{const[s,t]=st(k,v);return `<div class="cell ${t}-cell"><div class="eyebrow">${label}</div><div class="v">${pct(v,1)}</div><div class="cell-status">${s}</div></div>`}).join('');
- $('breadth').innerHTML=''; for(const[k,label,v] of B){const[s,t]=st(k,v);$('breadth').appendChild(card(k,'% above '+label+' MA',pct(v,1),'How much of the S&P 500 is above this trend?',s,t));}
- renderIndex('SPY',d); renderIndex('QQQ',d);
- const ctx=$('marketContext'); ctx.innerHTML=''; let s,t;
- [s,t]=st('vix',d.vix?.value); ctx.appendChild(card('vix','VIX',f(d.vix?.value,2),'How much fear the options market is pricing.',s,t));
- [s,t]=st('pc',d.equity_put_call?.value); ctx.appendChild(card('pc','Equity Put/Call',f(d.equity_put_call?.value,2),'Whether traders are buying protection or chasing upside.',s,t));
- const b5=n(b.above_5d),b50=n(b.above_50d),b200=n(b.above_200d),v=n(d.vix?.value),sh=b5==null?'Unknown':b5<15?'Washed out':b5<30?'Oversold':b5<50?'Weak':'Healthy',im=b50==null?'Unknown':b50<30?'Damaged':b50<40?'Weak':b50<60?'Mixed':'Healthy',lg=b200==null?'Unknown':b200<40?'Damaged':b200<60?'Mixed':'Healthy',fe=v==null?'Unknown':v<15?'Very low':v<20?'Normal':v<30?'Rising':v<40?'High':'Extreme';
- let h='Mixed market conditions'; if(b5!=null&&b5<30&&b200>=60)h='Short-term oversold. Long-term trend healthy.'; else if(b5!=null&&b5<15)h='Broad short-term washout developing.'; else if(b50>=60&&b200>=60)h='Broadly healthy market structure.'; else if(b50!=null&&b50<40&&b200<60)h='Breadth deterioration needs attention.';
- $('condition').textContent=h; $('summary').textContent=`Short term is ${sh.toLowerCase()}, intermediate breadth is ${im.toLowerCase()}, long-term breadth is ${lg.toLowerCase()}, and fear is ${fe.toLowerCase()}.`;
- $('chips').innerHTML=[`5-day breadth · ${sh}`,`50-day breadth · ${im}`,`200-day breadth · ${lg}`,`VIX · ${fe}`,`Put/call · ${f(d.equity_put_call?.value,2)}`].map(x=>`<span class="chip">${x}</span>`).join('');
- const dt=d.generated_at?new Date(d.generated_at):null; $('fresh').textContent='Latest saved data · '+(dt&&!isNaN(dt)?dt.toLocaleString():d.market_date||'unknown');
+function whatMatters(d,r){let head='Watch confirmation, not noise',text='The most important next signal is whether breadth and price confirm each other.';if(r.name==='Healthy pullback'){head='Does the pullback stay contained?';text='Watch the 50-day averages and short-term breadth. Stabilizing breadth with VIX below 20 would support the reset thesis; a 50-day break plus rising volatility would weaken it.'}else if(r.name.includes('Washout')){head='Look for stabilization';text='A washout becomes constructive only if selling pressure stops broadening, momentum turns up, and the primary trend remains intact.'}else if(r.name.includes('Trend deterioration')){head='Intermediate support is the battleground';text='The next decision point is whether SPY/QQQ reclaim the 50-day trend and breadth improves, or whether weakness spreads into the 200-day structure.'}else if(r.name.includes('Risk-off')||r.name.includes('Primary trend')){head='Repair must happen before risk-on';text='Watch for a 200-day reclaim, stronger long-term breadth, and cooling volatility before treating weakness as repaired.'}else if(r.name==='Healthy uptrend'){head='Watch for narrowing leadership';text='The trend is healthy. The earliest warning would be price holding near highs while 20- and 50-day breadth deteriorate and volatility begins rising.'}$('watchHeadline').textContent=head;$('watchNow').textContent=text}
+
+function renderStress(sym,d){const x=d.etfs?.[sym]||{},b=d.breadth||{};const checks=[['Short-term breadth',n(b.above_5d)!=null&&n(b.above_5d)<25,`5-day breadth ${pct(b.above_5d,1)} · trigger <25%`],['20-day breadth',n(b.above_20d)!=null&&n(b.above_20d)<35,`20-day breadth ${pct(b.above_20d,1)} · trigger <35%`],['Momentum stretch',(n(x.rsi14)!=null&&n(x.rsi14)<35)||(n(x.williams_r14)!=null&&n(x.williams_r14)<-80),`RSI ${f(x.rsi14,1)} · Williams ${f(x.williams_r14,1)}`],['Volatility stress',n(d.vix?.value)!=null&&n(d.vix?.value)>=20,`VIX ${f(d.vix?.value,2)} · trigger ≥20`],['Defensive positioning',n(d.equity_put_call?.value)!=null&&n(d.equity_put_call?.value)>=.9,`Put/call ${f(d.equity_put_call?.value,2)} · trigger ≥0.90`]];const hits=checks.filter(x=>x[1]).length;$('stressCount').textContent=`${hits} of ${checks.length}`;$('stressChecklist').innerHTML=checks.map(([a,hit,b])=>`<div class="stress-item ${hit?'hit':''}"><div class="check">${hit?'✓':'–'}</div><strong>${a}</strong><small>${b}</small></div>`).join('');$('stressTake').textContent=hits>=4?'Multiple stress signals are aligned. This is a genuine washout environment, not ordinary noise.':hits>=2?'Some tactical stress is present, but confirmation is incomplete. Treat it as a developing setup rather than capitulation.':'Very few washout conditions are present. Current weakness is not showing broad capitulation.'}
+
+function renderIndex(sym,d){const x=d.etfs?.[sym]||{},box=$(sym.toLowerCase()),pr=$(sym.toLowerCase()+'Price'),change=n(x.change_pct);pr.textContent=n(x.price)==null?'--':`$${f(x.price,2)}  ${change>=0?'+':''}${pct(change,2)}`;box.innerHTML='';let s,t;[s,t]=st('rsi',x.rsi14);box.appendChild(card('rsi','RSI (14)',f(x.rsi14,1),'Is momentum stretched?',s,t));[s,t]=st('wr',x.williams_r14);box.appendChild(card('wr','Williams %R',f(x.williams_r14,1),'Fast short-term overbought/oversold gauge.',s,t));[s,t]=st('bb',x.bollinger_pct_b);box.appendChild(card('bb','Bollinger %B',f(x.bollinger_pct_b,2),'Where price sits inside its volatility bands.',s,t));const m=n(x.macd),ms=n(x.macd_signal),q=m==null?['Unavailable','neutral']:ms==null?['Positive momentum','good']:m>=ms?['Momentum improving','good']:['Momentum weakening','warn'];box.appendChild(card('macd','MACD',f(m,2),'Medium-term momentum confirmation.',q[0],q[1]));[s,t]=st('adx',x.adx14);box.appendChild(card('adx','ADX (14)',f(x.adx14,1),'How strong the current trend is.',s,t));for(const h of[20,50,200]){const k='ma'+h,v=x['distance_ma'+h];[s,t]=st(k,v);box.appendChild(card(k,`Distance from ${h}-day MA`,pct(v,2),h===20?'Short-term trend.':h===50?'Intermediate trend.':'Long-term trend.',s,t))}
+ const hi=n(x.distance_52w_high),rel=n(d.relative_strength?.qqq_vs_spy_20d);$(sym.toLowerCase()+'Summary').textContent=indexSummary(sym,x,d);$(sym.toLowerCase()+'High').textContent=pct(hi,2);$(sym.toLowerCase()+'Leadership').textContent=rel==null?'—':`${rel>=0?'+':''}${rel.toFixed(2)}%`;$(sym.toLowerCase()+'Tactical').textContent=tacticalState(x);$(sym.toLowerCase()+'Watch').textContent=indexWatch(x,d)
 }
 
-function selectIndex(sym){
- const spy=sym==='SPY'; $('panelSPY').hidden=!spy; $('panelQQQ').hidden=spy; $('tabSPY').classList.toggle('active',spy); $('tabQQQ').classList.toggle('active',!spy); $('tabSPY').setAttribute('aria-selected',String(spy)); $('tabQQQ').setAttribute('aria-selected',String(!spy));
-}
+function render(d,h){currentData=d;currentHistory=h||{};const b=d.breadth||{},B=[['b5','5-day',b.above_5d],['b20','20-day',b.above_20d],['b50','50-day',b.above_50d],['b200','200-day',b.above_200d]];$('ladder').innerHTML=B.map(([k,label,v])=>{const[s,t]=st(k,v);return `<div class="cell ${t}-cell"><div class="eyebrow">${label}</div><div class="v">${pct(v,1)}</div><div class="cell-status">${s}</div></div>`}).join('');$('breadth').innerHTML='';for(const[k,label,v]of B){const[s,t]=st(k,v);$('breadth').appendChild(card(k,'% above '+label+' MA',pct(v,1),'How much of the S&P 500 is above this trend?',s,t))}
+ renderIndex('SPY',d);renderIndex('QQQ',d);const ctx=$('marketContext');ctx.innerHTML='';let s,t;[s,t]=st('vix',d.vix?.value);ctx.appendChild(card('vix','VIX',f(d.vix?.value,2),'How much fear the options market is pricing.',s,t));[s,t]=st('pc',d.equity_put_call?.value);ctx.appendChild(card('pc','Equity Put/Call',f(d.equity_put_call?.value,2),'Whether traders are buying protection or chasing upside.',s,t));const r=regime(d);$('regime').textContent=r.name;$('regimeWhy').textContent=r.why;$('condition').textContent=r.name;$('summary').textContent=r.why;const b5=n(b.above_5d),b200=n(b.above_200d),v=n(d.vix?.value),rel=n(d.relative_strength?.qqq_vs_spy_20d);$('chips').innerHTML=[`5-day breadth · ${pct(b5,1)}`,`200-day breadth · ${pct(b200,1)}`,`VIX · ${f(v,2)}`,`QQQ vs SPY · ${rel==null?'—':(rel>=0?'+':'')+rel.toFixed(2)+'%'}`].map(x=>`<span class="chip">${x}</span>`).join('');renderChanges(d,h);renderHistory(d,h);whatMatters(d,r);renderStress(activeIndex,d);const dt=d.generated_at?new Date(d.generated_at):null;$('fresh').textContent='Latest saved data · '+(dt&&!isNaN(dt)?dt.toLocaleString():d.market_date||'unknown')}
 
-async function load(){
- const btn=$('refresh'); btn.disabled=true; btn.setAttribute('aria-busy','true');
- try{const r=await fetch('data/market_context.json?v='+Date.now(),{cache:'no-store'}); if(!r.ok)throw Error('Could not load data'); render(await r.json());}
- catch(e){$('fresh').textContent='Data load error · '+e.message;}
- finally{btn.disabled=false;btn.removeAttribute('aria-busy');}
-}
+function selectIndex(sym){activeIndex=sym;const spy=sym==='SPY';$('panelSPY').hidden=!spy;$('panelQQQ').hidden=spy;$('tabSPY').classList.toggle('active',spy);$('tabQQQ').classList.toggle('active',!spy);$('tabSPY').setAttribute('aria-selected',String(spy));$('tabQQQ').setAttribute('aria-selected',String(!spy));if(currentData)renderStress(sym,currentData)}
 
-$('refresh').onclick=load; $('close').onclick=()=>$('detail').close(); $('detail').addEventListener('click',e=>{if(e.target===$('detail'))$('detail').close()}); $('tabSPY').onclick=()=>selectIndex('SPY'); $('tabQQQ').onclick=()=>selectIndex('QQQ');
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{}); load();
+async function load(){const btn=$('refresh');btn.disabled=true;btn.setAttribute('aria-busy','true');try{const stamp=Date.now();const [dr,hr]=await Promise.all([fetch('data/market_context.json?v='+stamp,{cache:'no-store'}),fetch('data/history.json?v='+stamp,{cache:'no-store'}).catch(()=>null)]);if(!dr.ok)throw Error('Could not load market data');const d=await dr.json();let h={};if(hr&&hr.ok)h=await hr.json();render(d,h)}catch(e){$('fresh').textContent='Data load error · '+e.message}finally{btn.disabled=false;btn.removeAttribute('aria-busy')}}
+
+$('refresh').onclick=load;$('close').onclick=()=>$('detail').close();$('detail').addEventListener('click',e=>{if(e.target===$('detail'))$('detail').close()});$('tabSPY').onclick=()=>selectIndex('SPY');$('tabQQQ').onclick=()=>selectIndex('QQQ');$('tabSPY').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){$('tabQQQ').focus();selectIndex('QQQ')}});$('tabQQQ').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){$('tabSPY').focus();selectIndex('SPY')}});if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});load();
