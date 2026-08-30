@@ -1,4 +1,4 @@
-const CACHE='market-pulse-v15';
+const CACHE='market-pulse-v16';
 const ASSETS=['./','./index.html','./styles.css?v=15','./enhancements.css?v=15','./premium.css?v=15','./clarity.css?v=15','./daily.css?v=15','./guide.css?v=15','./mobile.css?v=15','./app.js?v=15','./premium.js?v=15','./daily.js?v=15','./strategist.js?v=15','./strategist-daily.js?v=15','./indicator-commentary.js?v=12','./guide.js?v=15','./mobile.js?v=15','./manifest.webmanifest?v=15','./data/market_context.json','./data/history.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
 self.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});
