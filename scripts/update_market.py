@@ -43,7 +43,8 @@ def putcall():
     return float(m.group(1))
 
 def breadth():
-    syms=[str(x).replace('.','-') for x in pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0].Symbol.dropna()]
+    constituents=pd.read_csv('https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv')
+    syms=[str(x).replace('.','-') for x in constituents.Symbol.dropna()]
     raw=yf.download(syms,period='18mo',interval='1d',auto_adjust=False,progress=False,threads=True,group_by='ticker')
     closes={};adv=dec=unch=highs=lows=0
     for s in syms:
@@ -55,6 +56,7 @@ def breadth():
                 w=c.tail(min(252,len(c)));highs+=last>=float(w.max());lows+=last<=float(w.min())
         except:pass
     cm=pd.DataFrame(closes).sort_index()
+    if cm.shape[1]<400:raise ValueError(f'Breadth universe incomplete: only {cm.shape[1]} symbols')
     hist=pd.DataFrame(index=cm.index)
     for k in [5,20,50,200]:
         ma=cm.rolling(k,min_periods=k).mean();eligible=cm.notna()&ma.notna();above=(cm>ma)&eligible
