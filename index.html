@@ -3,30 +3,113 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#f6f8fb">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Market Pulse">
 <title>Market Pulse</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="wrap">
-<header class="top">
-<div><div class="eyebrow">MARKET PULSE</div><h1>Positioning & Market Health</h1><div id="fresh" class="muted">Loading latest saved data...</div></div>
-<button id="refresh" class="btn" type="button">Refresh</button>
-</header>
-<div class="hero">
-<article class="panel"><div class="eyebrow">CURRENT MARKET CONDITION</div><div id="condition" class="condition">Loading...</div><div id="summary" class="muted"></div><div id="chips" class="chips"></div></article>
-<article class="panel legend"><div class="eyebrow">HOW TO READ IT</div><div><span class="dot g"></span><b>Healthy</b> - supportive</div><div><span class="dot w"></span><b>Watch</b> - weakening or stretched</div><div><span class="dot b"></span><b>Extreme</b> - unusually fearful or washed out</div><div class="muted">Tap any indicator for a simple explanation and thresholds.</div></article>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div>
+        <div class="eyebrow">MARKET PULSE</div>
+        <h1>Market health, without the noise.</h1>
+        <div id="fresh" class="freshness">Loading latest market data...</div>
+      </div>
+    </div>
+    <button id="refresh" class="refresh-btn" type="button" aria-label="Refresh market data">
+      <span class="refresh-icon" aria-hidden="true">↻</span><span>Refresh</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="market-overview" aria-labelledby="overview-title">
+      <article class="signal-hero">
+        <div class="hero-kicker">CURRENT MARKET READ</div>
+        <div id="condition" class="market-condition">Loading...</div>
+        <div id="summary" class="market-summary"></div>
+        <div id="chips" class="signal-chips"></div>
+      </article>
+      <aside class="reading-guide" aria-labelledby="overview-title">
+        <div class="guide-title" id="overview-title">How to read this dashboard</div>
+        <div class="guide-row"><span class="guide-dot good-dot"></span><div><b>Healthy</b><small>supportive market condition</small></div></div>
+        <div class="guide-row"><span class="guide-dot watch-dot"></span><div><b>Watch</b><small>weakening or stretched</small></div></div>
+        <div class="guide-row"><span class="guide-dot extreme-dot"></span><div><b>Extreme</b><small>unusually fearful or washed out</small></div></div>
+        <div class="guide-note">Tap any indicator for the plain-English explanation and thresholds.</div>
+      </aside>
+    </section>
+
+    <section class="module breadth-module">
+      <div class="module-header">
+        <div>
+          <div class="eyebrow">MARKET BREADTH</div>
+          <h2>Is the whole market participating?</h2>
+          <p>Percentage of S&amp;P 500 stocks above key moving averages.</p>
+        </div>
+        <a class="source-link" href="https://www.barchart.com/stocks/market-performance" target="_blank" rel="noopener">Source <span>↗</span></a>
+      </div>
+      <div id="ladder" class="breadth-ladder"></div>
+      <div id="breadth" class="indicator-grid breadth-grid"></div>
+    </section>
+
+    <section class="market-pair">
+      <article class="module asset-module">
+        <div class="module-header asset-header">
+          <div>
+            <div class="asset-label"><span class="ticker-badge">SPY</span><span>S&amp;P 500</span></div>
+            <h2>Momentum &amp; trend</h2>
+          </div>
+          <div id="spyPrice" class="asset-price">--</div>
+        </div>
+        <div id="spy" class="indicator-grid asset-grid"></div>
+      </article>
+
+      <article class="module asset-module">
+        <div class="module-header asset-header">
+          <div>
+            <div class="asset-label"><span class="ticker-badge qqq">QQQ</span><span>Nasdaq 100</span></div>
+            <h2>Momentum &amp; trend</h2>
+          </div>
+          <div id="qqqPrice" class="asset-price">--</div>
+        </div>
+        <div id="qqq" class="indicator-grid asset-grid"></div>
+      </article>
+    </section>
+
+    <section class="module fear-module">
+      <div class="module-header">
+        <div>
+          <div class="eyebrow">FEAR &amp; POSITIONING</div>
+          <h2>Are investors calm, cautious, or panicking?</h2>
+          <p>Volatility, options positioning, and internal market participation.</p>
+        </div>
+        <a class="source-link" href="https://www.cboe.com/markets/us/options/market-statistics/daily/" target="_blank" rel="noopener">Cboe <span>↗</span></a>
+      </div>
+      <div id="fear" class="indicator-grid fear-grid"></div>
+    </section>
+  </main>
+
+  <footer>Personal market dashboard. Indicators describe conditions, not future returns. Data freshness is shown above.</footer>
 </div>
-<section><div class="head"><div><div class="eyebrow">MARKET BREADTH</div><h2>How much of the S&P 500 is participating?</h2></div><a class="source" href="https://www.barchart.com/stocks/market-performance" target="_blank" rel="noopener">Barchart ↗</a></div><div id="ladder" class="ladder"></div><div id="breadth" class="grid"></div></section>
-<section><div class="head"><div><div class="eyebrow">SPY</div><h2>S&P 500 momentum & trend</h2></div><div id="spyPrice" class="price">--</div></div><div id="spy" class="grid"></div></section>
-<section><div class="head"><div><div class="eyebrow">QQQ</div><h2>Nasdaq 100 momentum & trend</h2></div><div id="qqqPrice" class="price">--</div></div><div id="qqq" class="grid"></div></section>
-<section><div class="head"><div><div class="eyebrow">FEAR & POSITIONING</div><h2>Are investors calm, cautious or panicking?</h2></div><a class="source" href="https://www.cboe.com/markets/us/options/market-statistics/daily/" target="_blank" rel="noopener">Cboe ↗</a></div><div id="fear" class="grid"></div></section>
-<footer>Personal market dashboard. Indicators are descriptive, not investment advice. Data freshness is shown above.</footer>
-</div>
-<dialog id="detail"><div class="modal"><button id="close" class="close" type="button" aria-label="Close">×</button><div id="dk" class="eyebrow"></div><h2 id="dt"></h2><div id="dv" class="big"></div><div id="ds" class="status"></div><div class="box"><div class="eyebrow">VERY SIMPLE VERSION</div><p id="dm"></p></div><div id="th" class="thresholds"></div><a id="src" class="source" target="_blank" rel="noopener">Open source / chart ↗</a></div></dialog>
+
+<dialog id="detail">
+  <div class="modal">
+    <button id="close" class="close" type="button" aria-label="Close">×</button>
+    <div id="dk" class="eyebrow"></div>
+    <h2 id="dt"></h2>
+    <div class="modal-reading"><div id="dv" class="modal-value"></div><div id="ds" class="status-pill"></div></div>
+    <div class="plain-box"><div class="plain-label">IN PLAIN ENGLISH</div><p id="dm"></p></div>
+    <div class="threshold-title">How to interpret it</div>
+    <div id="th" class="thresholds"></div>
+    <a id="src" class="source-link modal-source" target="_blank" rel="noopener">Open source / chart <span>↗</span></a>
+  </div>
+</dialog>
+
 <script src="app.js" defer></script>
 </body>
 </html>
