@@ -8,18 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Market Pulse">
 <title>Market Pulse</title>
-<link rel="manifest" href="manifest.webmanifest?v=8">
-<link rel="stylesheet" href="styles.css?v=8">
-<link rel="stylesheet" href="enhancements.css?v=8">
-<link rel="stylesheet" href="premium.css?v=8">
-<link rel="stylesheet" href="clarity.css?v=8">
+<link rel="manifest" href="manifest.webmanifest?v=9">
+<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="enhancements.css?v=9">
+<link rel="stylesheet" href="premium.css?v=9">
+<link rel="stylesheet" href="clarity.css?v=9">
+<link rel="stylesheet" href="daily.css?v=9">
 </head>
 <body class="mode-simple">
 <div class="app-shell">
 <header class="app-header simplified-header">
   <div class="brand-block"><div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div><div><div class="eyebrow">MARKET PULSE</div><h1>Know what kind of market you're in.</h1><div id="fresh" class="freshness">Loading latest market data...</div></div></div>
   <div class="header-actions">
-    <div class="view-toggle" role="group" aria-label="Choose dashboard detail level"><button id="viewSimple" class="view-option active" type="button">Simple</button><button id="viewAdvanced" class="view-option" type="button">Advanced</button></div>
+    <div class="view-toggle" role="group" aria-label="Choose dashboard detail level"><button id="viewSimple" class="view-option active" type="button" title="Key conclusions and market context">Overview</button><button id="viewAdvanced" class="view-option" type="button" title="All charts, historical detail and technical evidence">Full Analysis</button></div>
     <button id="refresh" class="refresh-btn" type="button" aria-label="Refresh market data"><span class="refresh-icon" aria-hidden="true">↻</span><span>Refresh</span></button>
   </div>
 </header>
@@ -45,11 +46,7 @@
 <section class="editorial-section" aria-labelledby="brief-title">
   <div class="section-kicker"><div><div class="eyebrow">TODAY'S MARKET READ</div><h2 id="brief-title">What you need to know</h2></div><p>One market verdict, supported by five consistent signals.</p></div>
   <div class="editorial-grid">
-    <article class="brief-editorial">
-      <div class="brief-top"><span id="briefSignal" class="brief-signal">Loading</span></div>
-      <p id="briefText" class="brief-text">Building the market read...</p>
-      <div id="briefBullets" class="brief-bullets"></div>
-    </article>
+    <article class="brief-editorial"><div class="brief-top"><span id="briefSignal" class="brief-signal">Loading</span></div><p id="briefText" class="brief-text">Building the market read...</p><div id="briefBullets" class="brief-bullets"></div></article>
     <div class="editorial-side">
       <article class="insight-note featured"><div class="insight-label">WATCH NEXT</div><h3 id="watchHeadline">Loading...</h3><p id="watchNow"></p></article>
       <article class="insight-note"><div class="insight-label">DO THE SIGNALS AGREE?</div><h3 id="alignmentHeadline">Loading...</h3><p id="alignmentText"></p><div id="alignmentTags" class="alignment-tags advanced-only"></div></article>
@@ -57,73 +54,24 @@
   </div>
 </section>
 
-<section class="timeline-module advanced-only" aria-labelledby="timeline-title">
-  <div class="timeline-head"><div><div class="eyebrow">RECENT MARKET REGIMES</div><h3 id="timeline-title">How the market state has evolved</h3></div><span class="freshness">Recent sessions</span></div>
-  <div id="regimeTimeline" class="regime-timeline" aria-label="Recent regime timeline"></div>
-  <div class="timeline-legend"><span><i style="background:#85cbb5"></i>supportive</span><span><i style="background:#edc179"></i>caution</span><span><i style="background:#df9396"></i>stress</span><span><i style="background:#c9d0dc"></i>mixed / limited history</span></div>
-</section>
+<section class="timeline-module advanced-only" aria-labelledby="timeline-title"><div class="timeline-head"><div><div class="eyebrow">RECENT MARKET REGIMES</div><h3 id="timeline-title">How the market state has evolved</h3></div><span class="freshness">Recent sessions</span></div><div id="regimeTimeline" class="regime-timeline" aria-label="Recent regime timeline"></div><div class="timeline-legend"><span><i style="background:#85cbb5"></i>supportive</span><span><i style="background:#edc179"></i>caution</span><span><i style="background:#df9396"></i>stress</span><span><i style="background:#c9d0dc"></i>mixed / limited history</span></div></section>
 
-<section class="intelligence-section" aria-labelledby="intel-title">
-  <div class="intelligence-heading"><div class="eyebrow">MARKET CONTEXT</div><h2 id="intel-title">What changed, and is it unusual?</h2><p>Only changes large enough to matter make the cut.</p></div>
-  <div class="intelligence-grid simplified-intelligence">
-    <article class="intel-card"><div class="intel-label">WHAT CHANGED</div><div id="changes" class="change-list change-stream"><div class="change-row"><strong>Loading latest changes...</strong></div></div></article>
-    <article class="intel-card"><div class="intel-label">HOW UNUSUAL IS THIS?</div><div id="historyHeadline" class="intel-headline small">Loading...</div><p id="historyContext"></p><div id="percentileStrip" class="percentile-strip advanced-only"></div></article>
-    <article class="intel-card regime-card" aria-hidden="true"><div class="intel-label">MARKET REGIME</div><div id="regime" class="intel-headline">Loading...</div><p id="regimeWhy"></p></article>
-    <article class="intel-card intel-wide advanced-only"><div class="intel-label">HOW THE READ WORKS</div><div class="intel-headline small">Trend first. Breadth second. Stress confirms. Momentum and leadership refine the read.</div><p>No single oscillator can change the market regime on its own.</p></article>
-  </div>
-</section>
+<section class="intelligence-section" aria-labelledby="intel-title"><div class="intelligence-heading"><div class="eyebrow">MARKET CONTEXT</div><h2 id="intel-title">What changed, and is it unusual?</h2><p>Only changes large enough to matter make the cut.</p></div><div class="intelligence-grid simplified-intelligence"><article class="intel-card"><div class="intel-label">WHAT CHANGED</div><div id="changes" class="change-list change-stream"><div class="change-row"><strong>Loading latest changes...</strong></div></div></article><article class="intel-card"><div class="intel-label">HOW UNUSUAL IS THIS?</div><div id="historyHeadline" class="intel-headline small">Loading...</div><p id="historyContext"></p><div id="percentileStrip" class="percentile-strip advanced-only"></div></article><article class="intel-card regime-card" aria-hidden="true"><div class="intel-label">MARKET REGIME</div><div id="regime" class="intel-headline">Loading...</div><p id="regimeWhy"></p></article><article class="intel-card intel-wide advanced-only"><div class="intel-label">HOW THE READ WORKS</div><div class="intel-headline small">Trend first. Breadth second. Stress confirms. Momentum and leadership refine the read.</div><p>No single oscillator can change the market regime on its own.</p></article></div></section>
 
-<section class="module breadth-module">
-  <div class="module-header"><div><div class="eyebrow">BREADTH</div><h2>How much of the market is participating?</h2><p>Broad participation makes a market move healthier. Weak participation makes it more fragile.</p></div></div>
-  <div class="breadth-premium-grid"><div><div id="ladder" class="breadth-ladder"></div><div id="breadth" class="indicator-grid breadth-grid advanced-only"></div></div><aside class="breadth-viz advanced-only"><div class="insight-label">50-DAY BREADTH · 60 SESSIONS</div><div id="breadthSpark"></div><p class="alerts-note">This shows whether intermediate participation is improving or fading.</p></aside></div>
-</section>
+<section class="module breadth-module"><div class="module-header"><div><div class="eyebrow">BREADTH</div><h2>How much of the market is participating?</h2><p>Broad participation makes a market move healthier. Weak participation makes it more fragile.</p></div></div><div class="breadth-premium-grid"><div><div id="ladder" class="breadth-ladder"></div><div id="breadth" class="indicator-grid breadth-grid advanced-only"></div></div><aside class="breadth-viz advanced-only"><div class="insight-label">50-DAY BREADTH · 60 SESSIONS</div><div id="breadthSpark"></div><p class="alerts-note">This shows whether intermediate participation is improving or fading.</p></aside></div></section>
 
-<section class="asset-workspace">
-  <div class="asset-switcher-wrap">
-    <div><div class="eyebrow">INDEX VIEW</div><h2>Choose the market you want to inspect</h2></div>
-    <div class="asset-switcher" role="tablist" aria-label="Choose market index">
-      <button id="tabSPY" class="asset-tab active" type="button" role="tab" aria-selected="true" aria-controls="panelSPY"><span class="tab-code">SPY</span><span class="tab-copy"><small>S&amp;P 500</small><small>Broad market</small></span><span id="spyTabMove" class="tab-move">—</span></button>
-      <button id="tabQQQ" class="asset-tab" type="button" role="tab" aria-selected="false" aria-controls="panelQQQ"><span class="tab-code">QQQ</span><span class="tab-copy"><small>Nasdaq 100</small><small>Growth / tech</small></span><span id="qqqTabMove" class="tab-move">—</span></button>
-    </div>
-  </div>
-
-  <article id="panelSPY" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabSPY">
-    <div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge">SPY</span><span>S&amp;P 500</span></div><h2>Current state</h2></div><div id="spyPrice" class="asset-price">--</div></div>
-    <div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="spySummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="spyMini"></div></aside></div>
-    <div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="spyHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="spyLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="spyTactical">—</strong></div></div>
-    <div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="spyWatch">Loading...</p></div>
-    <details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="spy" class="indicator-grid asset-grid"></div></details>
-  </article>
-
-  <article id="panelQQQ" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabQQQ" hidden>
-    <div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge qqq">QQQ</span><span>Nasdaq 100</span></div><h2>Current state</h2></div><div id="qqqPrice" class="asset-price">--</div></div>
-    <div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="qqqSummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="qqqMini"></div></aside></div>
-    <div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="qqqHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="qqqLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="qqqTactical">—</strong></div></div>
-    <div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="qqqWatch">Loading...</p></div>
-    <details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="qqq" class="indicator-grid asset-grid"></div></details>
-  </article>
-
-  <aside class="module shared-context">
-    <div class="module-header"><div><div class="eyebrow">STRESS</div><h2>Is the market actually getting nervous?</h2><p>Volatility and options positioning help confirm whether weakness is routine or becoming serious.</p></div></div>
-    <div class="context-layout"><div id="marketContext" class="indicator-grid context-grid"></div><aside class="context-viz advanced-only"><div class="insight-label">VIX · 60 SESSIONS</div><div id="vixSpark"></div><div class="insight-label" style="margin-top:10px">LEADERSHIP TREND</div><div id="leadershipSpark"></div></aside></div>
-  </aside>
-
-  <aside class="module stress-module">
-    <div class="module-header"><div><div class="eyebrow">WASHOUT CHECK</div><h2>Is selling becoming unusually broad?</h2><p>A washout requires several stress conditions at the same time.</p></div><div id="stressCount" class="stress-count">—</div></div>
-    <div id="stressChecklist" class="stress-checklist"></div><p id="stressTake" class="stress-take"></p>
-  </aside>
-
-  <aside class="module alerts-module">
-    <div class="module-header"><div><div class="eyebrow">SMART ALERTS</div><h2>Only surface changes that deserve attention</h2><p>High-signal conditions saved on this device.</p></div><button id="enableNotifications" class="alert-permission" type="button">Enable browser alerts</button></div>
-    <div id="alertsGrid" class="alerts-grid"></div><p id="alertsNote" class="alerts-note">Alerts evaluate whenever Market Pulse refreshes. Browser notifications require permission and the app to be opened or refreshed.</p>
-  </aside>
-</section>
+<section class="asset-workspace"><div class="asset-switcher-wrap"><div><div class="eyebrow">INDEX VIEW</div><h2>Choose the market you want to inspect</h2></div><div class="asset-switcher" role="tablist" aria-label="Choose market index"><button id="tabSPY" class="asset-tab active" type="button" role="tab" aria-selected="true" aria-controls="panelSPY"><span class="tab-code">SPY</span><span class="tab-copy"><small>S&amp;P 500</small><small>Broad market</small></span><span id="spyTabMove" class="tab-move">—</span></button><button id="tabQQQ" class="asset-tab" type="button" role="tab" aria-selected="false" aria-controls="panelQQQ"><span class="tab-code">QQQ</span><span class="tab-copy"><small>Nasdaq 100</small><small>Growth / tech</small></span><span id="qqqTabMove" class="tab-move">—</span></button></div></div>
+<article id="panelSPY" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabSPY"><div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge">SPY</span><span>S&amp;P 500</span></div><h2>Current state</h2></div><div id="spyPrice" class="asset-price">--</div></div><div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="spySummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="spyMini"></div></aside></div><div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="spyHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="spyLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="spyTactical">—</strong></div></div><div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="spyWatch">Loading...</p></div><details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="spy" class="indicator-grid asset-grid"></div></details></article>
+<article id="panelQQQ" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabQQQ" hidden><div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge qqq">QQQ</span><span>Nasdaq 100</span></div><h2>Current state</h2></div><div id="qqqPrice" class="asset-price">--</div></div><div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="qqqSummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="qqqMini"></div></aside></div><div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="qqqHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="qqqLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="qqqTactical">—</strong></div></div><div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="qqqWatch">Loading...</p></div><details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="qqq" class="indicator-grid asset-grid"></div></details></article>
+<aside class="module shared-context"><div class="module-header"><div><div class="eyebrow">STRESS</div><h2>Is the market actually getting nervous?</h2><p>Volatility and options positioning help confirm whether weakness is routine or becoming serious.</p></div></div><div class="context-layout"><div id="marketContext" class="indicator-grid context-grid"></div><aside class="context-viz advanced-only"><div class="insight-label">VIX · 60 SESSIONS</div><div id="vixSpark"></div><div class="insight-label" style="margin-top:10px">LEADERSHIP TREND</div><div id="leadershipSpark"></div></aside></div></aside>
+<aside class="module stress-module"><div class="module-header"><div><div class="eyebrow">WASHOUT CHECK</div><h2>Is selling becoming unusually broad?</h2><p>A washout requires several stress conditions at the same time.</p></div><div id="stressCount" class="stress-count">—</div></div><div id="stressChecklist" class="stress-checklist"></div><p id="stressTake" class="stress-take"></p></aside>
+<aside class="module alerts-module"><div class="module-header"><div><div class="eyebrow">SMART ALERTS</div><h2>Only surface changes that deserve attention</h2><p>High-signal conditions saved on this device.</p></div><button id="enableNotifications" class="alert-permission" type="button">Enable browser alerts</button></div><div id="alertsGrid" class="alerts-grid"></div><p id="alertsNote" class="alerts-note">Alerts evaluate whenever Market Pulse refreshes. Browser notifications require permission and the app to be opened or refreshed.</p></aside></section>
 </main>
-
 <footer>Daily-session methodology · The market regime is the primary verdict. Trend, breadth, momentum, stress and leadership are supporting evidence — not separate competing calls.</footer>
 </div>
 <dialog id="detail"><div class="modal"><button id="close" class="close" type="button" aria-label="Close">×</button><div id="dk" class="eyebrow"></div><h2 id="dt"></h2><div class="modal-reading"><div id="dv" class="modal-value"></div><div id="ds" class="status-pill"></div></div><div class="plain-box"><div class="plain-label">IN PLAIN ENGLISH</div><p id="dm"></p></div><div class="threshold-title">How to interpret it</div><div id="th" class="thresholds"></div><a id="src" class="source-link modal-source" target="_blank" rel="noopener">Open source / chart <span>↗</span></a></div></dialog>
-<script src="app.js?v=8" defer></script>
-<script src="premium.js?v=8" defer></script>
+<script src="app.js?v=9" defer></script>
+<script src="premium.js?v=9" defer></script>
+<script src="daily.js?v=9" defer></script>
 </body>
 </html>
