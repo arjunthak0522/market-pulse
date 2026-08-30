@@ -1,58 +1,71 @@
 /* Market Pulse mobile-first UX layer */
-button,.view-option,.asset-tab,.alert-permission,.refresh-btn,summary{min-height:44px}
+button,.asset-tab,.alert-permission,.refresh-btn,summary{min-height:44px}
 @media(max-width:720px){
-  .app-shell{padding-left:14px;padding-right:14px}
-  .simplified-header{padding-top:14px;padding-bottom:10px}
-  .brand-block h1{font-size:clamp(22px,7vw,30px);line-height:1.05;max-width:280px}
-  .header-actions{gap:8px;align-items:center}
-  .view-toggle{flex:1;max-width:260px}
-  .view-option{font-size:10px;padding:8px 7px}
-  .premium-hero{padding:20px 16px 18px;margin-top:8px}
-  .premium-hero .hero-grid{grid-template-columns:1fr}
-  .premium-hero .hero-chart{display:none}
-  .regime-display{font-size:clamp(30px,10vw,42px);line-height:1.02}
-  .regime-thesis{font-size:15px;line-height:1.55;margin-top:10px}
-  .regime-evidence{grid-template-columns:1fr!important;gap:6px!important;margin-top:12px!important}
-  .regime-evidence .evidence-item{padding:9px 10px!important}
-  .market-state-strip{display:grid!important;grid-template-columns:repeat(5,minmax(92px,1fr))!important;overflow-x:auto;scroll-snap-type:x proximity;gap:0!important;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
-  .market-state-strip::-webkit-scrollbar{display:none}
-  .market-state-strip .state-cell{min-width:92px;padding:12px 9px;scroll-snap-align:start}
-  .reading-path{margin:10px 0 2px;padding:10px 11px;border-radius:12px;gap:6px}
-  .path-item{font-size:10px}.path-item b{width:20px;height:20px}.path-arrow{font-size:10px}
-  .guide-section{margin-top:22px}
-  .guide-heading{margin-bottom:10px}.guide-heading h2{font-size:21px;line-height:1.15}.guide-heading p{font-size:12px;line-height:1.45}
-  .health-grid{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;scrollbar-width:none}
-  .health-grid::-webkit-scrollbar{display:none}
-  .health-cell{min-width:72%;max-width:72%;border-top:0!important;border-right:1px solid var(--border)!important;padding:14px;scroll-snap-align:start}
-  .health-cell:last-child{border-right:0!important;grid-column:auto!important}
-  .health-cell strong{font-size:16px}.health-cell p{font-size:12px;margin-top:5px}
-  .trend-brief{padding:15px;margin-top:10px}.trend-brief h3{font-size:17px}.trend-brief>p{font-size:13px;line-height:1.5;margin-bottom:10px}
-  .trend-table-wrap{overflow:visible}.trend-table{table-layout:fixed;font-size:11px}.trend-table th,.trend-table td{padding:9px 5px;white-space:nowrap}.trend-table th:first-child,.trend-table td:first-child{width:22%}
-  .intelligence-section{margin-top:22px}.intelligence-heading h2{font-size:21px}.intelligence-grid{grid-template-columns:1fr!important;gap:10px}.intel-card{padding:15px}
-  .guide-watch{padding:16px}.guide-watch h3{font-size:19px;line-height:1.2}.guide-watch p{font-size:13px;line-height:1.55}
-  .daily-read-grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:22px!important}.daily-read-card{padding:16px!important}.daily-read-card h3{font-size:18px!important}.daily-read-card p{font-size:13px!important;line-height:1.55!important}
-  .breadth-module,.shared-context,.stress-module,.alerts-module,.asset-module{padding:16px!important;margin-top:22px!important}
-  .module-header h2{font-size:21px;line-height:1.18}.module-header p{font-size:12px;line-height:1.5}
-  .breadth-premium-grid{grid-template-columns:1fr!important}.breadth-viz{margin-top:10px}
-  .leadership-guide{padding:16px;gap:10px}.leadership-value strong{font-size:21px}.leadership-copy p{font-size:13px;line-height:1.55}
-  .asset-switcher-wrap{position:sticky;top:0;z-index:20;background:rgba(246,248,251,.96);backdrop-filter:blur(12px);padding:10px 0 8px;margin-top:18px;border-bottom:1px solid var(--border)}
-  .asset-switcher-wrap>div:first-child h2{font-size:18px;margin:3px 0 8px}.asset-switcher{width:100%;display:grid;grid-template-columns:1fr 1fr}.asset-tab{min-width:0;padding:9px}.tab-copy small:last-child{display:none}.tab-code{font-size:16px}.tab-move{font-size:11px}
-  .index-snapshot{grid-template-columns:1fr!important}.index-mini-chart{display:none}.index-meta{grid-template-columns:1fr 1fr!important}.index-meta>div:last-child{grid-column:1/-1}
-  .technical-details{margin-top:12px}.technical-details[open] .indicator-grid{grid-template-columns:1fr!important}.technical-details summary{display:flex;align-items:center;padding:10px 0;font-size:13px;font-weight:800}
-  .indicator-grid,.context-grid,.alerts-grid{grid-template-columns:1fr!important}
-  .card{padding:14px!important}.card p{font-size:12px!important;line-height:1.45!important}
-  .live-pulse{padding:15px!important;margin-top:10px!important}.live-head{display:block!important}.live-badge{display:inline-flex;margin-top:8px}.live-grid{grid-template-columns:1fr 1fr!important}.live-take{font-size:13px!important;line-height:1.5!important}
-  .session-bar{padding:10px 12px!important;gap:8px!important}.session-copy span{font-size:10px!important}.session-clock{font-size:10px!important;white-space:nowrap}
-  .analog-box{padding:15px!important}.analog-box h3{font-size:18px!important}.analog-box p{font-size:12px!important;line-height:1.55!important}
-  footer{font-size:10px;line-height:1.5;padding:24px 4px}
-  dialog .modal{width:min(94vw,520px);max-height:88vh;overflow:auto;padding:18px}.modal h2{font-size:22px}.plain-box p{font-size:13px;line-height:1.55}
+  body{background:#f5f7fa}
+  .app-shell{padding:0 14px 40px;max-width:none}
+  .simplified-header{padding:14px 0 10px;align-items:flex-start;gap:10px}
+  .brand-block{gap:9px}.brand-mark{transform:scale(.88);transform-origin:left top}
+  .brand-block h1{font-size:24px;line-height:1.08;letter-spacing:-.04em;max-width:280px}
+  .freshness{font-size:10px;line-height:1.35;margin-top:4px}
+  .header-actions{width:auto;margin-left:auto;display:block}.refresh-btn{width:44px;padding:0;display:grid;place-items:center;border-radius:12px}.refresh-btn span:last-child{display:none}
+
+  .premium-hero{margin:8px 0 0;padding:20px 16px 16px;border-radius:22px;box-shadow:0 14px 34px rgba(17,27,48,.16)}
+  .premium-hero .hero-grid{display:block}.premium-hero .hero-chart{display:none!important}
+  .regime-display{font-size:36px;line-height:1;letter-spacing:-.055em;margin-top:7px}
+  .regime-thesis{font-size:14px;line-height:1.5;margin:10px 0 0}
+  .hero-asof{font-size:10px;margin-top:12px}
+  .regime-evidence{display:none!important}
+  .market-state-strip{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important;margin:16px 0 0!important;padding:0!important;border-radius:14px!important}
+  .market-state-strip .state-cell{min-width:0!important;padding:11px 10px!important;border-right:1px solid rgba(255,255,255,.1)!important;border-bottom:1px solid rgba(255,255,255,.1)!important}
+  .market-state-strip .state-cell:nth-child(2n){border-right:0!important}.market-state-strip .state-cell:last-child{grid-column:1/-1;border-bottom:0!important;border-right:0!important}
+  .market-state-strip .state-cell span{font-size:8px}.market-state-strip .state-cell strong{font-size:12px;line-height:1.3}
+
+  .reading-path{display:none!important}
+  .guide-section{margin-top:26px}
+  .guide-heading{display:block;margin-bottom:10px}.guide-heading h2{font-size:22px;line-height:1.12;letter-spacing:-.03em;margin-top:4px}.guide-heading p{font-size:12px;line-height:1.45;margin-top:5px}
+  .section-step{font-size:9px;letter-spacing:.09em}.section-step b{width:20px;height:20px}
+
+  .health-grid{display:grid!important;grid-template-columns:1fr 1fr!important;overflow:visible!important;border-radius:14px!important}
+  .health-cell{min-width:0!important;max-width:none!important;padding:13px!important;border-top:0!important;border-right:1px solid var(--border)!important;border-bottom:1px solid var(--border)!important}
+  .health-cell:nth-child(2n){border-right:0!important}.health-cell:nth-child(5){grid-column:1/-1;border-bottom:0!important;border-right:0!important}
+  .health-cell span{font-size:8px}.health-cell strong{font-size:15px;line-height:1.2}.health-cell p{font-size:11px;line-height:1.4;margin-top:5px}
+
+  .trend-brief{padding:14px;margin-top:10px;border-radius:14px;box-shadow:none}.trend-brief h3{font-size:17px;margin-top:5px}.trend-brief>p{font-size:12px;line-height:1.5;margin-bottom:10px}
+  .trend-table-wrap{overflow:visible}.trend-table{table-layout:fixed;font-size:10px}.trend-table th,.trend-table td{padding:8px 4px;white-space:nowrap}.trend-table th:first-child,.trend-table td:first-child{width:22%}
+
+  .intelligence-section{margin-top:26px}.intelligence-heading h2{font-size:22px;line-height:1.12}.intelligence-heading p{font-size:12px;line-height:1.45}.intelligence-grid{grid-template-columns:1fr!important;gap:9px}.intel-card{padding:14px;border-radius:14px;box-shadow:none}.intel-headline.small{font-size:16px;line-height:1.25}.intel-card p{font-size:12px;line-height:1.5}
+  .guide-watch{padding:14px;border-radius:14px}.guide-watch h3{font-size:18px;line-height:1.2}.guide-watch p{font-size:12px;line-height:1.5}
+  .daily-read-grid{grid-template-columns:1fr!important;gap:9px!important;margin-top:22px!important}.daily-read-card{padding:14px!important;border-radius:14px!important}.daily-read-card h3{font-size:18px!important;line-height:1.2!important}.daily-read-card p{font-size:12px!important;line-height:1.5!important}.read-meta{display:none!important}
+
+  .module{margin-top:26px!important}.breadth-module,.shared-context,.stress-module,.alerts-module,.asset-module{padding:14px!important;border-radius:16px!important;box-shadow:none!important}
+  .module-header{gap:8px}.module-header h2{font-size:22px;line-height:1.14;letter-spacing:-.025em}.module-header p{font-size:12px;line-height:1.45}
+  .breadth-premium-grid{grid-template-columns:1fr!important}.breadth-viz{margin-top:10px;padding:12px;border-radius:12px}.breadth-viz .sparkline{height:90px}
+  .breadth-ladder{gap:7px}.breadth-row{padding:10px!important;border-radius:11px!important}
+
+  .leadership-guide{grid-template-columns:1fr!important;padding:14px;border-radius:14px;gap:9px}.leadership-value strong{font-size:21px}.leadership-copy p{font-size:12px;line-height:1.5}
+
+  .asset-switcher-wrap{position:sticky;top:0;z-index:20;margin-top:24px;padding:8px 0 7px;background:rgba(245,247,250,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+  .asset-switcher-wrap>div:first-child>.eyebrow,.asset-switcher-wrap>div:first-child>h2,.asset-switcher-wrap .section-step{display:none!important}
+  .asset-switcher{position:static!important;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border:1px solid var(--border);border-radius:13px;background:#e9edf3;box-shadow:none}
+  .asset-tab{min-height:50px!important;padding:8px 10px!important;border-radius:10px!important;display:grid!important;grid-template-columns:1fr auto!important}.asset-tab .tab-code{font-size:16px!important}.asset-tab .tab-copy{display:none!important}.asset-tab .tab-move{font-size:10px!important;padding:5px 6px!important;align-self:center}
+
+  .asset-header{padding-bottom:10px}.asset-label{font-size:11px}.asset-price{font-size:17px}.index-snapshot{grid-template-columns:1fr!important;gap:8px}.index-mini-chart{display:none!important}.asset-take p{font-size:13px;line-height:1.52}
+  .index-meta{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px}.index-meta>div{padding:10px!important;border-radius:11px!important}.index-meta>div:last-child{grid-column:1/-1}.index-meta span{font-size:8px!important}.index-meta strong{font-size:13px!important}
+  .read-change{padding:13px 13px 13px 17px!important;border-radius:12px!important}.read-change p{font-size:12px;line-height:1.5}
+  .technical-details{margin-top:10px}.technical-details summary{padding:9px 0;font-size:12px;font-weight:800}.technical-details[open] .indicator-grid{grid-template-columns:1fr!important}
+  .indicator-grid,.context-grid,.alerts-grid{grid-template-columns:1fr!important;gap:8px!important}.card{padding:13px!important;border-radius:12px!important;box-shadow:none!important}.card .value{font-size:22px!important}.card p{font-size:11px!important;line-height:1.42!important}
+
+  .context-layout{grid-template-columns:1fr!important}.context-viz{grid-column:auto!important;padding:12px;border-radius:12px}.context-viz .sparkline{height:62px}
+  .stress-checklist{gap:7px!important}.stress-item{padding:11px!important;border-radius:11px!important}.stress-take{font-size:12px!important;line-height:1.5!important}
+  .alerts-grid{gap:7px!important}.alert-card{border-radius:11px!important}.alert-permission{width:100%;margin-top:8px}
+
+  .live-pulse{padding:14px!important;margin-top:10px!important;border-radius:14px!important}.live-head{display:block!important}.live-badge{display:inline-flex;margin-top:7px}.live-grid{grid-template-columns:1fr 1fr!important;gap:7px!important}.live-metric{padding:10px!important;border-radius:10px!important}.live-take{font-size:12px!important;line-height:1.5!important}
+  .session-bar{padding:9px 10px!important;gap:8px!important;border-radius:12px!important;margin-top:8px!important}.session-copy strong{font-size:11px!important}.session-copy span{font-size:9px!important}.session-clock{font-size:9px!important;white-space:nowrap}
+  .analog-box{padding:14px!important;border-radius:14px!important}.analog-box h3{font-size:17px!important;line-height:1.25!important}.analog-box p{font-size:11px!important;line-height:1.5!important}
+
+  footer{font-size:9px;line-height:1.45;padding:22px 2px 0;margin-top:30px}
+  dialog .modal{width:min(94vw,520px);max-height:88vh;overflow:auto;padding:17px;border-radius:18px}.modal h2{font-size:21px}.plain-box p{font-size:12px;line-height:1.5}
 }
-@media(max-width:430px){
-  .app-shell{padding-left:11px;padding-right:11px}
-  .premium-hero{margin-left:0;margin-right:0;padding-left:14px;padding-right:14px}
-  .health-cell{min-width:84%;max-width:84%}
-  .trend-table{font-size:10px}.trend-table th,.trend-table td{padding:8px 3px}
-  .read-meta{gap:5px!important;flex-wrap:wrap}.read-pill{font-size:9px!important}
-  .live-grid{grid-template-columns:1fr 1fr!important;gap:7px!important}.live-metric{padding:10px!important}
-  .index-meta{gap:7px!important}
+@media(max-width:390px){
+  .app-shell{padding-left:11px;padding-right:11px}.brand-block h1{font-size:22px}.regime-display{font-size:33px}.premium-hero{padding-left:14px;padding-right:14px}.health-cell{padding:11px!important}.trend-table{font-size:9px}.trend-table th,.trend-table td{padding:7px 2px}.live-grid{grid-template-columns:1fr 1fr!important}.index-meta{gap:6px!important}
 }
