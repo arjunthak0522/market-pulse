@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-08-30T18:45:00Z",
+  "market_date": "2026-08-28",
+  "breadth": {
+    "above_5d": 33.2,
+    "above_20d": 42.34,
+    "above_50d": 52.88,
+    "above_200d": 68.78,
+    "advancers": null,
+    "decliners": null,
+    "new_highs_52w": null,
+    "new_lows_52w": null,
+    "source": "Barchart"
+  },
+  "vix": {"value": 14.43, "source": "Cboe"},
+  "equity_put_call": {"value": 0.62, "source": "Cboe Daily Market Statistics"},
+  "etfs": {
+    "SPY": {"price":769.35,"change_pct":-0.2334,"rsi14":51.443,"williams_r14":-73.951,"bollinger_pct_b":null,"macd":0.95,"macd_signal":null,"adx14":27.932,"distance_ma20":0.0286,"distance_ma50":0.3299,"distance_ma200":1.0959},
+    "QQQ": {"price":716.43,"change_pct":-0.6601,"rsi14":51.415,"williams_r14":-80.643,"bollinger_pct_b":null,"macd":1.33,"macd_signal":null,"adx14":26.496,"distance_ma20":0.0405,"distance_ma50":0.498,"distance_ma200":1.0964}
+  }
+}
