@@ -2,6 +2,12 @@ name: Update market data
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'requirements.txt'
+      - '.github/workflows/update-market-data.yml'
   schedule:
     - cron: '30 22 * * 1-5'
 
@@ -23,7 +29,7 @@ jobs:
         run: |
           git config user.name "market-pulse-bot"
           git config user.email "market-pulse-bot@users.noreply.github.com"
-          git add data/market_context.json
+          git add data/market_context.json data/history.json
           git diff --cached --quiet && exit 0
           git commit -m "Update market dashboard data"
           git push
