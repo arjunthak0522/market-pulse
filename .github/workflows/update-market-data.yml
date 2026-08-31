@@ -31,6 +31,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python scripts/update_market.py
+      - run: python scripts/update_options_risk.py
       - name: Commit refreshed data
         run: |
           git config user.name "market-pulse-bot"
