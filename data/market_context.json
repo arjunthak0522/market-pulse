@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-31T03:51:13.670554+00:00",
+  "generated_at": "2026-08-31T03:54:40.993936+00:00",
   "market_date": "2026-08-28",
   "breadth": {
     "above_5d": 33.2,
@@ -85,6 +85,19 @@
     },
     "put_call": {
       "as_of": "2026-08-28"
+    },
+    "options_risk": {
+      "as_of": "2026-08-28",
+      "source": "Cboe Global Indices daily history"
     }
+  },
+  "options_risk": {
+    "as_of": "2026-08-28",
+    "vix3m": 17.48,
+    "vix_vix3m_ratio": 0.826,
+    "term_structure": "Normal",
+    "skew": 149.77,
+    "skew_percentile_252d": 80.6,
+    "source": "Cboe Global Indices daily history"
   }
 }
