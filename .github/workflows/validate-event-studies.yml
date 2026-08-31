@@ -6,10 +6,11 @@ on:
     branches:
       - audit/contrast-reliability-20260831
     paths:
-      - 'scripts/update_event_studies.py'
-      - 'tests/test_event_studies.py'
-      - 'historical-forward-returns.js'
-      - 'historical-forward-returns.css'
+      - '*.js'
+      - '*.css'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'data/event_studies.json'
       - 'index.html'
       - '.github/workflows/validate-event-studies.yml'
       - 'requirements.txt'
@@ -27,8 +28,11 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: pip install -r requirements.txt
-      - name: JavaScript syntax
-        run: node --check historical-forward-returns.js
+      - name: JavaScript syntax - full active dashboard bundle
+        run: |
+          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js; do
+            node --check "$f"
+          done
       - name: Unit tests
         run: python -m unittest tests/test_event_studies.py -v
       - name: Generate historical studies
@@ -43,6 +47,7 @@ jobs:
           assert 'methodology' in p
           assert p['coverage']['SPY']['sessions'] > 5000
           assert p['coverage']['QQQ']['sessions'] > 5000
+          assert len(p['studies']) >= 80
           for s in p['studies']:
               assert s['definition']['rule']
               assert '5' in s['horizons'] and '21' in s['horizons']
