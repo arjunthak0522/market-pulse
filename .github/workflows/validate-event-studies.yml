@@ -15,15 +15,13 @@ on:
       - 'requirements.txt'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -57,11 +55,3 @@ jobs:
           name: event-study-validation
           path: data/event_studies.json
           retention-days: 7
-      - name: Persist validated study data on audit branch
-        run: |
-          git config user.name "market-pulse-bot"
-          git config user.email "market-pulse-bot@users.noreply.github.com"
-          git add data/event_studies.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Update validated historical event studies"
-          git push origin HEAD:audit/contrast-reliability-20260831
