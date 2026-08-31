@@ -14,11 +14,17 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: market-data-update
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -32,4 +38,6 @@ jobs:
           git add data/market_context.json data/history.json
           git diff --cached --quiet && exit 0
           git commit -m "Update market dashboard data"
-          git push
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
