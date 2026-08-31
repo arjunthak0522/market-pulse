@@ -34,7 +34,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: JavaScript syntax - full active dashboard bundle
         run: |
-          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js; do
+          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js tactical-summary.js; do
             node --check "$f"
           done
       - name: Unit tests
