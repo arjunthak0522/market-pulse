@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30T20:02:39.785184+00:00",
+  "generated_at": "2026-08-31T03:22:19.379902+00:00",
   "market_date": "2026-08-28",
   "breadth": {
     "above_5d": 33.2,
@@ -11,7 +11,17 @@
     "unchanged": 1,
     "new_highs_52w": 6,
     "new_lows_52w": 2,
-    "source": "S&P 500 constituent closes via Yahoo Finance"
+    "ad_net": -44,
+    "ad_ratio": 0.839,
+    "advancing_pct": 45.6,
+    "ad_ratio_5d": 0.966,
+    "rsi_below_30": 1.2,
+    "rsi_below_30_prev": 0.6,
+    "rsi_above_70": 3.6,
+    "trin": 1.051,
+    "trin_prev": 0.541,
+    "trin_method": "Arms formula using S&P 500 constituent issues and volume",
+    "source": "S&P 500 constituent closes and volume via Yahoo Finance"
   },
   "vix": {
     "value": 14.43,
@@ -19,6 +29,8 @@
   },
   "equity_put_call": {
     "value": 0.62,
+    "percentile_60d": 60.0,
+    "history_count": 63,
     "source": "Cboe Daily Market Statistics"
   },
   "relative_strength": {
