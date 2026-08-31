@@ -2,9 +2,14 @@ name: Update market data
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-market-data.yml'
   schedule:
     # GitHub cron is UTC. Run both UTC possibilities and gate by America/Chicago
-    # so exactly the 4:30 PM Central run proceeds across DST changes.
+    # so the 4 PM Central hour proceeds across DST changes. GitHub scheduled jobs
+    # can start several minutes late, so never require an exact 16:30 timestamp.
     - cron: '30 21 * * 1-5'
     - cron: '30 22 * * 1-5'
 
@@ -19,21 +24,22 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Gate scheduled run to 4:30 PM Central
+      - name: Gate end-of-day run to Central time
         id: gate
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Proceeding with manual end-of-day refresh at $(TZ=America/Chicago date)"
             exit 0
           fi
-          ct_time=$(TZ=America/Chicago date +%H:%M)
-          if [ "$ct_time" = "16:30" ]; then
+          ct_hour=$(TZ=America/Chicago date +%H)
+          if [ "$ct_hour" = "16" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
             echo "Proceeding with end-of-day refresh at $(TZ=America/Chicago date)"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping duplicate UTC schedule at $(TZ=America/Chicago date)"
+            echo "Skipping non-4-PM-Central run at $(TZ=America/Chicago date)"
           fi
       - uses: actions/checkout@v4
         if: steps.gate.outputs.run == 'true'
