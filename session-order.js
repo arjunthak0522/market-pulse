@@ -24,6 +24,8 @@ function ensurePolish(){
       .premium-hero{padding:13px 14px!important}
       .premium-hero .regime-display{font-size:28px!important}
       .premium-hero .regime-thesis{margin-top:6px!important}
+      .key-readings-grid small{font-size:8.5px!important;line-height:1.28!important}
+      .key-readings-grid span{font-size:9.8px!important;line-height:1.15!important}
     }
   `;
   document.head.appendChild(s);
