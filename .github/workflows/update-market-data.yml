@@ -35,8 +35,14 @@ jobs:
       - name: Update historical event studies with transient-data retry
         run: |
           for attempt in 1 2 3; do
-            python scripts/update_event_studies.py && exit 0
+            python scripts/update_event_studies.py && break
             echo "Historical data attempt $attempt failed"
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+          done
+          for attempt in 1 2 3; do
+            python scripts/append_mmfd_event_studies.py && exit 0
+            echo "One-week participation study attempt $attempt failed"
             if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
           done
           exit 1
