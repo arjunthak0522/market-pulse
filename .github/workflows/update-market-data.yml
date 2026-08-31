@@ -2,12 +2,6 @@ name: Update market data
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/**'
-      - 'requirements.txt'
-      - '.github/workflows/update-market-data.yml'
   schedule:
     # GitHub cron is UTC. Run both UTC possibilities and gate by America/Chicago
     # so exactly the 4:30 PM Central run proceeds across DST changes.
@@ -29,12 +23,12 @@ jobs:
         id: gate
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" != "schedule" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          ct_hour=$(TZ=America/Chicago date +%H)
-          if [ "$ct_hour" = "16" ]; then
+          ct_time=$(TZ=America/Chicago date +%H:%M)
+          if [ "$ct_time" = "16:30" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
             echo "Proceeding with end-of-day refresh at $(TZ=America/Chicago date)"
           else
@@ -54,8 +48,15 @@ jobs:
         run: pip install -r requirements.txt
       - if: steps.gate.outputs.run == 'true'
         run: python scripts/update_market.py
-      - if: steps.gate.outputs.run == 'true'
-        run: python scripts/update_options_risk.py
+      - name: Update options risk with end-of-day retry
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          for attempt in 1 2 3 4; do
+            python scripts/update_options_risk.py && break
+            echo "Options-risk attempt $attempt not aligned yet"
+            if [ "$attempt" -lt 4 ]; then sleep $((attempt * 30)); fi
+            if [ "$attempt" -eq 4 ]; then exit 1; fi
+          done
       - if: steps.gate.outputs.run == 'true'
         run: python scripts/update_breadth_cycle.py
       - name: Update historical event studies with transient-data retry
