@@ -32,17 +32,20 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python scripts/update_market.py
       - run: python scripts/update_options_risk.py
+      - run: python scripts/update_event_studies.py
       - name: Commit refreshed data
         run: |
           cp data/market_context.json /tmp/market_context.json
           cp data/history.json /tmp/history.json
+          cp data/event_studies.json /tmp/event_studies.json
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/market_context.json data/market_context.json
           cp /tmp/history.json data/history.json
+          cp /tmp/event_studies.json data/event_studies.json
           git config user.name "market-pulse-bot"
           git config user.email "market-pulse-bot@users.noreply.github.com"
-          git add data/market_context.json data/history.json
+          git add data/market_context.json data/history.json data/event_studies.json
           git diff --cached --quiet && exit 0
           git commit -m "Update market dashboard data"
           git push origin HEAD:main
