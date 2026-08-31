@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-31T03:22:19.379902+00:00",
+  "generated_at": "2026-08-31T03:40:33.643743+00:00",
   "market_date": "2026-08-28",
   "breadth": {
     "above_5d": 33.2,
@@ -66,6 +66,25 @@
       "distance_ma200": 9.35,
       "distance_52w_high": -3.984,
       "market_date": "2026-08-28"
+    }
+  },
+  "official_regime": "Healthy pullback",
+  "component_status": {
+    "breadth": {
+      "as_of": "2026-08-28",
+      "source": "S&P 500 constituent closes and volume"
+    },
+    "SPY": {
+      "as_of": "2026-08-28"
+    },
+    "QQQ": {
+      "as_of": "2026-08-28"
+    },
+    "VIX": {
+      "as_of": "2026-08-28"
+    },
+    "put_call": {
+      "as_of": "2026-08-28"
     }
   }
 }
