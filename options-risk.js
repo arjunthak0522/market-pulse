@@ -1,11 +1,11 @@
 (()=>{
 const $=id=>document.getElementById(id);
-const n=v=>Number.isFinite(Number(v))?Number(v):null;
+const n=v=>{if(v==null||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null};
 const f=(v,d=2)=>n(v)==null?'—':n(v).toFixed(d);
 
 function termRead(r){
   if(r==null)return['Unavailable','Term-structure data is unavailable.','VIX measures roughly one-month implied volatility; VIX3M looks roughly three months out. Comparing them shows whether fear is concentrated right now.'];
-  if(r>1)return['Inverted · acute stress',`VIX is ${f(r,2)}× VIX3M. Near-term volatility is priced above the three-month outlook — an unusually urgent form of fear.`,'An inversion is evidence of acute stress, not proof that a market low is already in. Stabilization matters more if the ratio subsequently falls back below 1.'];
+  if(r>1)return['Inverted · acute stress',`VIX is ${f(r,2)}× VIX3M. Near-term volatility is priced above the three-month outlook - an unusually urgent form of fear.`,'An inversion is evidence of acute stress, not proof that a market low is already in. Stabilization matters more if the ratio subsequently falls back below 1.'];
   if(r>=.95)return['Nearly flat · caution',`VIX is ${f(r,2)}× VIX3M. Near-term fear has moved close to longer-term volatility expectations, so the curve is losing its normal cushion.`,'A sustained move above 1 would mark genuine inversion. A retreat away from 1 would show that immediate stress is easing.'];
   return['Normal',`VIX is ${f(r,2)}× VIX3M. Near-term volatility remains below the three-month expectation, which is the normal shape of the curve.`,'A move toward 1 would show immediate fear building. Above 1 would signal an inverted, more acute stress regime.'];
 }
