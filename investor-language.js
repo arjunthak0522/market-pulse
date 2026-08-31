@@ -2,10 +2,10 @@
 const $=id=>document.getElementById(id);
 const n=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const MAP={
-  '% above 5-day MA':['One-week participation','MMFD-style breadth · % of S&P 500 stocks above 5-day moving average'],
-  '% above 20-day MA':['One-month participation','% of S&P 500 stocks above 20-day moving average'],
-  '% above 50-day MA':['Intermediate participation','% of S&P 500 stocks above 50-day moving average'],
-  '% above 200-day MA':['Long-term participation','% of S&P 500 stocks above 200-day moving average'],
+  '% above 5-day MA':['One-week participation','5-day breadth · % of S&P 500 stocks above 5-day moving average'],
+  '% above 20-day MA':['One-month participation','20-day breadth · % of S&P 500 stocks above 20-day moving average'],
+  '% above 50-day MA':['Intermediate participation','50-day breadth · % of S&P 500 stocks above 50-day moving average'],
+  '% above 200-day MA':['Long-term participation','200-day breadth · % of S&P 500 stocks above 200-day moving average'],
   'QQQ vs SPY · 20D':['Growth vs broad-market leadership','QQQ/SPY relative strength · 20 trading sessions'],
   'Distance from 20-day MA':['Short-term trend position','Distance from 20-day moving average'],
   'Distance from 50-day MA':['Intermediate trend position','Distance from 50-day moving average'],
@@ -31,9 +31,9 @@ function options(){document.querySelectorAll('.risk-card-top span').forEach(el=>
 function alerts(){const a=document.querySelector('.alerts-module');if(a&&!a.closest('.alerts-disclosure')){const d=document.createElement('details');d.className='alerts-disclosure';const s=document.createElement('summary');s.textContent='Smart alerts · optional';a.before(d);d.append(s,a)}}
 function watch(){const h=$('guideWatchHeadline'),p=$('guideWatchText');if(h){const map={'50-day breadth':'Intermediate participation','50-day repair':'Intermediate trend repair','200-day repair':'Long-term trend repair','Volatility normalization':'Fear cooling'};const k=h.textContent.trim();if(map[k])h.textContent=map[k]}if(p)p.textContent=plain(p.textContent)}
 function morning(d){const t=$('morningText');if(!t)return;const b=d.breadth||{},s=d.etfs?.SPY||{},q=d.etfs?.QQQ||{},b5=n(b.above_5d),b50=n(b.above_50d),v=n(d.vix?.value),s200=n(s.distance_ma200),q200=n(q.distance_ma200);let opening=s200==null||q200==null?'The prior close has incomplete long-term trend data.':s200<0||q200<0?'The prior close still shows long-term trend damage.':'The prior close still supports the primary uptrend.';let part=b5==null?'Short-term participation is unavailable.':b5<30?`Only ${b5.toFixed(0)}% of S&P 500 stocks are holding above their one-week trend, so selling is broad.`:b5<50?`${b5.toFixed(0)}% of S&P 500 stocks are above their one-week trend, so short-term participation is soft.`:`${b5.toFixed(0)}% of S&P 500 stocks are above their one-week trend, so short-term participation is healthy.`;let next=b50!=null&&b50<50?'Watch whether intermediate participation recovers or keeps fading.':'Watch whether intermediate participation stays healthy and SPY/QQQ hold intermediate support.';if(v!=null&&v>=20)next+=' Volatility is elevated, so further stress matters more.';t.textContent=`${opening} ${part} ${next}`}
-function readingOrder(){const hero=document.querySelector('.premium-hero');if(!hero)return;let anchor=hero;for(const node of [$('sessionBar'),$('livePulse'),$('dailyHabit'),document.querySelector('.intelligence-section'),$('guideWatch'),$('marketHealthGuide')]){if(node){anchor.after(node);anchor=node}}$('chapterRead')?.remove()}
+function readingOrder(){const hero=document.querySelector('.premium-hero');if(!hero)return;let anchor=hero;for(const node of [$('decisionFramework'),$('heroDecision'),$('keyReadings'),$('sessionBar'),$('livePulse'),$('dailyHabit'),document.querySelector('.intelligence-section'),$('guideWatch'),$('marketHealthGuide')]){if(node){anchor.after(node);anchor=node}}$('chapterRead')?.remove()}
 function run(d){hero(d);health();trend();participation();turning();intelligence();options();alerts();watch();relabelCards();morning(d);readingOrder()}
-async function boot(){try{const r=await fetch(`data/market_context.json?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const d=await r.json();[0,300,800,1400,2200,3400].forEach(ms=>setTimeout(()=>run(d),ms))}catch(e){console.warn('Investor language:',e)}}
+async function boot(){try{const r=await fetch(`data/market_context.json?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const d=await r.json();[0,300,800,1400,2200,3400,4600].forEach(ms=>setTimeout(()=>run(d),ms))}catch(e){console.warn('Investor language:',e)}}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',boot);else boot();
 document.getElementById('refresh')?.addEventListener('click',()=>setTimeout(boot,900));
 })();
