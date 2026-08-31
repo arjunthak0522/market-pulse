@@ -16,7 +16,7 @@ def old():
 
 def old_hist():
     try:return json.loads(HIST.read_text())
-    except:return {'breadth':[],'market':[],'put_call':[]}
+    except:return {'breadth':[],'market':[],'put_call':[],'regime_history':[]}
 
 def safe(prev,fn):
     try:return fn()
@@ -100,19 +100,14 @@ def breadth():
         ma=cm.rolling(k,min_periods=k).mean();eligible=cm.notna()&ma.notna();above=(cm>ma)&eligible
         hist[f'above_{k}d']=100*above.sum(axis=1)/eligible.sum(axis=1).replace(0,np.nan)
     diff=cm.diff();adv_mask=diff>0;dec_mask=diff<0
-    adv_count=adv_mask.sum(axis=1).astype(float);dec_count=dec_mask.sum(axis=1).astype(float)
-    active=(adv_count+dec_count).replace(0,np.nan)
+    adv_count=adv_mask.sum(axis=1).astype(float);dec_count=dec_mask.sum(axis=1).astype(float);active=(adv_count+dec_count).replace(0,np.nan)
     hist['advancers']=adv_count;hist['decliners']=dec_count;hist['ad_net']=adv_count-dec_count;hist['ad_ratio']=adv_count/dec_count.replace(0,np.nan);hist['advancing_pct']=100*adv_count/active
-    adv_vol=vm.where(adv_mask).sum(axis=1,min_count=1);dec_vol=vm.where(dec_mask).sum(axis=1,min_count=1)
-    vol_ratio=adv_vol/dec_vol.replace(0,np.nan);hist['trin']=(hist['ad_ratio']/vol_ratio.replace(0,np.nan)).replace([np.inf,-np.inf],np.nan)
-    rf=rsi_frame(cm,14);eligible_rsi=rf.notna();den=eligible_rsi.sum(axis=1).replace(0,np.nan)
-    hist['rsi_below_30']=100*((rf<30)&eligible_rsi).sum(axis=1)/den;hist['rsi_above_70']=100*((rf>70)&eligible_rsi).sum(axis=1)/den
-    hist=hist.dropna(subset=['above_200d']).tail(252)
-    last=hist.iloc[-1];prev=hist.iloc[-2] if len(hist)>1 else last
+    adv_vol=vm.where(adv_mask).sum(axis=1,min_count=1);dec_vol=vm.where(dec_mask).sum(axis=1,min_count=1);vol_ratio=adv_vol/dec_vol.replace(0,np.nan);hist['trin']=(hist['ad_ratio']/vol_ratio.replace(0,np.nan)).replace([np.inf,-np.inf],np.nan)
+    rf=rsi_frame(cm,14);eligible_rsi=rf.notna();den=eligible_rsi.sum(axis=1).replace(0,np.nan);hist['rsi_below_30']=100*((rf<30)&eligible_rsi).sum(axis=1)/den;hist['rsi_above_70']=100*((rf>70)&eligible_rsi).sum(axis=1)/den
+    hist=hist.dropna(subset=['above_200d']).tail(252);last=hist.iloc[-1];prev=hist.iloc[-2] if len(hist)>1 else last
     current={k:round(float(last[k]),2) for k in ['above_5d','above_20d','above_50d','above_200d']}
     current.update({'advancers':int(adv),'decliners':int(dec),'unchanged':int(unch),'new_highs_52w':int(highs),'new_lows_52w':int(lows),'ad_net':int(last.ad_net),'ad_ratio':round(float(last.ad_ratio),3) if pd.notna(last.ad_ratio) else None,'advancing_pct':round(float(last.advancing_pct),1) if pd.notna(last.advancing_pct) else None,'ad_ratio_5d':round(float(hist.ad_ratio.tail(5).mean()),3) if hist.ad_ratio.tail(5).notna().any() else None,'rsi_below_30':round(float(last.rsi_below_30),1) if pd.notna(last.rsi_below_30) else None,'rsi_below_30_prev':round(float(prev.rsi_below_30),1) if pd.notna(prev.rsi_below_30) else None,'rsi_above_70':round(float(last.rsi_above_70),1) if pd.notna(last.rsi_above_70) else None,'trin':round(float(last.trin),3) if pd.notna(last.trin) else None,'trin_prev':round(float(prev.trin),3) if pd.notna(prev.trin) else None,'trin_method':'Arms formula using S&P 500 constituent issues and volume','source':'S&P 500 constituent closes and volume via Yahoo Finance'})
-    records=[]
-    cols=['above_5d','above_20d','above_50d','above_200d','advancers','decliners','ad_net','ad_ratio','advancing_pct','rsi_below_30','rsi_above_70','trin']
+    records=[];cols=['above_5d','above_20d','above_50d','above_200d','advancers','decliners','ad_net','ad_ratio','advancing_pct','rsi_below_30','rsi_above_70','trin']
     for dt,row in hist.iterrows():
         rec={'date':str(dt.date())}
         for k in cols:
@@ -125,27 +120,37 @@ def leadership_history():
     def close(sym):
         x=raw[sym]['Close'] if isinstance(raw.columns,pd.MultiIndex) else raw['Close'];return x.dropna().astype(float)
     spy,qqq,vix=close('SPY'),close('QQQ'),close('^VIX');idx=spy.index.intersection(qqq.index);ratio=(qqq.reindex(idx)/spy.reindex(idx));rel20=(ratio/ratio.shift(20)-1)*100
-    frame=pd.DataFrame({'spy':spy.reindex(idx),'qqq':qqq.reindex(idx),'relative_strength_20d':rel20,'vix':vix.reindex(idx)}).dropna(subset=['spy','qqq']).tail(252)
-    rec=[]
-    for dt,row in frame.iterrows():
-        rec.append({'date':str(dt.date()),'spy':round(float(row.spy),4),'qqq':round(float(row.qqq),4),'relative_strength_20d':None if pd.isna(row.relative_strength_20d) else round(float(row.relative_strength_20d),3),'vix':None if pd.isna(row.vix) else round(float(row.vix),2)})
+    frame=pd.DataFrame({'spy':spy.reindex(idx),'qqq':qqq.reindex(idx),'relative_strength_20d':rel20,'vix':vix.reindex(idx)}).dropna(subset=['spy','qqq']).tail(252);rec=[]
+    for dt,row in frame.iterrows():rec.append({'date':str(dt.date()),'spy':round(float(row.spy),4),'qqq':round(float(row.qqq),4),'relative_strength_20d':None if pd.isna(row.relative_strength_20d) else round(float(row.relative_strength_20d),3),'vix':None if pd.isna(row.vix) else round(float(row.vix),2)})
     latest=next((x['relative_strength_20d'] for x in reversed(rec) if x['relative_strength_20d'] is not None),None)
     return latest,rec
+
+def official_regime(br,spy,qqq,vix,pc):
+    b5,b50,b200=br.get('above_5d'),br.get('above_50d'),br.get('above_200d');s20,q20=spy.get('distance_ma20'),qqq.get('distance_ma20');s50,q50=spy.get('distance_ma50'),qqq.get('distance_ma50');s200,q200=spy.get('distance_ma200'),qqq.get('distance_ma200')
+    primary=(b200 is None or b200>=60) and (s200 is None or s200>=0) and (q200 is None or q200>=0);struct=(b200 is not None and b200<40) or (s200 is not None and s200<0 and q200 is not None and q200<0);stress=(vix is not None and vix>=25) or (pc is not None and pc>=1);pressure=(b50 is not None and b50<40) or (s50 is not None and s50<0) or (q50 is not None and q50<0)
+    if struct and stress:return 'Risk-off / structural weakness'
+    if struct:return 'Primary trend damage'
+    if b5 is not None and b5<15 and stress:return 'Broad washout'
+    if b5 is not None and b5<25 and primary:return 'Washout developing'
+    if pressure and primary:return 'Trend deterioration'
+    if primary and ((b5 is not None and b5<45) or (s20 is not None and s20<0) or (q20 is not None and q20<0)):return 'Healthy pullback'
+    if primary and b50 is not None and b50<50:return 'Narrow / fragile rally'
+    if primary:return 'Healthy uptrend'
+    return 'Mixed / transitional market'
 
 def main():
     p=old();ph=old_hist();spy=safe((p.get('etfs')or{}).get('SPY',{}),lambda:snap('SPY'));qqq=safe((p.get('etfs')or{}).get('QQQ',{}),lambda:snap('QQQ'))
     vx=safe((p.get('vix')or{}).get('value'),lambda:float(np.asarray(yf.download('^VIX',period='5d',interval='1d',auto_adjust=False,progress=False)['Close'].dropna()).reshape(-1)[-1]));pc=safe((p.get('equity_put_call')or{}).get('value'),putcall)
-    br_res=safe((p.get('breadth',{}),ph.get('breadth',[])),breadth)
-    if isinstance(br_res,tuple):br,bhist=br_res
-    else:br,bhist=br_res,ph.get('breadth',[])
-    lead_res=safe((None,ph.get('market',[])),leadership_history)
-    if isinstance(lead_res,tuple):lead,lhist=lead_res
-    else:lead,lhist=None,ph.get('market',[])
-    date=spy.get('market_date') or p.get('market_date')
-    pc_hist,pc_pct=safe((ph.get('put_call',[]),(p.get('equity_put_call')or{}).get('percentile_60d')),lambda:putcall_history(ph.get('put_call',[]),date,pc))
-    out={'generated_at':datetime.now(timezone.utc).isoformat(),'market_date':date,'breadth':br,'vix':{'value':round(float(vx),2) if vx is not None else None,'source':'Cboe VIX via Yahoo Finance'},'equity_put_call':{'value':pc,'percentile_60d':pc_pct,'history_count':len(pc_hist),'source':'Cboe Daily Market Statistics'},'relative_strength':{'qqq_vs_spy_20d':lead},'etfs':{'SPY':spy,'QQQ':qqq}}
+    br_res=safe((p.get('breadth',{}),ph.get('breadth',[])),breadth);br,bhist=br_res if isinstance(br_res,tuple) else (br_res,ph.get('breadth',[]))
+    lead_res=safe((None,ph.get('market',[])),leadership_history);lead,lhist=lead_res if isinstance(lead_res,tuple) else (None,ph.get('market',[]))
+    date=spy.get('market_date') or p.get('market_date');pc_hist,pc_pct=safe((ph.get('put_call',[]),(p.get('equity_put_call')or{}).get('percentile_60d')),lambda:putcall_history(ph.get('put_call',[]),date,pc))
+    now=datetime.now(timezone.utc).isoformat();reg=official_regime(br,spy,qqq,vx,pc)
+    out={'generated_at':now,'market_date':date,'breadth':br,'vix':{'value':round(float(vx),2) if vx is not None else None,'source':'Cboe VIX via Yahoo Finance'},'equity_put_call':{'value':pc,'percentile_60d':pc_pct,'history_count':len(pc_hist),'source':'Cboe Daily Market Statistics'},'relative_strength':{'qqq_vs_spy_20d':lead},'etfs':{'SPY':spy,'QQQ':qqq},'official_regime':reg,'component_status':{'breadth':{'as_of':date,'source':'S&P 500 constituent closes and volume'},'SPY':{'as_of':spy.get('market_date')},'QQQ':{'as_of':qqq.get('market_date')},'VIX':{'as_of':date},'put_call':{'as_of':date}}}
     OUT.write_text(json.dumps(out,indent=2)+'\n')
-    hist={'generated_at':out['generated_at'],'market_date':date,'breadth':bhist,'market':lhist,'put_call':pc_hist}
+    rh=[x for x in ph.get('regime_history',[]) if x.get('date')!=date]
+    if date:rh.append({'date':date,'regime':reg,'recorded_at':now})
+    rh=sorted(rh,key=lambda x:x.get('date',''))[-1000:]
+    hist={'generated_at':now,'market_date':date,'breadth':bhist,'market':lhist,'put_call':pc_hist,'regime_history':rh}
     HIST.write_text(json.dumps(hist,indent=2)+'\n')
     print(json.dumps(out,indent=2))
 
