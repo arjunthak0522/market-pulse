@@ -8,22 +8,29 @@ on:
     paths:
       - 'scripts/update_event_studies.py'
       - 'tests/test_event_studies.py'
+      - 'historical-forward-returns.js'
+      - 'historical-forward-returns.css'
+      - 'index.html'
       - '.github/workflows/validate-event-studies.yml'
       - 'requirements.txt'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: pip
       - run: pip install -r requirements.txt
+      - name: JavaScript syntax
+        run: node --check historical-forward-returns.js
       - name: Unit tests
         run: python -m unittest tests/test_event_studies.py -v
       - name: Generate historical studies
@@ -36,10 +43,13 @@ jobs:
           p=json.loads(Path('data/event_studies.json').read_text())
           assert p['studies'], 'no studies generated'
           assert 'methodology' in p
+          assert p['coverage']['SPY']['sessions'] > 5000
+          assert p['coverage']['QQQ']['sessions'] > 5000
           for s in p['studies']:
               assert s['definition']['rule']
               assert '5' in s['horizons'] and '21' in s['horizons']
               assert s['horizons']['5']['baseline']['n'] > 0
+              assert s['horizons']['5']['signal']['n'] <= s['historical_sample']
           print('studies', len(p['studies']), 'current_events', len(p['current_events']))
           PY
       - uses: actions/upload-artifact@v4
@@ -47,3 +57,11 @@ jobs:
           name: event-study-validation
           path: data/event_studies.json
           retention-days: 7
+      - name: Persist validated study data on audit branch
+        run: |
+          git config user.name "market-pulse-bot"
+          git config user.email "market-pulse-bot@users.noreply.github.com"
+          git add data/event_studies.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update validated historical event studies"
+          git push origin HEAD:audit/contrast-reliability-20260831
