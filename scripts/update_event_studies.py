@@ -45,6 +45,14 @@ def rsi(close: pd.Series, period: int = 14) -> pd.Series:
     return 100 - 100 / (1 + rs)
 
 
+def rolling_percentile(series: pd.Series, window: int = 252, min_periods: int = 100) -> pd.Series:
+    def rank_last(a):
+        if not len(a):
+            return np.nan
+        return 100 * np.mean(a <= a[-1])
+    return series.rolling(window, min_periods=min_periods).apply(rank_last, raw=True)
+
+
 def consecutive(mask: pd.Series, sessions: int) -> pd.Series:
     return mask.rolling(sessions).sum().eq(sessions)
 
@@ -76,6 +84,16 @@ def cooldown(mask: pd.Series, sessions: int) -> pd.Series:
     return out
 
 
+def compound_transition(*conditions: Callable[[pd.DataFrame], pd.Series]) -> Callable[[pd.DataFrame], pd.Series]:
+    """Trigger once when all supplied conditions become true together."""
+    def detect(df: pd.DataFrame) -> pd.Series:
+        active = pd.Series(True, index=df.index)
+        for condition in conditions:
+            active &= condition(df).fillna(False)
+        return active & ~active.shift(1, fill_value=False)
+    return detect
+
+
 @dataclass(frozen=True)
 class SignalSpec:
     signal_id: str
@@ -86,6 +104,7 @@ class SignalSpec:
     priority: int = 50
     cooldown_sessions: int = 0
     category: str = "Price / momentum"
+    conditions: tuple[str, ...] = ()
 
 
 def ma_cross(period: int, direction: str) -> Callable[[pd.DataFrame], pd.Series]:
@@ -113,6 +132,21 @@ def multi_move(sessions: int, threshold: float, direction: str) -> Callable[[pd.
     def detect(df: pd.DataFrame) -> pd.Series:
         r = df.close.pct_change(sessions)
         return r.ge(threshold) if direction == "up" else r.le(-threshold)
+    return detect
+
+
+def gap_move(threshold: float, direction: str) -> Callable[[pd.DataFrame], pd.Series]:
+    def detect(df: pd.DataFrame) -> pd.Series:
+        gap = df.open / df.close.shift(1) - 1
+        return gap.ge(threshold) if direction == "up" else gap.le(-threshold)
+    return detect
+
+
+def drawdown_cross(lookback: int, threshold: float) -> Callable[[pd.DataFrame], pd.Series]:
+    def detect(df: pd.DataFrame) -> pd.Series:
+        peak = df.close.shift(1).rolling(lookback).max()
+        drawdown = df.close / peak - 1
+        return crossing_below(drawdown, -threshold)
     return detect
 
 
@@ -160,12 +194,31 @@ def signal_catalog() -> list[SignalSpec]:
         SignalSpec("three_day_decline_3", "Three-day selloff >3%", ("SPY", "QQQ"), "Three-session adjusted-close return is <= -3%.", multi_move(3, .03, "down"), 78, 3),
         SignalSpec("three_up_days", "Three consecutive up days", ("SPY", "QQQ"), "Adjusted close rises for exactly the first 3 consecutive sessions of an up streak.", run_streak(3, "up"), 45),
         SignalSpec("three_down_days", "Three consecutive down days", ("SPY", "QQQ"), "Adjusted close falls for exactly the first 3 consecutive sessions of a down streak.", run_streak(3, "down"), 55),
+        SignalSpec("gap_up_1_5", "Gap up >1.5%", ("SPY", "QQQ"), "Adjusted open is at least 1.5% above the prior adjusted close.", gap_move(.015, "up"), 58, 2),
+        SignalSpec("gap_down_1_5", "Gap down >1.5%", ("SPY", "QQQ"), "Adjusted open is at least 1.5% below the prior adjusted close.", gap_move(.015, "down"), 68, 2),
+        SignalSpec("drawdown_63d_cross_5", "Drawdown crosses -5%", ("SPY", "QQQ"), "Adjusted close crosses below 5% beneath the highest close of the prior 63 trading sessions.", drawdown_cross(63, .05), 68, 5),
+        SignalSpec("drawdown_63d_cross_10", "Drawdown crosses -10%", ("SPY", "QQQ"), "Adjusted close crosses below 10% beneath the highest close of the prior 63 trading sessions.", drawdown_cross(63, .10), 82, 10),
         SignalSpec("vix_cross_above_20", "VIX crosses above 20", ("SPY", "QQQ"), "VIX crosses from <=20 to >20.", vix_cross(20, "above"), 72, category="Volatility"),
         SignalSpec("vix_cross_above_25", "VIX crosses above 25", ("SPY", "QQQ"), "VIX crosses from <=25 to >25.", vix_cross(25, "above"), 80, category="Volatility"),
         SignalSpec("vix_cross_above_30", "VIX crosses above 30", ("SPY", "QQQ"), "VIX crosses from <=30 to >30.", vix_cross(30, "above"), 90, category="Volatility"),
         SignalSpec("vix_falls_below_20", "VIX falls back below 20", ("SPY", "QQQ"), "VIX crosses from >=20 to <20.", vix_cross(20, "below"), 70, category="Volatility"),
+        SignalSpec("vix_falls_below_25", "VIX falls back below 25", ("SPY", "QQQ"), "VIX crosses from >=25 to <25.", vix_cross(25, "below"), 72, category="Volatility"),
+        SignalSpec("vix_falls_below_30", "VIX falls back below 30", ("SPY", "QQQ"), "VIX crosses from >=30 to <30.", vix_cross(30, "below"), 75, category="Volatility"),
         SignalSpec("vix_one_day_spike_20pct", "VIX one-day spike >20%", ("SPY", "QQQ"), "VIX rises at least 20% in one trading session.", lambda d: d.vix.pct_change().ge(.20), 82, 2, "Volatility"),
         SignalSpec("vix_three_day_spike_30pct", "VIX three-day spike >30%", ("SPY", "QQQ"), "VIX rises at least 30% over three trading sessions.", lambda d: d.vix.pct_change(3).ge(.30), 82, 3, "Volatility"),
+        SignalSpec("vix_percentile_cross_90", "VIX enters top decile", ("SPY", "QQQ"), "VIX 252-session rolling percentile crosses from <=90 to >90.", lambda d: crossing_above(d.vix_pct252, 90), 86, 5, "Volatility"),
+        SignalSpec("vix_percentile_exit_90", "VIX exits top decile", ("SPY", "QQQ"), "VIX 252-session rolling percentile crosses from >=90 to <90.", lambda d: crossing_below(d.vix_pct252, 90), 74, 5, "Volatility"),
+        SignalSpec(
+            "compound_oversold_selloff_vix25",
+            "Oversold selloff with VIX >25",
+            ("SPY", "QQQ"),
+            "RSI(14) <35 AND three-session return <=-3% AND VIX >25; triggers only when the full condition first becomes true.",
+            compound_transition(lambda d: d.rsi14.lt(35), lambda d: d.close.pct_change(3).le(-.03), lambda d: d.vix.gt(25)),
+            92,
+            10,
+            "Compound",
+            ("RSI(14)<35", "3-session return<=-3%", "VIX>25"),
+        ),
     ])
     return specs
 
@@ -179,6 +232,7 @@ def prepare(df: pd.DataFrame, vix: pd.Series) -> pd.DataFrame:
         x[f"ma{p}"] = x.close.rolling(p).mean()
         x[f"dist_ma{p}"] = (x.close / x[f"ma{p}"] - 1) * 100
     x["vix"] = vix.reindex(x.index).ffill(limit=3)
+    x["vix_pct252"] = rolling_percentile(x.vix, 252, 100)
     return x
 
 
@@ -204,7 +258,8 @@ def path_metrics(df: pd.DataFrame, event_positions: list[int], horizon: int) -> 
     up_hits = {t: 0 for t in THRESHOLDS}
     down_hits = {t: 0 for t in THRESHOLDS}
     down_first = {t: 0 for t in THRESHOLDS}
-    ordered = {t: 0 for t in THRESHOLDS}
+    up_first = {t: 0 for t in THRESHOLDS}
+    ambiguous = {t: 0 for t in THRESHOLDS}
     usable = 0
     for pos in event_positions:
         if pos + horizon >= len(df):
@@ -221,15 +276,19 @@ def path_metrics(df: pd.DataFrame, event_positions: list[int], horizon: int) -> 
         for t in THRESHOLDS:
             up_idx = np.flatnonzero(high_path >= t)
             dn_idx = np.flatnonzero(low_path <= -t)
-            if len(up_idx):
+            first_up = int(up_idx[0]) if len(up_idx) else None
+            first_dn = int(dn_idx[0]) if len(dn_idx) else None
+            if first_up is not None:
                 up_hits[t] += 1
-                hit_times[t].append(int(up_idx[0] + 1))
-            if len(dn_idx):
+                hit_times[t].append(first_up + 1)
+            if first_dn is not None:
                 down_hits[t] += 1
-            if len(up_idx) and len(dn_idx) and up_idx[0] != dn_idx[0]:
-                ordered[t] += 1
-                if dn_idx[0] < up_idx[0]:
-                    down_first[t] += 1
+            if first_dn is not None and (first_up is None or first_dn < first_up):
+                down_first[t] += 1
+            elif first_up is not None and (first_dn is None or first_up < first_dn):
+                up_first[t] += 1
+            elif first_up is not None and first_dn is not None and first_up == first_dn:
+                ambiguous[t] += 1
     out = {
         "n": usable,
         "median_max_drawdown": pct(np.median(maes)) if maes else None,
@@ -243,8 +302,9 @@ def path_metrics(df: pd.DataFrame, event_positions: list[int], horizon: int) -> 
         out["thresholds"][key] = {
             "reached_up": round(100 * up_hits[t] / usable, 1) if usable else None,
             "reached_down": round(100 * down_hits[t] / usable, 1) if usable else None,
-            "downside_hit_first": round(100 * down_first[t] / ordered[t], 1) if ordered[t] else None,
-            "ordered_comparisons": ordered[t],
+            "downside_hit_first": round(100 * down_first[t] / usable, 1) if usable else None,
+            "upside_hit_first": round(100 * up_first[t] / usable, 1) if usable else None,
+            "same_day_order_ambiguous": round(100 * ambiguous[t] / usable, 1) if usable else None,
             "median_days_to_up": round(float(np.median(hit_times[t])), 1) if hit_times[t] else None,
         }
     return out
@@ -375,13 +435,21 @@ def build() -> dict:
                 continue
             horizons = summarize_study(df, positions)
             n_complete = horizons.get("21", {}).get("signal", {}).get("n", len(positions))
+            condition_ids = list(spec.conditions) if spec.conditions else [spec.signal_id]
             study = {
                 "study_id": f"{symbol.lower()}:{spec.signal_id}",
                 "signal_id": spec.signal_id,
                 "symbol": symbol,
                 "title": f"{symbol} {spec.title}",
                 "category": spec.category,
-                "definition": {"rule": spec.rule, "event_logic": "Transition/crossing event; repeated persistent observations are not counted unless the rule explicitly says so.", "cooldown_sessions": spec.cooldown_sessions},
+                "definition": {
+                    "rule": spec.rule,
+                    "event_logic": "Transition/crossing event; repeated persistent observations are not counted unless the rule explicitly says so.",
+                    "cooldown_sessions": spec.cooldown_sessions,
+                    "condition_logic": "ALL" if len(condition_ids) > 1 else "SINGLE",
+                    "conditions": condition_ids,
+                    "compound_ready": True,
+                },
                 "historical_sample": len(positions),
                 "complete_21d_sample": n_complete,
                 "first_event": rows[0]["event_date"],
@@ -418,6 +486,7 @@ def build() -> dict:
             "baseline": "All eligible trading-day windows for the same symbol over the same available history.",
             "returns": "Adjusted-close forward returns from the event close.",
             "path": "Adjusted daily high/low path after the event close through the selected horizon.",
+            "hit_order": "Upside/downside first-hit probabilities use the full eligible event sample. If both thresholds occur on the same daily bar, order is marked ambiguous rather than guessed.",
             "lookahead": "Signal detection uses only information available on or before the event close; future observations are used only for outcome measurement.",
             "survivorship": "V1 price studies use index ETFs and VIX, so constituent survivorship bias is not applicable. Future breadth studies must use point-in-time constituent membership or disclose the limitation.",
         },
