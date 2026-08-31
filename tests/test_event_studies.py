@@ -52,6 +52,37 @@ class EventStudyTests(unittest.TestCase):
         self.assertEqual(p["thresholds"]["2pct"]["downside_hit_first"], 100.0)
         self.assertEqual(p["thresholds"]["2pct"]["median_days_to_up"], 3.0)
 
+    def test_downside_first_probability_uses_full_event_sample(self):
+        idx = pd.bdate_range("2024-01-02", periods=16)
+        close = pd.Series([100, 98, 98, 99, 99, 99, 100, 101, 101, 101, 101, 101, 101, 101, 101, 101], index=idx, dtype=float)
+        high = close.copy()
+        low = close.copy()
+        low.iloc[1] = 97.0
+        df = pd.DataFrame({"open": close, "high": high, "low": low, "close": close, "volume": 1}, index=idx)
+        p = es.path_metrics(df, [0, 6], 5)
+        t = p["thresholds"]["2pct"]
+        self.assertEqual(t["reached_down"], 50.0)
+        self.assertEqual(t["downside_hit_first"], 50.0)
+        self.assertEqual(t["reached_up"], 0.0)
+
+    def test_same_bar_two_sided_hit_is_ambiguous_not_guessed(self):
+        idx = pd.bdate_range("2024-01-02", periods=8)
+        close = pd.Series([100] * 8, index=idx, dtype=float)
+        high = close.copy(); low = close.copy()
+        high.iloc[1] = 103.0; low.iloc[1] = 97.0
+        df = pd.DataFrame({"open": close, "high": high, "low": low, "close": close, "volume": 1}, index=idx)
+        p = es.path_metrics(df, [0], 5)["thresholds"]["2pct"]
+        self.assertEqual(p["same_day_order_ambiguous"], 100.0)
+        self.assertEqual(p["downside_hit_first"], 0.0)
+        self.assertEqual(p["upside_hit_first"], 0.0)
+
+    def test_compound_transition_only_fires_when_all_conditions_first_align(self):
+        idx = pd.bdate_range("2024-01-02", periods=6)
+        df = pd.DataFrame({"a": [False, True, True, True, False, True], "b": [True, False, True, True, True, True]}, index=idx)
+        detector = es.compound_transition(lambda d: d.a, lambda d: d.b)
+        hits = list(idx[detector(df)])
+        self.assertEqual(hits, [idx[2], idx[5]])
+
     def test_future_data_does_not_change_prior_signal_dates(self):
         idx = pd.bdate_range("2024-01-02", periods=30)
         base = pd.Series([50.0] * 20 + [69.0, 71.0] + [65.0] * 8, index=idx)
