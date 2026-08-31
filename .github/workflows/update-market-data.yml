@@ -80,7 +80,7 @@ jobs:
             if [ "$attempt" -eq 3 ]; then exit 1; fi
           done
           for attempt in 1 2 3; do
-            python scripts/append_current_close_conditions.py && break
+            python scripts/append_current_close_conditions_runner.py && break
             echo "Current-close condition study attempt $attempt failed"
             if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
             if [ "$attempt" -eq 3 ]; then exit 1; fi
