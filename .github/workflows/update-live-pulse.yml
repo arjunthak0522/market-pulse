@@ -29,6 +29,7 @@ jobs:
             exit 0
           fi
           cp data/live.json /tmp/live.json
+          rm -f data/live.json
           git fetch origin live-data
           git checkout live-data
           mkdir -p data
