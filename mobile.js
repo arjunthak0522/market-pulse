@@ -1,6 +1,9 @@
 (()=>{
 const isMobile=()=>window.matchMedia('(max-width:720px)').matches;
 function forceSingleView(){document.querySelector('.view-toggle')?.remove();document.body.classList.add('mode-advanced');document.body.classList.remove('mode-simple');try{localStorage.setItem('marketPulseViewV2','advanced')}catch{}}
+function enforceRiskSeparation(){const items=[...document.querySelectorAll('.stress-item')];for(const item of items){const txt=(item.textContent||'').toLowerCase();if(txt.includes('defensive positioning')||txt.includes('put/call'))item.remove()}const remaining=[...document.querySelectorAll('.stress-item')],count=document.getElementById('stressCount');if(count&&remaining.length){const hits=remaining.filter(x=>x.classList.contains('hit')).length;count.textContent=`${hits} of ${remaining.length}`}}
 function mobileDefaults(){if(!isMobile())return;document.querySelectorAll('.technical-details,.trend-disclosure,.breadth-disclosure,.washout-disclosure,.alerts-disclosure').forEach(d=>d.open=false);const heroEye=document.querySelector('.premium-hero .eyebrow');if(heroEye&&!heroEye.dataset.mobileStep){heroEye.textContent='MARKET REGIME';heroEye.dataset.mobileStep='true'}}
-window.addEventListener('DOMContentLoaded',()=>{forceSingleView();setTimeout(mobileDefaults,250);setTimeout(()=>{forceSingleView();mobileDefaults()},1400)});window.addEventListener('resize',mobileDefaults);
+function settle(){forceSingleView();enforceRiskSeparation();mobileDefaults()}
+if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>{settle();[250,800,1400,2400].forEach(ms=>setTimeout(settle,ms))});else{settle();[250,800,1400,2400].forEach(ms=>setTimeout(settle,ms))}
+window.addEventListener('resize',()=>{enforceRiskSeparation();mobileDefaults()});document.getElementById('refresh')?.addEventListener('click',()=>[500,1200,2200].forEach(ms=>setTimeout(settle,ms)));
 })();
