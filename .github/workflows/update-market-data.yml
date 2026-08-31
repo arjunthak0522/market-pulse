@@ -9,6 +9,9 @@ on:
       - 'requirements.txt'
       - '.github/workflows/update-market-data.yml'
   schedule:
+    # GitHub cron is UTC. Run both UTC possibilities and gate by America/Chicago
+    # so exactly the 4:30 PM Central run proceeds across DST changes.
+    - cron: '30 21 * * 1-5'
     - cron: '30 22 * * 1-5'
 
 permissions:
@@ -22,18 +25,41 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      - name: Gate scheduled run to 4:30 PM Central
+        id: gate
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ct_hour=$(TZ=America/Chicago date +%H)
+          if [ "$ct_hour" = "16" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Proceeding with end-of-day refresh at $(TZ=America/Chicago date)"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping duplicate UTC schedule at $(TZ=America/Chicago date)"
+          fi
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
         with:
           python-version: '3.12'
           cache: pip
-      - run: pip install -r requirements.txt
-      - run: python scripts/update_market.py
-      - run: python scripts/update_options_risk.py
-      - run: python scripts/update_breadth_cycle.py
+      - if: steps.gate.outputs.run == 'true'
+        run: pip install -r requirements.txt
+      - if: steps.gate.outputs.run == 'true'
+        run: python scripts/update_market.py
+      - if: steps.gate.outputs.run == 'true'
+        run: python scripts/update_options_risk.py
+      - if: steps.gate.outputs.run == 'true'
+        run: python scripts/update_breadth_cycle.py
       - name: Update historical event studies with transient-data retry
+        if: steps.gate.outputs.run == 'true'
         run: |
           for attempt in 1 2 3; do
             python scripts/update_event_studies.py && break
@@ -48,12 +74,19 @@ jobs:
             if [ "$attempt" -eq 3 ]; then exit 1; fi
           done
           for attempt in 1 2 3; do
-            python scripts/append_breadth_cycle_event_studies.py && exit 0
+            python scripts/append_breadth_cycle_event_studies.py && break
             echo "Breadth-cycle study attempt $attempt failed"
             if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
           done
-          exit 1
+          for attempt in 1 2 3; do
+            python scripts/append_current_close_conditions.py && break
+            echo "Current-close condition study attempt $attempt failed"
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+          done
       - name: Commit refreshed data
+        if: steps.gate.outputs.run == 'true'
         run: |
           cp data/market_context.json /tmp/market_context.json
           cp data/history.json /tmp/history.json
