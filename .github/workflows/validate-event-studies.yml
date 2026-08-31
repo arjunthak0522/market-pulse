@@ -18,6 +18,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: event-study-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -35,8 +39,14 @@ jobs:
           done
       - name: Unit tests
         run: python -m unittest tests/test_event_studies.py -v
-      - name: Generate historical studies
-        run: python scripts/update_event_studies.py
+      - name: Generate historical studies with transient-data retry
+        run: |
+          for attempt in 1 2 3; do
+            python scripts/update_event_studies.py && exit 0
+            echo "Historical data attempt $attempt failed"
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+          done
+          exit 1
       - name: Validate generated JSON
         run: |
           python - <<'PY'
