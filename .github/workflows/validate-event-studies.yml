@@ -1,0 +1,49 @@
+name: Validate event studies
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - audit/contrast-reliability-20260831
+    paths:
+      - 'scripts/update_event_studies.py'
+      - 'tests/test_event_studies.py'
+      - '.github/workflows/validate-event-studies.yml'
+      - 'requirements.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Unit tests
+        run: python -m unittest tests/test_event_studies.py -v
+      - name: Generate historical studies
+        run: python scripts/update_event_studies.py
+      - name: Validate generated JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('data/event_studies.json').read_text())
+          assert p['studies'], 'no studies generated'
+          assert 'methodology' in p
+          for s in p['studies']:
+              assert s['definition']['rule']
+              assert '5' in s['horizons'] and '21' in s['horizons']
+              assert s['horizons']['5']['baseline']['n'] > 0
+          print('studies', len(p['studies']), 'current_events', len(p['current_events']))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: event-study-validation
+          path: data/event_studies.json
+          retention-days: 7
