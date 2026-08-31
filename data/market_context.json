@@ -1,103 +1,210 @@
 {
-  "generated_at": "2026-08-31T03:55:35.118932+00:00",
-  "market_date": "2026-08-28",
+  "generated_at": "2026-08-31T21:50:51.345094+00:00",
+  "market_date": "2026-08-31",
   "breadth": {
-    "above_5d": 33.2,
-    "above_20d": 42.43,
-    "above_50d": 52.99,
-    "above_200d": 69.14,
-    "advancers": 229,
-    "decliners": 273,
-    "unchanged": 1,
-    "new_highs_52w": 6,
-    "new_lows_52w": 2,
-    "ad_net": -44,
-    "ad_ratio": 0.839,
-    "advancing_pct": 45.6,
-    "ad_ratio_5d": 0.966,
-    "rsi_below_30": 1.2,
-    "rsi_below_30_prev": 0.6,
-    "rsi_above_70": 3.6,
-    "trin": 1.051,
-    "trin_prev": 0.541,
+    "above_5d": 26.04,
+    "above_20d": 39.04,
+    "above_50d": 49.6,
+    "above_200d": 66.33,
+    "advancers": 136,
+    "decliners": 362,
+    "unchanged": 5,
+    "new_highs_52w": 5,
+    "new_lows_52w": 12,
+    "ad_net": -226,
+    "ad_ratio": 0.376,
+    "advancing_pct": 27.3,
+    "ad_ratio_5d": 0.73,
+    "rsi_below_30": 3.0,
+    "rsi_below_30_prev": 1.2,
+    "rsi_above_70": 2.4,
+    "trin": 0.619,
+    "trin_prev": 1.051,
     "trin_method": "Arms formula using S&P 500 constituent issues and volume",
     "source": "S&P 500 constituent closes and volume via Yahoo Finance"
   },
   "vix": {
-    "value": 14.43,
+    "value": 14.92,
     "source": "Cboe VIX via Yahoo Finance"
   },
   "equity_put_call": {
     "value": 0.62,
     "percentile_60d": 60.0,
-    "history_count": 63,
+    "history_count": 64,
     "source": "Cboe Daily Market Statistics"
   },
   "relative_strength": {
-    "qqq_vs_spy_20d": 1.113
+    "qqq_vs_spy_20d": 1.132
   },
   "etfs": {
     "SPY": {
-      "price": 769.35,
-      "change_pct": -0.2269,
-      "rsi14": 56.614,
-      "williams_r14": -57.819,
-      "bollinger_pct_b": 0.5072,
-      "macd": 4.116,
-      "macd_signal": 5.0577,
-      "adx14": 15.554,
-      "distance_ma20": 0.017,
-      "distance_ma50": 2.042,
-      "distance_ma200": 8.383,
-      "distance_52w_high": -1.097,
-      "market_date": "2026-08-28"
+      "price": 767.05,
+      "change_pct": -0.299,
+      "rsi14": 54.036,
+      "williams_r14": -71.091,
+      "bollinger_pct_b": 0.3308,
+      "macd": 3.7823,
+      "macd_signal": 4.8026,
+      "adx14": 15.065,
+      "distance_ma20": -0.342,
+      "distance_ma50": 1.682,
+      "distance_ma200": 7.995,
+      "distance_52w_high": -1.392,
+      "market_date": "2026-08-31"
     },
     "QQQ": {
-      "price": 716.43,
-      "change_pct": -0.649,
-      "rsi14": 51.883,
-      "williams_r14": -56.932,
-      "bollinger_pct_b": 0.4524,
-      "macd": 1.831,
-      "macd_signal": 2.3163,
-      "adx14": 12.854,
-      "distance_ma20": -0.211,
-      "distance_ma50": 0.613,
-      "distance_ma200": 9.35,
-      "distance_52w_high": -3.984,
-      "market_date": "2026-08-28"
+      "price": 716.76,
+      "change_pct": 0.0461,
+      "rsi14": 52.074,
+      "williams_r14": -55.897,
+      "bollinger_pct_b": 0.4261,
+      "macd": 1.8149,
+      "macd_signal": 2.216,
+      "adx14": 11.942,
+      "distance_ma20": -0.281,
+      "distance_ma50": 0.727,
+      "distance_ma200": 9.321,
+      "distance_52w_high": -3.94,
+      "market_date": "2026-08-31"
     }
   },
   "official_regime": "Healthy pullback",
   "component_status": {
     "breadth": {
-      "as_of": "2026-08-28",
+      "as_of": "2026-08-31",
       "source": "S&P 500 constituent closes and volume"
     },
     "SPY": {
-      "as_of": "2026-08-28"
+      "as_of": "2026-08-31"
     },
     "QQQ": {
-      "as_of": "2026-08-28"
+      "as_of": "2026-08-31"
     },
     "VIX": {
-      "as_of": "2026-08-28"
+      "as_of": "2026-08-31"
     },
     "put_call": {
-      "as_of": "2026-08-28"
+      "as_of": "2026-08-31"
     },
-    "options_risk": {
-      "as_of": "2026-08-28",
-      "source": "Cboe Global Indices daily history"
+    "breadth_cycle": {
+      "as_of": "2026-08-31",
+      "source": "Derived from recorded S&P 500 advance/decline history"
+    },
+    "sector_leadership": {
+      "as_of": "2026-08-31",
+      "source": "Sector SPDR adjusted closes via Yahoo Finance"
     }
   },
-  "options_risk": {
-    "as_of": "2026-08-28",
-    "vix3m": 17.48,
-    "vix_vix3m_ratio": 0.826,
-    "term_structure": "Normal",
-    "skew": 149.77,
-    "skew_percentile_252d": 80.6,
-    "source": "Cboe Global Indices daily history"
-  }
+  "breadth_cycle": {
+    "state": "Approaching washout",
+    "read": "Breadth is deteriorating toward an extreme, but a recovery signal has not appeared yet.",
+    "value": -4.78,
+    "change": -2.011,
+    "percentile_63d": 1.6,
+    "direction": "Deteriorating",
+    "method": "19-session EMA minus 39-session EMA of normalized S&P 500 net advances",
+    "technical_name": "McClellan-style Breadth Momentum",
+    "universe_note": "Uses Market Pulse's recorded S&P 500 advance/decline universe; it is not the NYSE McClellan Oscillator."
+  },
+  "sector_leadership": [
+    {
+      "ticker": "XLK",
+      "name": "Technology",
+      "relative_5d": 3.099,
+      "relative_20d": 3.471,
+      "relative_acceleration": 7.355,
+      "return_5d": 3.582,
+      "status": "Leader"
+    },
+    {
+      "ticker": "XLE",
+      "name": "Energy",
+      "relative_5d": 0.874,
+      "relative_20d": 7.464,
+      "relative_acceleration": -1.188,
+      "return_5d": 1.347,
+      "status": "Leader"
+    },
+    {
+      "ticker": "XLC",
+      "name": "Communication Services",
+      "relative_5d": -1.229,
+      "relative_20d": -1.116,
+      "relative_acceleration": -3.804,
+      "return_5d": -0.766,
+      "status": "Lagging"
+    },
+    {
+      "ticker": "XLF",
+      "name": "Financials",
+      "relative_5d": -1.339,
+      "relative_20d": -0.655,
+      "relative_acceleration": -3.669,
+      "return_5d": -0.876,
+      "status": "Neutral"
+    },
+    {
+      "ticker": "XLY",
+      "name": "Consumer Discretionary",
+      "relative_5d": -1.905,
+      "relative_20d": -2.577,
+      "relative_acceleration": -4.454,
+      "return_5d": -1.445,
+      "status": "Lagging"
+    },
+    {
+      "ticker": "XLB",
+      "name": "Materials",
+      "relative_5d": -2.12,
+      "relative_20d": 2.03,
+      "relative_acceleration": -5.921,
+      "return_5d": -1.661,
+      "status": "Neutral"
+    },
+    {
+      "ticker": "XLI",
+      "name": "Industrials",
+      "relative_5d": -2.619,
+      "relative_20d": -5.553,
+      "relative_acceleration": 0.152,
+      "return_5d": -2.162,
+      "status": "Lagging"
+    },
+    {
+      "ticker": "XLU",
+      "name": "Utilities",
+      "relative_5d": -2.747,
+      "relative_20d": -5.966,
+      "relative_acceleration": -1.753,
+      "return_5d": -2.291,
+      "status": "Lagging"
+    },
+    {
+      "ticker": "XLV",
+      "name": "Health Care",
+      "relative_5d": -2.837,
+      "relative_20d": 3.83,
+      "relative_acceleration": -8.677,
+      "return_5d": -2.381,
+      "status": "Neutral"
+    },
+    {
+      "ticker": "XLRE",
+      "name": "Real Estate",
+      "relative_5d": -3.146,
+      "relative_20d": -3.562,
+      "relative_acceleration": -5.479,
+      "return_5d": -2.691,
+      "status": "Lagging"
+    },
+    {
+      "ticker": "XLP",
+      "name": "Consumer Staples",
+      "relative_5d": -3.278,
+      "relative_20d": -1.083,
+      "relative_acceleration": -7.794,
+      "return_5d": -2.824,
+      "status": "Lagging"
+    }
+  ]
 }
