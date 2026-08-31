@@ -32,7 +32,14 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python scripts/update_market.py
       - run: python scripts/update_options_risk.py
-      - run: python scripts/update_event_studies.py
+      - name: Update historical event studies with transient-data retry
+        run: |
+          for attempt in 1 2 3; do
+            python scripts/update_event_studies.py && exit 0
+            echo "Historical data attempt $attempt failed"
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+          done
+          exit 1
       - name: Commit refreshed data
         run: |
           cp data/market_context.json /tmp/market_context.json
