@@ -8,14 +8,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Market Pulse">
 <title>Market Pulse</title>
-<link rel="manifest" href="manifest.webmanifest?v=18">
-<link rel="stylesheet" href="styles.css?v=18">
-<link rel="stylesheet" href="enhancements.css?v=18">
-<link rel="stylesheet" href="premium.css?v=18">
-<link rel="stylesheet" href="clarity.css?v=18">
-<link rel="stylesheet" href="daily.css?v=18">
-<link rel="stylesheet" href="mobile.css?v=18">
-<link rel="stylesheet" href="guide.css?v=18">
+<link rel="manifest" href="manifest.webmanifest?v=19">
+<link rel="stylesheet" href="styles.css?v=19">
+<link rel="stylesheet" href="enhancements.css?v=19">
+<link rel="stylesheet" href="premium.css?v=19">
+<link rel="stylesheet" href="clarity.css?v=19">
+<link rel="stylesheet" href="daily.css?v=19">
+<link rel="stylesheet" href="mobile.css?v=19">
+<link rel="stylesheet" href="guide.css?v=19">
+<link rel="stylesheet" href="options-risk.css?v=19">
 </head>
 <body class="mode-advanced">
 <div class="app-shell">
@@ -35,7 +36,7 @@
 <div class="asset-switcher-wrap"><div><div class="eyebrow">INDEX VIEW</div><h2>Choose the market you want to inspect</h2></div><div class="asset-switcher" role="tablist" aria-label="Choose market index"><button id="tabSPY" class="asset-tab active" type="button" role="tab" aria-selected="true" aria-controls="panelSPY"><span class="tab-code">SPY</span><span class="tab-copy"><small>S&amp;P 500</small><small>Broad market</small></span><span id="spyTabMove" class="tab-move">—</span></button><button id="tabQQQ" class="asset-tab" type="button" role="tab" aria-selected="false" aria-controls="panelQQQ"><span class="tab-code">QQQ</span><span class="tab-copy"><small>Nasdaq 100</small><small>Growth / tech</small></span><span id="qqqTabMove" class="tab-move">—</span></button></div></div>
 <article id="panelSPY" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabSPY"><div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge">SPY</span><span>S&amp;P 500</span></div><h2>Current state</h2></div><div id="spyPrice" class="asset-price">--</div></div><div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="spySummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="spyMini"></div></aside></div><div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="spyHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="spyLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="spyTactical">—</strong></div></div><div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="spyWatch">Loading...</p></div><details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="spy" class="indicator-grid asset-grid"></div></details></article>
 <article id="panelQQQ" class="module asset-module asset-panel" role="tabpanel" aria-labelledby="tabQQQ" hidden><div class="module-header asset-header"><div><div class="asset-label"><span class="ticker-badge qqq">QQQ</span><span>Nasdaq 100</span></div><h2>Current state</h2></div><div id="qqqPrice" class="asset-price">--</div></div><div class="index-snapshot"><div class="asset-take"><div class="eyebrow">WHAT IT MEANS</div><p id="qqqSummary">Loading interpretation...</p></div><aside class="index-mini-chart advanced-only"><div class="insight-label">45 SESSIONS</div><div id="qqqMini"></div></aside></div><div class="index-meta"><div><span>FROM 52-WEEK HIGH</span><strong id="qqqHigh">—</strong></div><div><span>LEADERSHIP</span><strong id="qqqLeadership">—</strong></div><div><span>MOMENTUM</span><strong id="qqqTactical">—</strong></div></div><div class="read-change"><div class="eyebrow">WATCH NEXT</div><p id="qqqWatch">Loading...</p></div><details class="technical-details advanced-only"><summary>Inspect technical evidence</summary><div id="qqq" class="indicator-grid asset-grid"></div></details></article>
-<aside class="module shared-context"><div class="module-header"><div><div class="eyebrow">STRESS</div><h2>Is the market actually getting nervous?</h2><p>Volatility and positioning confirm whether weakness is routine or becoming serious.</p></div></div><div class="context-layout"><div id="marketContext" class="indicator-grid context-grid"></div><aside class="context-viz advanced-only"><div class="insight-label">VIX · 60 SESSIONS</div><div id="vixSpark"></div><div class="insight-label" style="margin-top:10px">LEADERSHIP TREND</div><div id="leadershipSpark"></div></aside></div></aside>
+<aside class="module shared-context"><div class="module-header"><div><div class="eyebrow">STRESS &amp; OPTIONS RISK</div><h2>What is the options market pricing beneath the surface?</h2><p>Fear level, urgency, positioning and tail-risk demand tell different parts of the same story.</p></div></div><div class="context-layout"><div id="marketContext" class="indicator-grid context-grid"></div><aside class="context-viz advanced-only"><div class="insight-label">VIX · 60 SESSIONS</div><div id="vixSpark"></div><div class="insight-label" style="margin-top:10px">LEADERSHIP TREND</div><div id="leadershipSpark"></div></aside></div></aside>
 <aside class="module stress-module"><div class="module-header"><div><div class="eyebrow">WASHOUT CHECK</div><h2>Is selling becoming unusually broad?</h2><p>A washout requires several stress conditions at the same time.</p></div><div id="stressCount" class="stress-count">—</div></div><div id="stressChecklist" class="stress-checklist"></div><p id="stressTake" class="stress-take"></p></aside>
 <aside class="module alerts-module"><div class="module-header"><div><div class="eyebrow">SMART ALERTS</div><h2>Only surface changes that deserve attention</h2><p>High-signal conditions saved on this device.</p></div><button id="enableNotifications" class="alert-permission" type="button">Enable browser alerts</button></div><div id="alertsGrid" class="alerts-grid"></div><p id="alertsNote" class="alerts-note">Alerts evaluate whenever Market Pulse refreshes. Browser notifications require permission and the app to be opened or refreshed.</p></aside>
 </section>
@@ -43,12 +44,13 @@
 <footer>Market Pulse separates primary regime evidence from tactical confirmation. Oversold conditions are not reversal signals by themselves.</footer>
 </div>
 <dialog id="detail"><div class="modal"><button id="close" class="close" type="button" aria-label="Close">×</button><div id="dk" class="eyebrow"></div><h2 id="dt"></h2><div class="modal-reading"><div id="dv" class="modal-value"></div><div id="ds" class="status-pill"></div></div><div class="plain-box"><div class="plain-label">IN PLAIN ENGLISH</div><p id="dm"></p></div><div class="threshold-title">How to interpret it</div><div id="th" class="thresholds"></div><a id="src" class="source-link modal-source" target="_blank" rel="noopener">Open source / chart <span>↗</span></a></div></dialog>
-<script src="app.js?v=18" defer></script>
-<script src="premium.js?v=18" defer></script>
-<script src="daily.js?v=18" defer></script>
-<script src="strategist.js?v=18" defer></script>
-<script src="strategist-daily.js?v=18" defer></script>
-<script src="mobile.js?v=18" defer></script>
-<script src="guide.js?v=18" defer></script>
+<script src="app.js?v=19" defer></script>
+<script src="premium.js?v=19" defer></script>
+<script src="daily.js?v=19" defer></script>
+<script src="strategist.js?v=19" defer></script>
+<script src="strategist-daily.js?v=19" defer></script>
+<script src="mobile.js?v=19" defer></script>
+<script src="guide.js?v=19" defer></script>
+<script src="options-risk.js?v=19" defer></script>
 </body>
 </html>
