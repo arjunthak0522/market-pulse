@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import json
 from pathlib import Path
-import numpy as np
 import pandas as pd
-import yfinance as yf
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'data'/'market_context.json'
 HIST=ROOT/'data'/'history.json'
+CBOE='https://cdn.cboe.com/api/global/us_indices/daily_prices/{symbol}_History.csv'
 
 
 def load(path,default):
@@ -15,12 +14,22 @@ def load(path,default):
     except:return default
 
 
-def close_series(sym,period='18mo'):
-    df=yf.download(sym,period=period,interval='1d',auto_adjust=False,progress=False,threads=False)
-    if isinstance(df.columns,pd.MultiIndex):df.columns=df.columns.get_level_values(0)
-    c=df['Close'].dropna().astype(float)
-    if c.empty:raise ValueError(f'No data for {sym}')
-    return c
+def cboe_series(symbol):
+    df=pd.read_csv(CBOE.format(symbol=symbol))
+    cols={str(c).strip().upper():c for c in df.columns}
+    if 'DATE' not in cols:raise ValueError(f'{symbol}: DATE column missing')
+    date_col=cols['DATE']
+    value_col=cols.get('CLOSE') or cols.get(symbol.upper())
+    if value_col is None:
+        candidates=[c for c in df.columns if c!=date_col and pd.to_numeric(df[c],errors='coerce').notna().any()]
+        if not candidates:raise ValueError(f'{symbol}: value column missing')
+        value_col=candidates[-1]
+    dates=pd.to_datetime(df[date_col],errors='coerce')
+    vals=pd.to_numeric(df[value_col],errors='coerce')
+    s=pd.Series(vals.values,index=dates).dropna().sort_index()
+    s=s[~s.index.duplicated(keep='last')]
+    if s.empty:raise ValueError(f'{symbol}: no usable observations')
+    return s.astype(float)
 
 
 def percentile(value,series,window=252):
@@ -32,33 +41,31 @@ def percentile(value,series,window=252):
 def main():
     d=load(OUT,{})
     h=load(HIST,{'breadth':[],'market':[],'put_call':[],'regime_history':[]})
-    vix=close_series('^VIX')
-    vix3m=close_series('^VIX3M')
-    skew=close_series('^SKEW')
+    market_date=d.get('market_date')
+    if not market_date:raise ValueError('market_context market_date missing')
+    target=pd.Timestamp(market_date)
+    vix=cboe_series('VIX');vix3m=cboe_series('VIX3M');skew=cboe_series('SKEW')
+    missing=[name for name,s in [('VIX',vix),('VIX3M',vix3m),('SKEW',skew)] if target not in s.index]
+    if missing:raise ValueError(f'Options-risk data not aligned to {market_date}: missing {", ".join(missing)}')
+    vx=float(vix.loc[target]);v3=float(vix3m.loc[target]);sk=float(skew.loc[target]);ratio=vx/v3 if v3 else None
+    term_state='Unavailable' if ratio is None else 'Inverted' if ratio>1 else 'Nearly flat' if ratio>=0.95 else 'Normal'
+    sk_pct=percentile(sk,skew.loc[:target],252)
     common=vix.index.intersection(vix3m.index).intersection(skew.index)
-    if common.empty:raise ValueError('No common VIX/VIX3M/SKEW market date')
-    dt=common[-1]
-    vx=float(vix.loc[dt]);v3=float(vix3m.loc[dt]);sk=float(skew.loc[dt])
-    ratio=vx/v3 if v3 else None
-    if ratio is None:term_state='Unavailable'
-    elif ratio>1:term_state='Inverted'
-    elif ratio>=0.95:term_state='Nearly flat'
-    else:term_state='Normal'
-    sk_pct=percentile(sk,skew,252)
+    common=common[common<=target][-252:]
     rows=[]
-    for x in common[-252:]:
+    for x in common:
         a=float(vix.loc[x]);b=float(vix3m.loc[x]);s=float(skew.loc[x])
         rows.append({'date':str(x.date()),'vix':round(a,3),'vix3m':round(b,3),'vix_vix3m_ratio':round(a/b,4) if b else None,'skew':round(s,3)})
     d['options_risk']={
-        'as_of':str(dt.date()),
+        'as_of':market_date,
         'vix3m':round(v3,2),
         'vix_vix3m_ratio':None if ratio is None else round(ratio,3),
         'term_structure':term_state,
         'skew':round(sk,2),
         'skew_percentile_252d':sk_pct,
-        'source':'Cboe VIX3M and SKEW indexes via Yahoo Finance'
+        'source':'Cboe Global Indices daily history'
     }
-    d.setdefault('component_status',{})['options_risk']={'as_of':str(dt.date()),'source':'Cboe VIX3M and SKEW indexes via Yahoo Finance'}
+    d.setdefault('component_status',{})['options_risk']={'as_of':market_date,'source':'Cboe Global Indices daily history'}
     h['options_risk']=rows
     OUT.write_text(json.dumps(d,indent=2)+'\n')
     HIST.write_text(json.dumps(h,indent=2)+'\n')
