@@ -7,9 +7,8 @@ on:
     paths:
       - '.github/workflows/update-market-data.yml'
   schedule:
-    # GitHub cron is UTC. Run both UTC possibilities and gate by America/Chicago
-    # so the 4 PM Central hour proceeds across DST changes. GitHub scheduled jobs
-    # can start several minutes late, so never require an exact 16:30 timestamp.
+    # GitHub cron is UTC. Run both UTC possibilities and gate by America/Chicago.
+    # Scheduled jobs can start several minutes late, so gate by the 4 PM hour.
     - cron: '30 21 * * 1-5'
     - cron: '30 22 * * 1-5'
 
@@ -56,13 +55,20 @@ jobs:
         run: python scripts/update_market.py
       - name: Update options risk with end-of-day retry
         if: steps.gate.outputs.run == 'true'
+        shell: bash
         run: |
+          aligned=false
           for attempt in 1 2 3 4; do
-            python scripts/update_options_risk.py && break
+            if python scripts/update_options_risk.py; then
+              aligned=true
+              break
+            fi
             echo "Options-risk attempt $attempt not aligned yet"
             if [ "$attempt" -lt 4 ]; then sleep $((attempt * 30)); fi
-            if [ "$attempt" -eq 4 ]; then exit 1; fi
           done
+          if [ "$aligned" != "true" ]; then
+            echo "::warning::Options-risk sources are still lagging the confirmed close. Publishing the core market and historical studies without blocking; options remain unavailable or on their last confirmed reading."
+          fi
       - if: steps.gate.outputs.run == 'true'
         run: python scripts/update_breadth_cycle.py
       - name: Update historical event studies with transient-data retry
