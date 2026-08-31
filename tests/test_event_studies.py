@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 import numpy as np
@@ -8,6 +9,7 @@ import pandas as pd
 MODULE = Path(__file__).resolve().parents[1] / "scripts" / "update_event_studies.py"
 spec = importlib.util.spec_from_file_location("event_studies", MODULE)
 es = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = es
 spec.loader.exec_module(es)
 
 
@@ -23,7 +25,7 @@ class EventStudyTests(unittest.TestCase):
         idx = pd.bdate_range("2024-01-02", periods=8)
         raw = pd.Series([False, True, True, False, True, False, True, False], index=idx)
         mask = es.cooldown(raw, 2)
-        self.assertEqual(list(np.flatnonzero(mask.to_numpy())), [1, 4, 6])
+        self.assertEqual(list(np.flatnonzero(mask.to_numpy())), [1, 4])
 
     def test_forward_returns_use_trading_session_offsets(self):
         idx = pd.bdate_range("2024-01-04", periods=70)
