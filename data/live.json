@@ -1,23 +1,23 @@
 {
   "status": "market_open",
-  "generated_at": "2026-09-01T18:27:44.251475+00:00",
+  "generated_at": "2026-09-01T18:40:48.077941+00:00",
   "market_date": "2026-09-01",
-  "data_time": "2026-09-01T18:25:00+00:00",
-  "data_time_ct": "2026-09-01T13:25:00-05:00",
+  "data_time": "2026-09-01T18:40:00+00:00",
+  "data_time_ct": "2026-09-01T13:40:00-05:00",
   "market_open_utc": "2026-09-01T13:30:00+00:00",
   "market_close_utc": "2026-09-01T20:00:00+00:00",
   "etfs": {
     "SPY": {
-      "price": 761.325,
-      "change_pct": -0.7464,
+      "price": 760.575,
+      "change_pct": -0.8441,
       "previous_close": 767.05
     },
     "QQQ": {
-      "price": 706.975,
-      "change_pct": -1.3652,
+      "price": 706.06,
+      "change_pct": -1.4928,
       "previous_close": 716.76
     }
   },
-  "vix": 16.08,
+  "vix": 16.11,
   "source": "Yahoo Finance intraday via yfinance; delayed/non-exchange-grade"
 }
