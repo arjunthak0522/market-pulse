@@ -12,4 +12,5 @@ function render(d){const host=document.querySelector('.shared-context');if(!host
 async function boot(){try{const r=await fetch(`data/market_context.json?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;render(await r.json())}catch(e){console.warn('Options risk:',e)}}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>setTimeout(boot,650));else setTimeout(boot,650);
 document.getElementById('refresh')?.addEventListener('click',()=>setTimeout(boot,1300));
+if(!document.querySelector('script[data-signal-quality]')){const s=document.createElement('script');s.src='signal-quality.js?v=1';s.dataset.signalQuality='true';s.defer=true;document.head.appendChild(s)}
 })();
