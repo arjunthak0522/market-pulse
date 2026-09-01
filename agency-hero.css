@@ -1,0 +1,22 @@
+/* Premium agency hero: explanation first, visual signal board second */
+body.focus-mode .premium-hero.agency-hero{background:linear-gradient(145deg,#0a1020 0%,#111a2f 58%,#182744 100%);border-radius:28px;padding:clamp(24px,4vw,42px);box-shadow:0 28px 80px rgba(15,24,46,.22);overflow:hidden}
+body.focus-mode .premium-hero.agency-hero .hero-grid{display:block!important}
+body.focus-mode .premium-hero.agency-hero .hero-chart,body.focus-mode .premium-hero.agency-hero #premiumStateStrip{display:none!important}
+.agency-regime-tag{display:inline-flex!important;width:auto!important;max-width:none!important;font-size:12px!important;line-height:1!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-weight:850!important;color:#d6deee!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:999px!important;padding:8px 10px!important;margin-top:8px!important}
+.agency-market-brief{max-width:980px!important;margin:20px 0 0!important;font-size:clamp(18px,2.1vw,25px)!important;line-height:1.52!important;letter-spacing:-.022em!important;color:#f7f9fc!important;font-weight:620!important}
+.agency-signal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:28px}
+.agency-signal{position:relative;min-height:176px;border:1px solid rgba(255,255,255,.11);border-radius:18px;padding:15px 16px 14px;background:rgba(255,255,255,.055);backdrop-filter:blur(12px);overflow:hidden}
+.agency-signal:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:#8290a8}
+.agency-signal-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.agency-signal-top span{font-size:9px;font-weight:900;letter-spacing:.12em;color:rgba(255,255,255,.55)}.agency-signal-top i{width:9px;height:9px;border-radius:50%;background:#8290a8;box-shadow:0 0 0 4px rgba(130,144,168,.12)}
+.agency-signal strong{display:block;margin-top:12px;font-size:20px;line-height:1.08;letter-spacing:-.03em;color:#fff}.agency-signal p{margin:8px 0 0;font-size:11.5px;line-height:1.43;color:rgba(255,255,255,.68)}.agency-signal small{display:block;margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.09);font-size:9.5px;line-height:1.35;color:rgba(255,255,255,.48)}
+.agency-tone-good:before,.agency-tone-good .agency-signal-top i{background:#44d3a5}.agency-tone-good .agency-signal-top i{box-shadow:0 0 0 4px rgba(68,211,165,.13)}
+.agency-tone-warn:before,.agency-tone-warn .agency-signal-top i{background:#f1b45b}.agency-tone-warn .agency-signal-top i{box-shadow:0 0 0 4px rgba(241,180,91,.13)}
+.agency-tone-bad:before,.agency-tone-bad .agency-signal-top i{background:#ef777d}.agency-tone-bad .agency-signal-top i{box-shadow:0 0 0 4px rgba(239,119,125,.13)}
+.agency-watch{display:grid;grid-template-columns:165px 1fr;gap:14px;align-items:start;margin-top:12px;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}.agency-watch span{font-size:9px;font-weight:900;letter-spacing:.11em;color:rgba(255,255,255,.46)}.agency-watch strong{font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.84);font-weight:700}
+/* Kill failed placeholder-heavy top layers in the default briefing. */
+body.focus-mode #retailSnapshot,body.focus-mode #dailyExperience{display:none!important}
+/* Tighten the remaining default briefing so the hero owns the page. */
+body.focus-mode .intelligence-section{margin-top:18px!important}body.focus-mode .breadth-module{margin-top:12px!important}body.focus-mode #historicalForwardReturns{margin-top:12px!important}
+@media(max-width:900px){.agency-signal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.agency-signal{min-height:156px}}
+@media(max-width:720px){body.focus-mode .premium-hero.agency-hero{padding:18px!important;border-radius:20px!important}.agency-regime-tag{font-size:9px!important;padding:7px 9px!important}.agency-market-brief{font-size:16px!important;line-height:1.5!important;margin-top:14px!important}.agency-signal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:18px}.agency-signal{min-height:150px;border-radius:14px;padding:12px}.agency-signal strong{font-size:16px}.agency-signal p{font-size:10.5px}.agency-signal small{font-size:8.5px}.agency-watch{grid-template-columns:1fr;gap:5px;padding:11px 12px}.agency-watch strong{font-size:11px}}
+@media(max-width:390px){.agency-signal-grid{grid-template-columns:1fr}.agency-signal{min-height:0}.agency-market-brief{font-size:15px!important}}
