@@ -44,23 +44,26 @@ def main():
     market_date=d.get('market_date')
     if not market_date:raise ValueError('market_context market_date missing')
     target=pd.Timestamp(market_date)
-    vix=cboe_series('VIX');vix3m=cboe_series('VIX3M');skew=cboe_series('SKEW')
-    missing=[name for name,s in [('VIX',vix),('VIX3M',vix3m),('SKEW',skew)] if target not in s.index]
+    vix=cboe_series('VIX');vix3m=cboe_series('VIX3M');vvix=cboe_series('VVIX');skew=cboe_series('SKEW')
+    missing=[name for name,s in [('VIX',vix),('VIX3M',vix3m),('VVIX',vvix),('SKEW',skew)] if target not in s.index]
     if missing:raise ValueError(f'Options-risk data not aligned to {market_date}: missing {", ".join(missing)}')
-    vx=float(vix.loc[target]);v3=float(vix3m.loc[target]);sk=float(skew.loc[target]);ratio=vx/v3 if v3 else None
+    vx=float(vix.loc[target]);v3=float(vix3m.loc[target]);vv=float(vvix.loc[target]);sk=float(skew.loc[target]);ratio=vx/v3 if v3 else None
     term_state='Unavailable' if ratio is None else 'Inverted' if ratio>1 else 'Nearly flat' if ratio>=0.95 else 'Normal'
+    vv_pct=percentile(vv,vvix.loc[:target],252)
     sk_pct=percentile(sk,skew.loc[:target],252)
-    common=vix.index.intersection(vix3m.index).intersection(skew.index)
+    common=vix.index.intersection(vix3m.index).intersection(vvix.index).intersection(skew.index)
     common=common[common<=target][-252:]
     rows=[]
     for x in common:
-        a=float(vix.loc[x]);b=float(vix3m.loc[x]);s=float(skew.loc[x])
-        rows.append({'date':str(x.date()),'vix':round(a,3),'vix3m':round(b,3),'vix_vix3m_ratio':round(a/b,4) if b else None,'skew':round(s,3)})
+        a=float(vix.loc[x]);b=float(vix3m.loc[x]);vvx=float(vvix.loc[x]);s=float(skew.loc[x])
+        rows.append({'date':str(x.date()),'vix':round(a,3),'vix3m':round(b,3),'vix_vix3m_ratio':round(a/b,4) if b else None,'vvix':round(vvx,3),'skew':round(s,3)})
     d['options_risk']={
         'as_of':market_date,
         'vix3m':round(v3,2),
         'vix_vix3m_ratio':None if ratio is None else round(ratio,3),
         'term_structure':term_state,
+        'vvix':round(vv,2),
+        'vvix_percentile_252d':vv_pct,
         'skew':round(sk,2),
         'skew_percentile_252d':sk_pct,
         'source':'Cboe Global Indices daily history'
