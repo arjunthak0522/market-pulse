@@ -5,12 +5,15 @@ on:
   push:
     branches:
       - audit/contrast-reliability-20260831
+      - signal-quality-review
     paths:
       - '*.js'
       - '*.css'
       - 'scripts/**'
       - 'tests/**'
       - 'data/event_studies.json'
+      - 'data/global_liquidity.json'
+      - 'data/stocktwits_sentiment.json'
       - 'index.html'
       - '.github/workflows/validate-event-studies.yml'
       - 'requirements.txt'
@@ -34,9 +37,11 @@ jobs:
       - run: pip install -r requirements.txt
       - name: JavaScript syntax - full active dashboard bundle
         run: |
-          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js tactical-summary.js actionable-summary.js historical-priority.js breadth-cycle.js; do
+          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js signal-quality.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js tactical-summary.js actionable-summary.js historical-priority.js breadth-cycle.js; do
             node --check "$f"
           done
+      - name: Python syntax - market signal updaters
+        run: python -m py_compile scripts/update_options_risk.py scripts/update_global_liquidity.py scripts/update_stocktwits_sentiment.py
       - name: Unit tests
         run: python -m unittest tests/test_event_studies.py -v
       - name: Build breadth-cycle context
