@@ -69,6 +69,23 @@ jobs:
           if [ "$aligned" != "true" ]; then
             echo "::warning::Options-risk sources are still lagging the confirmed close. Publishing the core market and historical studies without blocking; options remain unavailable or on their last confirmed reading."
           fi
+      - name: Update global liquidity proxy
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          if ! python scripts/update_global_liquidity.py; then
+            echo "::warning::Global-liquidity refresh failed. Preserving the last confirmed reading."
+          fi
+      - name: Update Stocktwits sentiment
+        if: steps.gate.outputs.run == 'true'
+        env:
+          STOCKTWITS_API_USER: ${{ secrets.STOCKTWITS_API_USER }}
+          STOCKTWITS_API_PASSWORD: ${{ secrets.STOCKTWITS_API_PASSWORD }}
+        shell: bash
+        run: |
+          if ! python scripts/update_stocktwits_sentiment.py; then
+            echo "::warning::Stocktwits sentiment refresh failed. Preserving or withholding the sentiment module."
+          fi
       - if: steps.gate.outputs.run == 'true'
         run: python scripts/update_breadth_cycle.py
       - name: Update historical event studies with transient-data retry
@@ -104,14 +121,18 @@ jobs:
           cp data/market_context.json /tmp/market_context.json
           cp data/history.json /tmp/history.json
           cp data/event_studies.json /tmp/event_studies.json
+          cp data/global_liquidity.json /tmp/global_liquidity.json
+          cp data/stocktwits_sentiment.json /tmp/stocktwits_sentiment.json
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/market_context.json data/market_context.json
           cp /tmp/history.json data/history.json
           cp /tmp/event_studies.json data/event_studies.json
+          cp /tmp/global_liquidity.json data/global_liquidity.json
+          cp /tmp/stocktwits_sentiment.json data/stocktwits_sentiment.json
           git config user.name "market-pulse-bot"
           git config user.email "market-pulse-bot@users.noreply.github.com"
-          git add data/market_context.json data/history.json data/event_studies.json
+          git add data/market_context.json data/history.json data/event_studies.json data/global_liquidity.json data/stocktwits_sentiment.json
           git diff --cached --quiet && exit 0
           git commit -m "Update market dashboard data"
           git push origin HEAD:main
