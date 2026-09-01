@@ -37,7 +37,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: JavaScript syntax - full active dashboard bundle
         run: |
-          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js signal-quality.js williams-review.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js tactical-summary.js actionable-summary.js historical-priority.js breadth-cycle.js; do
+          for f in app.js premium.js daily.js strategist.js indicator-commentary.js strategist-daily.js mobile.js guide.js options-risk.js signal-quality.js williams-review.js daily-experience.js history-intelligence.js session-order.js investor-language.js historical-forward-returns.js tactical-summary.js actionable-summary.js historical-priority.js breadth-cycle.js; do
             node --check "$f"
           done
       - name: Python syntax - market signal updaters
