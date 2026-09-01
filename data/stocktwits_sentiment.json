@@ -1,0 +1,7 @@
+{
+  "status": "credentials_required",
+  "as_of": null,
+  "source": "Stocktwits Firestream Sentiment V2",
+  "symbols": {},
+  "note": "Configure Stocktwits Firestream credentials before live dashboard use."
+}
