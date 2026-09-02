@@ -1,0 +1,124 @@
+name: Refresh seven signals
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 13-21 * * 1-5'
+  push:
+    branches: [signal-quality-review]
+    paths:
+      - 'scripts/update_extremes.py'
+      - 'scripts/run_refresh.py'
+      - 'scripts/live_refresh.py'
+      - 'scripts/trace_stockcharts.py'
+      - 'requirements.txt'
+      - '.github/workflows/refresh-signals.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-seven-signals
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: signal-quality-review
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Audit current StockCharts symbols
+        continue-on-error: true
+        run: python -u scripts/trace_stockcharts.py > trace-stockcharts.log 2>&1
+      - name: Build current-session market state and studies
+        run: |
+          set -o pipefail
+          python -u scripts/live_refresh.py 2>&1 | tee refresh.log
+      - name: Hard product data contract
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee contract.log
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import pandas_market_calendars as mcal
+
+          p=json.loads(Path('data/signal_data.json').read_text())
+          required={'cpce','namo','nymo','trin','trinq','newlows','breadth','vol'}
+          assert required == set(p['signals']), (required, set(p['signals']))
+          assert p.get('market_state',{}).get('name'), 'missing market state'
+          assert p.get('what_changed'), 'missing What Changed feed'
+          assert p.get('data_status',{}).get('session_date'), 'missing current-session data status'
+          session=p['data_status']['session_date']
+          is_open=bool(p['data_status'].get('market_open'))
+
+          for name,row in p['signals'].items():
+              primary=row.get('value', row.get('above_5d', row.get('vix')))
+              assert primary is not None, f'{name}: no current value'
+              assert row.get('as_of'), f'{name}: missing as_of'
+              assert row.get('as_of_timestamp'), f'{name}: missing provider timestamp'
+              study=row.get('study')
+              assert study and study.get('horizons'), f'{name}: no study'
+              assert study.get('episode_method'), f'{name}: study not episode-based'
+              assert all(str(h) in study['horizons'] for h in (5,10,21,60)), f'{name}: missing horizon'
+              for h in (5,10,21,60):
+                  st=study['horizons'][str(h)]
+                  assert int(st.get('n',0)) >= 5, f'{name}: {h}d study too thin'
+                  assert 'median_max_drawdown' in st and 'median_max_favorable' in st, f'{name}: path stats missing'
+
+          # During the open session, every natively intraday family must be same-session
+          # and recent. EOD-only CPCE/SKEW are explicitly labeled rather than faked live.
+          intraday=('trin','trinq','namo','nymo','newlows','breadth','vol')
+          if is_open:
+              now=datetime.now(timezone.utc)
+              for name in intraday:
+                  row=p['signals'][name]
+                  assert row.get('as_of') == session, f'{name}: wrong session {row.get("as_of")} != {session}'
+                  ts=datetime.fromisoformat(row['as_of_timestamp'].replace('Z','+00:00')).astimezone(timezone.utc)
+                  age=(now-ts).total_seconds()/60
+                  assert -5 <= age <= 20, f'{name}: intraday input stale ({age:.1f}m)'
+                  assert row.get('freshness') == 'intraday', f'{name}: not labeled intraday'
+          else:
+              # After the bell, all primary readings must resolve to the latest completed session.
+              for name,row in p['signals'].items():
+                  assert row.get('as_of') == session, f'{name}: stale completed-session date {row.get("as_of")} != {session}'
+
+          for name in ('trin','trinq'):
+              assert 'StockCharts' in p['signals'][name].get('definition',''), f'{name}: wrong Arms definition'
+
+          vol=p['signals']['vol']
+          for key in ('term_study','vvix_study','skew_study'):
+              st=vol.get(key)
+              assert st and st.get('episode_method'), f'vol: missing {key}'
+              assert all(str(h) in st.get('horizons',{}) for h in (5,10,21,60)), f'vol: {key} missing horizon'
+
+          print('current-session Market Pulse contract passed', session, 'market_open=', is_open)
+          PY
+      - name: Upload refresh diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seven-signal-refresh-diagnostic
+          path: |
+            trace-stockcharts.log
+            refresh.log
+            contract.log
+            data/signal_data.json
+          retention-days: 3
+          if-no-files-found: ignore
+      - name: Commit refreshed static dataset
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/signal_data.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Refresh current-session Market Pulse dataset'
+          git pull --rebase origin signal-quality-review
+          git push origin HEAD:signal-quality-review

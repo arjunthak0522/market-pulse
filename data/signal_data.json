@@ -1,0 +1,870 @@
+{
+  "generated_at": "2026-09-02T22:14:29.888269+00:00",
+  "market_date": "2026-09-02",
+  "methodology": {
+    "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
+    "breadth_archive": "Unicorn historical breadth archive supplies long-run NYSE/Nasdaq precedent; current readings use the current sources listed per signal.",
+    "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention.",
+    "volatility_family": "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. Raw VIX is supporting context only.",
+    "live_data": "Market Pulse uses same-session current inputs. TRIN/TRINQ, exchange breadth, new highs/lows and VIX-family inputs refresh intraday; NYMO/NAMO are calculated intraday from live A/D counts; CPCE and SKEW are explicitly EOD publications and are never mislabeled as intraday.",
+    "event_studies": "Historical studies use independent extreme episodes separated by at least five signal sessions and report forward return, median maximum drawdown, and median maximum favorable excursion."
+  },
+  "signals": {
+    "cpce": {
+      "value": 0.71,
+      "average_5d": 0.6,
+      "percentile_252d": 74.6,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $CPCE",
+      "study": {
+        "title": "Equity put/call fear extremes",
+        "rule": "Equity put/call ratio in the top decile of available history.",
+        "threshold": 0.79,
+        "direction": "high",
+        "historical_sample": 158,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 157,
+            "average": 0.234,
+            "median": 0.384,
+            "positive_rate": 56.1,
+            "best": 10.827,
+            "worst": -10.781,
+            "median_max_drawdown": -1.011,
+            "median_max_favorable": 1.343
+          },
+          "10": {
+            "n": 157,
+            "average": 0.463,
+            "median": 1.195,
+            "positive_rate": 61.8,
+            "best": 8.93,
+            "worst": -26.769,
+            "median_max_drawdown": -1.638,
+            "median_max_favorable": 2.322
+          },
+          "21": {
+            "n": 155,
+            "average": 0.596,
+            "median": 2.066,
+            "positive_rate": 61.3,
+            "best": 13.511,
+            "worst": -30.534,
+            "median_max_drawdown": -2.563,
+            "median_max_favorable": 3.579
+          },
+          "60": {
+            "n": 155,
+            "average": 1.034,
+            "median": 3.66,
+            "positive_rate": 64.5,
+            "best": 27.92,
+            "worst": -35.653,
+            "median_max_drawdown": -4.525,
+            "median_max_favorable": 6.026
+          }
+        },
+        "prior_dates": [
+          "2019-10-02",
+          "2019-08-23",
+          "2019-08-14",
+          "2019-08-02",
+          "2019-05-31",
+          "2019-05-17",
+          "2019-05-10",
+          "2018-12-21",
+          "2018-12-14",
+          "2018-12-06",
+          "2018-11-20",
+          "2018-11-09"
+        ]
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
+    },
+    "namo": {
+      "value": -23.48,
+      "percentile_252d": 20.6,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $NAMO",
+      "study": {
+        "title": "Nasdaq McClellan washouts",
+        "rule": "Ratio-adjusted Nasdaq McClellan Oscillator in the bottom decile of historical readings.",
+        "threshold": -40.0737,
+        "direction": "low",
+        "historical_sample": 379,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 238,
+            "average": 0.698,
+            "median": 0.684,
+            "positive_rate": 63.4,
+            "best": 13.746,
+            "worst": -11.001,
+            "median_max_drawdown": -0.606,
+            "median_max_favorable": 1.375
+          },
+          "10": {
+            "n": 238,
+            "average": 0.983,
+            "median": 1.116,
+            "positive_rate": 63.9,
+            "best": 13.952,
+            "worst": -14.02,
+            "median_max_drawdown": -1.174,
+            "median_max_favorable": 2.132
+          },
+          "21": {
+            "n": 238,
+            "average": 1.842,
+            "median": 2.144,
+            "positive_rate": 69.7,
+            "best": 19.762,
+            "worst": -16.373,
+            "median_max_drawdown": -1.993,
+            "median_max_favorable": 3.509
+          },
+          "60": {
+            "n": 238,
+            "average": 3.675,
+            "median": 4.194,
+            "positive_rate": 70.2,
+            "best": 29.921,
+            "worst": -25.041,
+            "median_max_drawdown": -2.76,
+            "median_max_favorable": 6.507
+          }
+        },
+        "prior_dates": [
+          "2020-01-31",
+          "2020-01-24",
+          "2019-10-08",
+          "2019-09-27",
+          "2019-08-12",
+          "2019-08-02",
+          "2019-05-31",
+          "2019-05-23",
+          "2019-05-13",
+          "2019-03-22",
+          "2019-03-06",
+          "2018-12-21"
+        ]
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
+    },
+    "nymo": {
+      "value": -28.53,
+      "percentile_252d": 0.4,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $NYMO",
+      "study": {
+        "title": "NYSE McClellan washouts",
+        "rule": "Ratio-adjusted NYSE McClellan Oscillator in the bottom decile of historical readings.",
+        "threshold": -48.4599,
+        "direction": "low",
+        "historical_sample": 491,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 212,
+            "average": 0.622,
+            "median": 0.78,
+            "positive_rate": 63.2,
+            "best": 15.676,
+            "worst": -11.001,
+            "median_max_drawdown": -0.57,
+            "median_max_favorable": 1.396
+          },
+          "10": {
+            "n": 212,
+            "average": 0.862,
+            "median": 1.039,
+            "positive_rate": 61.3,
+            "best": 13.952,
+            "worst": -17.168,
+            "median_max_drawdown": -1.131,
+            "median_max_favorable": 2.153
+          },
+          "21": {
+            "n": 212,
+            "average": 1.625,
+            "median": 1.77,
+            "positive_rate": 69.3,
+            "best": 16.512,
+            "worst": -16.373,
+            "median_max_drawdown": -1.835,
+            "median_max_favorable": 3.267
+          },
+          "60": {
+            "n": 212,
+            "average": 3.83,
+            "median": 4.275,
+            "positive_rate": 70.8,
+            "best": 30.685,
+            "worst": -25.041,
+            "median_max_drawdown": -2.803,
+            "median_max_favorable": 6.567
+          }
+        },
+        "prior_dates": [
+          "2020-01-27",
+          "2019-10-02",
+          "2019-08-14",
+          "2019-08-05",
+          "2019-05-29",
+          "2019-05-09",
+          "2019-03-07",
+          "2018-12-24",
+          "2018-12-17",
+          "2018-12-10",
+          "2018-10-24",
+          "2018-10-11"
+        ]
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
+    },
+    "trin": {
+      "value": 0.837,
+      "percentile_252d": 23.8,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $TRIN",
+      "study": {
+        "title": "NYSE TRIN capitulation extremes",
+        "rule": "NYSE Arms Index in the top decile of historical readings.",
+        "threshold": 1.5396,
+        "direction": "high",
+        "historical_sample": 876,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 490,
+            "average": 0.319,
+            "median": 0.473,
+            "positive_rate": 61.2,
+            "best": 9.166,
+            "worst": -12.828,
+            "median_max_drawdown": -0.587,
+            "median_max_favorable": 1.266
+          },
+          "10": {
+            "n": 490,
+            "average": 0.688,
+            "median": 1.017,
+            "positive_rate": 63.7,
+            "best": 11.482,
+            "worst": -16.96,
+            "median_max_drawdown": -1.135,
+            "median_max_favorable": 2.041
+          },
+          "21": {
+            "n": 490,
+            "average": 1.12,
+            "median": 1.764,
+            "positive_rate": 68.0,
+            "best": 14.814,
+            "worst": -17.083,
+            "median_max_drawdown": -1.891,
+            "median_max_favorable": 3.178
+          },
+          "60": {
+            "n": 490,
+            "average": 2.525,
+            "median": 3.846,
+            "positive_rate": 70.0,
+            "best": 24.379,
+            "worst": -31.047,
+            "median_max_drawdown": -2.924,
+            "median_max_favorable": 5.732
+          }
+        },
+        "prior_dates": [
+          "2020-01-31",
+          "2020-01-24",
+          "2019-11-29",
+          "2019-11-14",
+          "2019-10-08",
+          "2019-10-01",
+          "2019-09-24",
+          "2019-09-17",
+          "2019-08-09",
+          "2019-07-29",
+          "2019-05-10",
+          "2019-05-01"
+        ]
+      },
+      "session_open": 2.1117,
+      "session_high": 2.1117,
+      "session_low": 0.7604,
+      "definition": "StockCharts $TRIN / classic NYSE Arms Index",
+      "intraday_extreme_occurred": true,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
+    },
+    "trinq": {
+      "value": 0.578,
+      "percentile_252d": 2.8,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $TRINQ",
+      "study": {
+        "title": "Nasdaq TRINQ capitulation extremes",
+        "rule": "Nasdaq Arms Index in the top decile of historical readings.",
+        "threshold": 1.4861,
+        "direction": "high",
+        "historical_sample": 628,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 524,
+            "average": 0.383,
+            "median": 0.456,
+            "positive_rate": 58.6,
+            "best": 9.738,
+            "worst": -10.781,
+            "median_max_drawdown": -0.693,
+            "median_max_favorable": 1.105
+          },
+          "10": {
+            "n": 524,
+            "average": 0.493,
+            "median": 0.899,
+            "positive_rate": 60.9,
+            "best": 14.738,
+            "worst": -16.182,
+            "median_max_drawdown": -1.187,
+            "median_max_favorable": 1.939
+          },
+          "21": {
+            "n": 524,
+            "average": 0.982,
+            "median": 1.57,
+            "positive_rate": 63.5,
+            "best": 23.348,
+            "worst": -20.979,
+            "median_max_drawdown": -1.931,
+            "median_max_favorable": 2.903
+          },
+          "60": {
+            "n": 524,
+            "average": 2.421,
+            "median": 3.529,
+            "positive_rate": 66.8,
+            "best": 38.733,
+            "worst": -33.072,
+            "median_max_drawdown": -3.422,
+            "median_max_favorable": 5.512
+          }
+        },
+        "prior_dates": [
+          "2019-10-29",
+          "2019-09-20",
+          "2019-01-29",
+          "2019-01-16",
+          "2018-12-19",
+          "2018-12-07",
+          "2018-11-19",
+          "2018-08-16",
+          "2018-07-03",
+          "2018-06-25",
+          "2018-05-17",
+          "2018-04-20"
+        ]
+      },
+      "session_open": 0.7166,
+      "session_high": 0.9887,
+      "session_low": 0.5736,
+      "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
+      "intraday_extreme_occurred": false,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
+    },
+    "newlows": {
+      "value": 115,
+      "new_highs": 58,
+      "new_low_pct": 4.08,
+      "percentile_252d": 84.5,
+      "as_of": "2026-09-02",
+      "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows",
+      "study": {
+        "title": "52-week new-low pressure extremes",
+        "rule": "NYSE new 52-week lows as a share of active issues in the top decile of historical readings.",
+        "threshold": 4.9874,
+        "direction": "high",
+        "historical_sample": 112,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 112,
+            "average": -0.395,
+            "median": 0.12,
+            "positive_rate": 50.9,
+            "best": 7.215,
+            "worst": -19.793,
+            "median_max_drawdown": -1.326,
+            "median_max_favorable": 1.268
+          },
+          "10": {
+            "n": 112,
+            "average": -0.526,
+            "median": 0.125,
+            "positive_rate": 50.9,
+            "best": 11.574,
+            "worst": -26.769,
+            "median_max_drawdown": -2.607,
+            "median_max_favorable": 1.961
+          },
+          "21": {
+            "n": 112,
+            "average": -0.273,
+            "median": 0.654,
+            "positive_rate": 55.4,
+            "best": 16.512,
+            "worst": -30.534,
+            "median_max_drawdown": -3.419,
+            "median_max_favorable": 3.297
+          },
+          "60": {
+            "n": 112,
+            "average": 1.267,
+            "median": 3.827,
+            "positive_rate": 64.3,
+            "best": 30.685,
+            "worst": -29.536,
+            "median_max_drawdown": -5.458,
+            "median_max_favorable": 5.802
+          }
+        },
+        "prior_dates": [
+          "2019-08-23",
+          "2019-08-12",
+          "2019-08-02",
+          "2019-05-31",
+          "2019-05-23",
+          "2018-12-21",
+          "2018-12-14",
+          "2018-12-07",
+          "2018-11-30",
+          "2018-11-23",
+          "2018-11-14",
+          "2018-10-29"
+        ]
+      },
+      "nasdaq_new_lows": 235,
+      "nasdaq_new_highs": 86,
+      "nasdaq_new_low_pct": 4.76,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday"
+    },
+    "breadth": {
+      "above_5d": 39.39,
+      "above_20d": 38.6,
+      "above_50d": 48.4,
+      "above_200d": 66.0,
+      "percentile_252d": 18.4,
+      "as_of": "2026-09-02",
+      "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
+      "study": {
+        "title": "Short-term breadth washouts",
+        "rule": "S&P 500 5-day participation in the bottom decile of recorded Market Pulse history.",
+        "threshold": 32.1744,
+        "direction": "low",
+        "historical_sample": 10,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 8,
+            "average": 0.36,
+            "median": 0.235,
+            "positive_rate": 50.0,
+            "best": 3.917,
+            "worst": -2.238,
+            "median_max_drawdown": -0.561,
+            "median_max_favorable": 1.277
+          },
+          "10": {
+            "n": 8,
+            "average": 1.01,
+            "median": 1.144,
+            "positive_rate": 75.0,
+            "best": 8.202,
+            "worst": -3.157,
+            "median_max_drawdown": -0.903,
+            "median_max_favorable": 1.439
+          },
+          "21": {
+            "n": 7,
+            "average": 3.496,
+            "median": 1.978,
+            "positive_rate": 85.7,
+            "best": 12.238,
+            "worst": -3.021,
+            "median_max_drawdown": -1.362,
+            "median_max_favorable": 2.643
+          },
+          "60": {
+            "n": 6,
+            "average": 8.553,
+            "median": 11.463,
+            "positive_rate": 83.3,
+            "best": 15.934,
+            "worst": -7.072,
+            "median_max_drawdown": -5.668,
+            "median_max_favorable": 12.995
+          }
+        },
+        "prior_dates": [
+          "2026-06-17",
+          "2026-03-27",
+          "2026-03-20",
+          "2026-03-12",
+          "2026-03-05",
+          "2026-01-20",
+          "2025-12-31"
+        ]
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday"
+    },
+    "vol": {
+      "vix": 15.2,
+      "vix3m": 17.73,
+      "term_ratio": 0.857,
+      "vvix": 86.25,
+      "skew": 149.23,
+      "stress_score": 32.7,
+      "percentile_252d": 36.9,
+      "as_of": "2026-09-02",
+      "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
+      "study": {
+        "title": "Volatility stress-cluster extremes",
+        "rule": "Combined VIX, VVIX, SKEW and term-structure stress score in the top decile of history.",
+        "threshold": 75.7341,
+        "direction": "high",
+        "historical_sample": 135,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 135,
+            "average": 0.416,
+            "median": 0.773,
+            "positive_rate": 58.5,
+            "best": 11.068,
+            "worst": -14.546,
+            "median_max_drawdown": -1.067,
+            "median_max_favorable": 1.555
+          },
+          "10": {
+            "n": 135,
+            "average": 0.909,
+            "median": 1.421,
+            "positive_rate": 67.4,
+            "best": 13.457,
+            "worst": -22.63,
+            "median_max_drawdown": -1.683,
+            "median_max_favorable": 2.834
+          },
+          "21": {
+            "n": 135,
+            "average": 1.868,
+            "median": 2.694,
+            "positive_rate": 70.4,
+            "best": 19.336,
+            "worst": -32.751,
+            "median_max_drawdown": -2.765,
+            "median_max_favorable": 3.946
+          },
+          "60": {
+            "n": 135,
+            "average": 5.063,
+            "median": 5.325,
+            "positive_rate": 77.0,
+            "best": 36.783,
+            "worst": -14.215,
+            "median_max_drawdown": -3.614,
+            "median_max_favorable": 6.916
+          }
+        },
+        "prior_dates": [
+          "2026-04-07",
+          "2026-03-30",
+          "2026-03-23",
+          "2026-03-10",
+          "2026-03-03",
+          "2025-11-18",
+          "2025-10-16",
+          "2025-04-16",
+          "2025-04-09",
+          "2025-04-02",
+          "2025-03-13",
+          "2025-03-06"
+        ]
+      },
+      "term_percentile_252d": 47.2,
+      "vvix_percentile_252d": 5.2,
+      "skew_percentile_252d": 79.8,
+      "term_study": {
+        "title": "VIX term-structure stress",
+        "rule": "VIX/VIX3M ratio in the top decile of history. Higher ratios mean near-term fear is unusually urgent; readings above 1.00 indicate inversion.",
+        "threshold": 0.9858,
+        "direction": "high",
+        "historical_sample": 139,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 139,
+            "average": 0.724,
+            "median": 1.097,
+            "positive_rate": 64.7,
+            "best": 17.358,
+            "worst": -12.537,
+            "median_max_drawdown": -0.947,
+            "median_max_favorable": 1.763
+          },
+          "10": {
+            "n": 139,
+            "average": 1.353,
+            "median": 2.166,
+            "positive_rate": 69.8,
+            "best": 18.798,
+            "worst": -22.401,
+            "median_max_drawdown": -1.448,
+            "median_max_favorable": 3.043
+          },
+          "21": {
+            "n": 139,
+            "average": 2.426,
+            "median": 3.153,
+            "positive_rate": 71.2,
+            "best": 25.185,
+            "worst": -24.142,
+            "median_max_drawdown": -2.188,
+            "median_max_favorable": 4.471
+          },
+          "60": {
+            "n": 139,
+            "average": 5.892,
+            "median": 5.861,
+            "positive_rate": 80.6,
+            "best": 39.789,
+            "worst": -13.218,
+            "median_max_drawdown": -3.096,
+            "median_max_favorable": 7.813
+          }
+        },
+        "prior_dates": [
+          "2026-04-07",
+          "2026-03-30",
+          "2026-03-23",
+          "2026-03-12",
+          "2026-03-03",
+          "2025-11-18",
+          "2025-10-16",
+          "2025-04-22",
+          "2025-04-14",
+          "2025-04-07",
+          "2025-03-31",
+          "2025-03-13"
+        ]
+      },
+      "vvix_study": {
+        "title": "VVIX fear-of-fear extremes",
+        "rule": "VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
+        "threshold": 116.31,
+        "direction": "high",
+        "historical_sample": 127,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 127,
+            "average": 0.281,
+            "median": 0.539,
+            "positive_rate": 59.8,
+            "best": 6.899,
+            "worst": -12.35,
+            "median_max_drawdown": -1.071,
+            "median_max_favorable": 1.302
+          },
+          "10": {
+            "n": 127,
+            "average": 0.541,
+            "median": 1.149,
+            "positive_rate": 62.2,
+            "best": 9.671,
+            "worst": -15.801,
+            "median_max_drawdown": -1.539,
+            "median_max_favorable": 2.089
+          },
+          "21": {
+            "n": 127,
+            "average": 1.805,
+            "median": 2.569,
+            "positive_rate": 74.0,
+            "best": 14.777,
+            "worst": -20.601,
+            "median_max_drawdown": -2.266,
+            "median_max_favorable": 3.528
+          },
+          "60": {
+            "n": 127,
+            "average": 5.31,
+            "median": 5.872,
+            "positive_rate": 78.7,
+            "best": 28.225,
+            "worst": -11.268,
+            "median_max_drawdown": -3.302,
+            "median_max_favorable": 7.182
+          }
+        },
+        "prior_dates": [
+          "2026-04-07",
+          "2026-03-27",
+          "2026-03-20",
+          "2026-03-13",
+          "2026-03-06",
+          "2026-02-05",
+          "2026-01-20",
+          "2025-11-17",
+          "2025-10-15",
+          "2025-04-16",
+          "2025-04-09",
+          "2025-04-02"
+        ]
+      },
+      "skew_study": {
+        "title": "SKEW tail-risk extremes",
+        "rule": "Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
+        "threshold": 147.962,
+        "direction": "high",
+        "historical_sample": 118,
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": {
+          "5": {
+            "n": 116,
+            "average": 0.429,
+            "median": 0.457,
+            "positive_rate": 62.1,
+            "best": 5.346,
+            "worst": -3.972,
+            "median_max_drawdown": -0.317,
+            "median_max_favorable": 0.869
+          },
+          "10": {
+            "n": 115,
+            "average": 0.695,
+            "median": 1.03,
+            "positive_rate": 71.3,
+            "best": 6.805,
+            "worst": -13.725,
+            "median_max_drawdown": -0.663,
+            "median_max_favorable": 1.477
+          },
+          "21": {
+            "n": 113,
+            "average": 1.261,
+            "median": 1.88,
+            "positive_rate": 71.7,
+            "best": 11.318,
+            "worst": -7.984,
+            "median_max_drawdown": -1.067,
+            "median_max_favorable": 2.512
+          },
+          "60": {
+            "n": 112,
+            "average": 2.099,
+            "median": 3.5,
+            "positive_rate": 72.3,
+            "best": 13.27,
+            "worst": -24.843,
+            "median_max_drawdown": -2.371,
+            "median_max_favorable": 5.095
+          }
+        },
+        "prior_dates": [
+          "2026-06-05",
+          "2026-04-14",
+          "2026-04-07",
+          "2026-03-09",
+          "2026-03-02",
+          "2026-01-20",
+          "2026-01-12",
+          "2025-12-26",
+          "2025-12-18",
+          "2025-12-11",
+          "2025-12-03",
+          "2025-11-21"
+        ]
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "mixed_intraday_eod",
+      "skew_freshness": "eod",
+      "skew_as_of": "2026-09-02",
+      "skew_as_of_timestamp": "2026-09-02T20:00:00+00:00"
+    }
+  },
+  "data_status": {
+    "session_date": "2026-09-02",
+    "market_open": false,
+    "generated_at": "2026-09-02T22:14:29.888269+00:00"
+  },
+  "market_state": {
+    "name": "Breadth Washout",
+    "summary": "Market internals are severely stretched, but a reversal trigger has not been confirmed yet.",
+    "dimensions": {
+      "fear": {
+        "label": "Elevated",
+        "score": 79.8
+      },
+      "internals": {
+        "label": "Severe washout",
+        "score": 99.6
+      },
+      "capitulation": {
+        "label": "Not confirmed",
+        "score": 23.8
+      }
+    },
+    "setup": {
+      "extreme": {
+        "confirmed": true,
+        "copy": "A historically unusual condition is present."
+      },
+      "confirmation": {
+        "confirmed": true,
+        "copy": "Independent signal families agree."
+      },
+      "trigger": {
+        "confirmed": false,
+        "copy": "A reversal trigger is not confirmed yet."
+      }
+    }
+  },
+  "what_changed": [
+    {
+      "signal": "breadth",
+      "headline": "Short-term participation",
+      "detail": "Short-term participation rose from 36% to 39% above the 5-day trend.",
+      "magnitude": 3.27
+    }
+  ]
+}

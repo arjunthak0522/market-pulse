@@ -1,0 +1,69 @@
+name: Validate clean Market Pulse
+on:
+  workflow_dispatch:
+  push:
+    branches: [signal-quality-review]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: JavaScript syntax
+        run: |
+          node --check pulse-v5.js
+          node --check live-ui.js
+          node --check cloudflare/worker.js
+      - name: Python syntax
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py tests/test_extremes.py
+      - name: Unit tests
+        run: python -m unittest tests/test_extremes.py -v
+      - name: Clean V5 unified Worker guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','live-ui.js','manifest.webmanifest','requirements.txt','.assetsignore'}
+          roots={p.name for p in Path('.').iterdir() if p.is_file()}
+          extras=roots-allowed
+          assert not extras, f'unexpected root product files: {sorted(extras)}'
+
+          html=Path('index.html').read_text()
+          assert html.count('<script ')==2, 'expected exactly the V5 app script and live-data overlay'
+          assert 'pulse-v5.js' in html and 'live-ui.js' in html
+          assert 'market-pulse-live-endpoint' in html, 'missing configurable live endpoint'
+          assert 'content="/api/live"' in html, 'dashboard must use same-origin /api/live'
+          assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
+          required=["TODAY'S MARKET STATE",'MARKET PRESSURE','What changed?','What matters underneath the market']
+          for text in required:
+              assert text in html, f'missing V5 product element: {text}'
+          assert 'TURNING-POINT FRAMEWORK' not in html, 'methodology block should not occupy the main mobile flow'
+
+          js=Path('pulse-v5.js').read_text()
+          for text in ['View historical study','data-watch','median_max_drawdown','median_max_favorable','STANDS OUT']:
+              assert text in js, f'missing V5 behavior: {text}'
+          assert 'weight = {severe:0,extreme:1,watch:2,normal:3}' in js, 'signal priority ordering missing'
+
+          live=Path('live-ui.js').read_text()
+          for text in ['POLL_MS = 5 * 60_000','intraday_extreme_occurred','SESSION CLOSE','~5 MIN','market-pulse-live-endpoint']:
+              assert text in live, f'missing live-data behavior: {text}'
+
+          relay=Path('cloudflare/worker.js').read_text()
+          for text in ['/api/live','/api/health','env.ASSETS.fetch','$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','refresh_guidance_seconds','StockCharts QuoteBrain']:
+              assert text in relay, f'missing unified Worker contract: {text}'
+
+          wrangler=Path('cloudflare/wrangler.toml').read_text()
+          for text in ['name = "market-pulse"','binding = "ASSETS"','directory = "../"','run_worker_first = ["/api/*"]']:
+              assert text in wrangler, f'missing unified Wrangler contract: {text}'
+
+          ignore=Path('.assetsignore').read_text()
+          for text in ['.github/','cloudflare/','scripts/','tests/']:
+              assert text in ignore, f'non-public source not excluded from static assets: {text}'
+
+          assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
+          print('clean V5 unified Cloudflare Worker guard passed')
+          PY

@@ -1,0 +1,50 @@
+name: Smoke deployed Market Pulse
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dashboard + live API smoke test
+        run: |
+          set -euo pipefail
+          base='https://market-pulse.arjunthak.workers.dev'
+
+          curl -fsS --retry 5 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 10 --max-time 30 \
+            -D /tmp/site-headers.txt "$base/" -o /tmp/site.html
+          grep -q '<title>Market Pulse</title>' /tmp/site.html
+          grep -q 'pulse-v5.js' /tmp/site.html
+          grep -q 'content="/api/live"' /tmp/site.html
+
+          curl -fsS --retry 5 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 10 --max-time 30 \
+            -H 'Origin: https://market-pulse.arjunthak.workers.dev' \
+            -D /tmp/live-headers.txt "$base/api/live?t=$(date +%s)" \
+            -o /tmp/live.json
+
+          python - <<'PY'
+          import json, math
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload=json.loads(Path('/tmp/live.json').read_text())
+          headers=Path('/tmp/live-headers.txt').read_text().lower()
+          assert 'content-type: application/json' in headers
+          assert payload.get('refresh_guidance_seconds') == 300
+          assert 'StockCharts QuoteBrain' in payload.get('source','')
+          quotes=payload.get('quotes') or {}
+          critical=['$TRIN','$TRINQ','$NYHGH','$NYLOW','$NAHGH','$NALOW','$VIX','$VIX3M']
+          missing=[s for s in critical if not quotes.get(s) or not math.isfinite(float(quotes[s].get('value')))]
+          assert not missing, f'missing critical live quotes: {missing}'
+          generated=datetime.fromisoformat(payload['generated_at'].replace('Z','+00:00'))
+          age=(datetime.now(timezone.utc)-generated).total_seconds()
+          assert -60 <= age <= 180, f'live relay generated_at stale: {age:.0f}s'
+          assert not payload.get('missing_critical'), payload.get('missing_critical')
+          print('deployed unified Market Pulse passed')
+          PY

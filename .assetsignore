@@ -1,0 +1,8 @@
+.git/
+.github/
+cloudflare/
+scripts/
+tests/
+README.md
+requirements.txt
+.assetsignore
