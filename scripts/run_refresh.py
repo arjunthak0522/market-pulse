@@ -8,6 +8,7 @@ All live market-data hosts retain normal TLS verification.
 """
 import io
 import warnings
+from datetime import datetime, timezone
 
 import pandas as pd
 import urllib3
@@ -48,7 +49,28 @@ def source_get(url, timeout=30):
     return r
 
 
+def official_nasdaq_daily():
+    year = datetime.now(timezone.utc).year
+    url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.csv"
+    df = pd.read_csv(io.BytesIO(source_get(url, timeout=45).content))
+    cols = {str(c).strip().lower(): c for c in df.columns}
+    date_col = cols.get("date")
+    adv_col = cols.get("advances")
+    dec_col = cols.get("declines")
+    if date_col is None or adv_col is None or dec_col is None:
+        raise RuntimeError(f"Nasdaq official breadth columns not recognized: {list(df.columns)}")
+    out = pd.DataFrame({
+        "date": pd.to_datetime(df[date_col], errors="coerce"),
+        "adv": pd.to_numeric(df[adv_col], errors="coerce"),
+        "dec": pd.to_numeric(df[dec_col], errors="coerce"),
+    }).dropna().set_index("date").sort_index()
+    if len(out) < 40:
+        raise RuntimeError("Nasdaq official current-year breadth history too short")
+    return out
+
+
 if __name__ == "__main__":
     builder.spy_history = github_spy_history
     builder.get = source_get
+    builder.nasdaq_daily = official_nasdaq_daily
     builder.main()
