@@ -1,11 +1,12 @@
 {
-  "generated_at": "2026-09-02T19:41:58.689040+00:00",
+  "generated_at": "2026-09-02T21:53:37.296982+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
     "breadth_archive": "Unicorn historical breadth archive supplies long-run NYSE/Nasdaq precedent; current readings use the current sources listed per signal.",
     "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention.",
     "volatility_family": "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. Raw VIX is supporting context only.",
+    "live_data": "TRIN and TRINQ are fetched from StockCharts QuoteBrain, the quote service used by its chart app. Prior-session values are not accepted as current substitutes.",
     "event_studies": "Historical studies use independent extreme episodes separated by at least five signal sessions and report forward return, median maximum drawdown, and median maximum favorable excursion."
   },
   "signals": {
@@ -151,9 +152,9 @@
       }
     },
     "nymo": {
-      "value": -130.0,
-      "percentile_252d": 0.0,
-      "as_of": "2026-09-01",
+      "value": -78.0,
+      "percentile_252d": 0.4,
+      "as_of": "2026-09-02",
       "source": "McClellan Financial final NYSE breadth",
       "study": {
         "title": "NYSE McClellan washouts",
@@ -221,10 +222,10 @@
       }
     },
     "trin": {
-      "value": 0.719,
-      "percentile_252d": 11.1,
-      "as_of": "2026-09-01",
-      "source": "McClellan Financial NYSE issues and volume; Arms formula",
+      "value": 0.837,
+      "percentile_252d": 23.8,
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $TRIN",
       "study": {
         "title": "NYSE TRIN capitulation extremes",
         "rule": "NYSE Arms Index in the top decile of historical readings.",
@@ -288,13 +289,17 @@
           "2019-05-10",
           "2019-05-01"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T21:53:37.395303+00:00",
+      "freshness": "intraday",
+      "definition": "StockCharts $TRIN / classic NYSE Arms Index",
+      "quote_transport": "StockCharts QuoteBrain"
     },
     "trinq": {
-      "value": 0.61,
-      "percentile_252d": 5.6,
+      "value": 0.578,
+      "percentile_252d": 2.8,
       "as_of": "2026-08-31",
-      "source": "Barchart $TRIQ current; Unicorn Nasdaq breadth history",
+      "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
         "title": "Nasdaq TRINQ capitulation extremes",
         "rule": "Nasdaq Arms Index in the top decile of historical readings.",
@@ -358,7 +363,11 @@
           "2018-05-17",
           "2018-04-20"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T21:53:37.437565+00:00",
+      "freshness": "intraday",
+      "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
+      "quote_transport": "StockCharts QuoteBrain"
     },
     "newlows": {
       "value": 14.0,
@@ -781,11 +790,11 @@
       },
       "internals": {
         "label": "Severe washout",
-        "score": 100.0
+        "score": 99.6
       },
       "capitulation": {
         "label": "Not confirmed",
-        "score": 11.1
+        "score": 23.8
       }
     },
     "setup": {
@@ -805,10 +814,22 @@
   },
   "what_changed": [
     {
-      "signal": "market",
-      "headline": "No major state change",
-      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
-      "magnitude": 0
+      "signal": "nymo",
+      "headline": "NYSE breadth",
+      "detail": "NYSE breadth rose from -130.00 to -78.00.",
+      "magnitude": 52.0
+    },
+    {
+      "signal": "trin",
+      "headline": "NYSE selling pressure",
+      "detail": "NYSE selling pressure rose from 0.72 to 0.84.",
+      "magnitude": 0.118
+    },
+    {
+      "signal": "trinq",
+      "headline": "Nasdaq selling pressure",
+      "detail": "Nasdaq selling pressure fell from 0.61 to 0.58.",
+      "magnitude": 0.032
     }
   ]
 }
