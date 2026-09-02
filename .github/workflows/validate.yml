@@ -15,21 +15,27 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: JavaScript syntax
-        run: node --check pulse.js
+        run: node --check pulse-v5.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py tests/test_extremes.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py tests/test_extremes.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py -v
-      - name: Clean product guard
+      - name: Clean V5 product guard
         run: |
           python - <<'PY'
           from pathlib import Path
-          allowed={'README.md','index.html','pulse.css','pulse.js','manifest.webmanifest','requirements.txt'}
+          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','manifest.webmanifest','requirements.txt'}
           roots={p.name for p in Path('.').iterdir() if p.is_file()}
           extras=roots-allowed
           assert not extras, f'unexpected root product files: {sorted(extras)}'
           html=Path('index.html').read_text()
-          assert html.count('<script ')==1 and 'pulse.js' in html
-          assert html.count('stylesheet')==1 and 'pulse.css' in html
-          print('clean UI guard passed')
+          assert html.count('<script ')==1 and 'pulse-v5.js' in html
+          assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
+          required=['MARKET STATE','MARKET PRESSURE MAP','What changed?','Extreme → Confirmation → Trigger','Seven signals behind the state']
+          for text in required:
+              assert text in html, f'missing V5 product element: {text}'
+          js=Path('pulse-v5.js').read_text()
+          for text in ['Historical study','Watch signal','median_max_drawdown','median_max_favorable']:
+              assert text in js, f'missing V5 behavior: {text}'
+          print('clean buyer-ready V5 guard passed')
           PY
