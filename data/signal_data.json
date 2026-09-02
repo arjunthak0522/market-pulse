@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T21:53:37.296982+00:00",
+  "generated_at": "2026-09-02T21:55:49.844202+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -290,7 +290,7 @@
           "2019-05-01"
         ]
       },
-      "as_of_timestamp": "2026-09-02T21:53:37.395303+00:00",
+      "as_of_timestamp": "2026-09-02T21:55:49.915335+00:00",
       "freshness": "intraday",
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
       "quote_transport": "StockCharts QuoteBrain"
@@ -364,7 +364,7 @@
           "2018-04-20"
         ]
       },
-      "as_of_timestamp": "2026-09-02T21:53:37.437565+00:00",
+      "as_of_timestamp": "2026-09-02T21:55:50.026666+00:00",
       "freshness": "intraday",
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
       "quote_transport": "StockCharts QuoteBrain"
@@ -814,22 +814,10 @@
   },
   "what_changed": [
     {
-      "signal": "nymo",
-      "headline": "NYSE breadth",
-      "detail": "NYSE breadth rose from -130.00 to -78.00.",
-      "magnitude": 52.0
-    },
-    {
-      "signal": "trin",
-      "headline": "NYSE selling pressure",
-      "detail": "NYSE selling pressure rose from 0.72 to 0.84.",
-      "magnitude": 0.118
-    },
-    {
-      "signal": "trinq",
-      "headline": "Nasdaq selling pressure",
-      "detail": "Nasdaq selling pressure fell from 0.61 to 0.58.",
-      "magnitude": 0.032
+      "signal": "market",
+      "headline": "No major state change",
+      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
+      "magnitude": 0
     }
   ]
 }
