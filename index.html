@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f6f8">
 <title>Market Pulse</title>
-<link rel="stylesheet" href="pulse.css?v=1">
+<link rel="stylesheet" href="pulse.css?v=2">
 </head>
 <body>
 <div class="shell">
@@ -16,35 +16,24 @@
   </div>
   <button id="refresh" class="refresh" type="button" aria-label="Refresh market data">↻</button>
 </header>
-
 <main>
 <section class="hero">
-  <div class="hero-copy">
-    <div class="kicker">MARKET EXTREMES</div>
-    <h1>What is unusually stretched <em>right now?</em></h1>
-    <p id="heroSummary">Scanning the seven signals that matter most for fear, breadth, capitulation, structural damage and volatility stress.</p>
-  </div>
-  <div class="hero-status">
-    <div id="extremeCount" class="count">—</div>
-    <div class="count-copy"><strong>signals at an extreme</strong><span>out of 7 tracked families</span></div>
-  </div>
+  <div class="kicker">TODAY'S MARKET READ</div>
+  <h1 id="heroTitle">Reading market internals…</h1>
+  <p id="heroSummary">Connecting fear, breadth, capitulation, structural damage and volatility into one clear read.</p>
 </section>
-
 <section class="section-head">
-  <div><div class="kicker">THE SIGNAL BOARD</div><h2>Seven signals. Nothing else.</h2></div>
-  <p>Every signal stays visible. Extreme readings move forward. Historical outcomes appear only when trustworthy study data exists.</p>
+  <div><div class="kicker">MARKET RADAR</div><h2>Where is the market stretched?</h2></div>
+  <p>Seven complementary signals. Current reading, historical position and forward-return context in one place.</p>
 </section>
-
 <section id="signalBoard" class="signal-board" aria-live="polite"></section>
-
 <section id="historyPanel" class="history-panel" hidden>
   <button id="historyClose" class="history-close" type="button">Close</button>
   <div id="historyContent"></div>
 </section>
 </main>
-
-<footer>Extremes are context, not forecasts. Market Pulse distinguishes verified data from unavailable or unvalidated feeds.</footer>
+<footer>Extremes are context, not forecasts. Data definitions stay consistent across the full signal set.</footer>
 </div>
-<script src="pulse.js?v=1" defer></script>
+<script src="pulse.js?v=2" defer></script>
 </body>
 </html>
