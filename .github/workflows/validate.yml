@@ -31,11 +31,12 @@ jobs:
           html=Path('index.html').read_text()
           assert html.count('<script ')==1 and 'pulse-v5.js' in html
           assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
-          required=['MARKET STATE','MARKET PRESSURE MAP','What changed?','Extreme → Confirmation → Trigger','Seven signals behind the state']
+          required=['MARKET STATE','MARKET PRESSURE MAP','What changed?','Seven signals behind the state']
           for text in required:
               assert text in html, f'missing V5 product element: {text}'
+          assert 'TURNING-POINT FRAMEWORK' not in html, 'methodology block should not occupy the main mobile flow'
           js=Path('pulse-v5.js').read_text()
           for text in ['Historical study','Watch signal','median_max_drawdown','median_max_favorable']:
               assert text in js, f'missing V5 behavior: {text}'
-          print('clean buyer-ready V5 guard passed')
+          print('clean simplified V5 guard passed')
           PY
