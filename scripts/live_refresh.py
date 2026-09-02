@@ -2,102 +2,70 @@
 """Intraday Market Pulse refresh.
 
 StockCharts $TRIN/$TRINQ remain the canonical Arms-index definitions. Current
-transport uses machine-readable intraday market-breadth symbols and never
-substitutes an older completed-session value during an intraday refresh.
+transport calculates the same classic Arms formula from intraday NYSE/Nasdaq
+advancing/declining issues and advancing/declining volume. Prior-session values
+are never substituted for an intraday snapshot.
 """
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime, timezone
-from urllib.parse import quote
 
 import pandas as pd
 
 import run_refresh as base
 
 builder = base.builder
+ORIGINAL_MCOSCILLATOR = builder.mcoscillator_current
 
 
-def stockcharts_quote(symbol: str) -> tuple[float, str, str]:
-    encoded = "%24" + symbol.lstrip("$")
-    url = f"https://stockcharts.com/sc3/ui/?s={encoded}"
-    r = builder.requests.get(url, headers=builder.UA, timeout=25)
-    r.raise_for_status()
-    patterns = [
-        r'"lastPrice"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
-        r'"last"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
-    ]
-    for pat in patterns:
-        m = re.search(pat, r.text, re.I)
-        if m:
-            value = float(m.group(1))
-            if 0.02 <= value <= 25:
-                return value, datetime.now(timezone.utc).isoformat(), f"StockCharts {symbol} intraday"
-    raise RuntimeError(f"StockCharts {symbol} interactive shell does not expose quote server-side")
-
-
-def tradingview_quote(symbol: str) -> tuple[float, str, str]:
-    tv_symbol = "USI:TRIN.NY" if symbol == "$TRIN" else "USI:TRIN.NQ"
+def tradingview_components(market: str) -> tuple[float, str, str, dict]:
+    suffix = "NY" if market == "nyse" else "NQ"
+    canonical = "$TRIN" if market == "nyse" else "$TRINQ"
+    symbols = {
+        "adv": f"USI:ADVN.{suffix}",
+        "dec": f"USI:DECL.{suffix}",
+        "upvol": f"USI:UPVOL.{suffix}",
+        "dnvol": f"USI:DNVOL.{suffix}",
+    }
     url = "https://scanner.tradingview.com/america/scan"
     body = {
-        "symbols": {"tickers": [tv_symbol], "query": {"types": []}},
+        "symbols": {"tickers": list(symbols.values()), "query": {"types": []}},
         "columns": ["close", "update_mode"],
     }
     r = builder.requests.post(url, json=body, headers=builder.UA, timeout=20)
     r.raise_for_status()
-    payload = r.json()
-    rows = payload.get("data") or []
-    if not rows or not rows[0].get("d"):
-        raise RuntimeError(f"TradingView {tv_symbol}: no data")
-    value = float(rows[0]["d"][0])
+    rows = r.json().get("data") or []
+    by_symbol = {row.get("s"): row.get("d") for row in rows if row.get("s") and row.get("d")}
+    vals = {}
+    modes = []
+    missing = []
+    for key, sym in symbols.items():
+        data = by_symbol.get(sym)
+        if not data or data[0] is None:
+            missing.append(sym)
+            continue
+        vals[key] = float(data[0])
+        if len(data) > 1 and data[1] is not None:
+            modes.append(str(data[1]))
+    if missing:
+        raise RuntimeError(f"TradingView {market} breadth missing: {', '.join(missing)}; returned={list(by_symbol)}")
+    if min(vals.values()) <= 0:
+        raise RuntimeError(f"TradingView {market} breadth invalid: {vals}")
+    value = (vals["adv"] / vals["dec"]) / (vals["upvol"] / vals["dnvol"])
     if not (0.02 <= value <= 25):
-        raise RuntimeError(f"TradingView {tv_symbol}: invalid value {value}")
-    mode = rows[0]["d"][1] if len(rows[0]["d"]) > 1 else None
-    return value, datetime.now(timezone.utc).isoformat(), f"TradingView {tv_symbol} intraday transport ({mode}); StockCharts {symbol} definition"
-
-
-def yahoo_chart_quote(symbols: list[str], canonical: str) -> tuple[float, str, str]:
-    errors = []
-    now = datetime.now(timezone.utc)
-    for sym in symbols:
-        try:
-            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(sym, safe='')}?interval=1m&range=1d"
-            r = builder.requests.get(url, headers=builder.UA, timeout=20)
-            r.raise_for_status()
-            result = (r.json().get("chart", {}).get("result") or [])[0]
-            meta = result.get("meta", {})
-            value = meta.get("regularMarketPrice")
-            ts = meta.get("regularMarketTime")
-            if value is None or ts is None:
-                errors.append(f"{sym}: missing current price/time")
-                continue
-            asof_dt = datetime.fromtimestamp(int(ts), timezone.utc)
-            age_min = (now - asof_dt).total_seconds() / 60
-            if age_min > 24 * 60:
-                errors.append(f"{sym}: stale by {age_min:.0f}m")
-                continue
-            value = float(value)
-            if not (0.02 <= value <= 25):
-                errors.append(f"{sym}: invalid value {value}")
-                continue
-            return value, asof_dt.isoformat(), f"Yahoo {sym} intraday transport; StockCharts {canonical} definition"
-        except Exception as exc:
-            errors.append(f"{sym}: {exc}")
-    raise RuntimeError("Yahoo Arms quote unavailable: " + " | ".join(errors))
+        raise RuntimeError(f"TradingView {market} Arms invalid: {value} from {vals}")
+    now = datetime.now(timezone.utc).isoformat()
+    mode = ",".join(sorted(set(modes))) if modes else "intraday"
+    source = f"TradingView USI {market.upper()} breadth components ({mode}); StockCharts {canonical} Arms definition"
+    return value, now, source, vals
 
 
 def live_quote(symbol: str) -> tuple[float, str, str]:
-    try:
-        return stockcharts_quote(symbol)
-    except Exception as exc:
-        print(f"{symbol} StockCharts transport warning: {exc}")
-    try:
-        return tradingview_quote(symbol)
-    except Exception as exc:
-        print(f"{symbol} TradingView transport warning: {exc}")
-    candidates = ["C:TRIN", "^TRIN"] if symbol == "$TRIN" else ["C:TRINQ", "^TRINQ", "C:TRIN.NQ"]
-    return yahoo_chart_quote(candidates, symbol)
+    market = "nyse" if symbol == "$TRIN" else "nasdaq"
+    value, asof, source, components = tradingview_components(market)
+    print(f"{symbol} live components: {components}; Arms={value:.4f}")
+    return value, asof, source
 
 
 def live_mcoscillator_current():
@@ -107,9 +75,6 @@ def live_mcoscillator_current():
     data["trin_as_of"] = asof
     data["trin_source"] = source
     return data
-
-
-ORIGINAL_MCOSCILLATOR = builder.mcoscillator_current
 
 
 def live_trinq_value():
@@ -138,7 +103,7 @@ def stamp_live_metadata():
     })
     payload["generated_at"] = now
     payload.setdefault("methodology", {})["live_data"] = (
-        "TRIN and TRINQ use the StockCharts Arms-index definition with machine-readable intraday transport. Prior-session values are not accepted as current substitutes."
+        "TRIN and TRINQ use the StockCharts classic Arms formula calculated from intraday exchange breadth components. Prior-session values are not accepted as current substitutes."
     )
     builder.OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
