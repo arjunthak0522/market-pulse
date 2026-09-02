@@ -175,13 +175,13 @@ def enrich_volatility_family():
     vvix = builder.cboe_series("VVIX")
     skew = builder.cboe_series("SKEW")
     frame = pd.concat({"vix": vix, "vix3m": vix3m, "vvix": vvix, "skew": skew}, axis=1).dropna()
-    frame["term"] = frame.vix / frame.vix3m
+    frame["term"] = frame["vix"] / frame["vix3m"]
     latest = frame.iloc[-1]
 
     term_study = builder.require_study(
         "VIX term structure",
         builder.event_study(
-            frame.term,
+            frame["term"],
             spy,
             high=True,
             title="VIX term-structure stress",
@@ -191,7 +191,7 @@ def enrich_volatility_family():
     vvix_study = builder.require_study(
         "VVIX",
         builder.event_study(
-            frame.vvix,
+            frame["vvix"],
             spy,
             high=True,
             title="VVIX fear-of-fear extremes",
@@ -201,7 +201,7 @@ def enrich_volatility_family():
     skew_study = builder.require_study(
         "SKEW",
         builder.event_study(
-            frame.skew,
+            frame["skew"],
             spy,
             high=True,
             title="SKEW tail-risk extremes",
@@ -210,10 +210,10 @@ def enrich_volatility_family():
     )
 
     vol.update({
-        "term_ratio": round(float(latest.term), 3),
-        "term_percentile_252d": builder.pct_rank(frame.term, float(latest.term)),
-        "vvix_percentile_252d": builder.pct_rank(frame.vvix, float(latest.vvix)),
-        "skew_percentile_252d": builder.pct_rank(frame.skew, float(latest.skew)),
+        "term_ratio": round(float(latest["term"]), 3),
+        "term_percentile_252d": builder.pct_rank(frame["term"], float(latest["term"])),
+        "vvix_percentile_252d": builder.pct_rank(frame["vvix"], float(latest["vvix"])),
+        "skew_percentile_252d": builder.pct_rank(frame["skew"], float(latest["skew"])),
         "term_study": term_study,
         "vvix_study": vvix_study,
         "skew_study": skew_study,
