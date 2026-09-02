@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""Stable runtime adapters for the seven-signal builder.
+"""Buyer-ready runtime adapters for the seven-signal Market Pulse builder.
 
-A versioned public SPY daily dataset is used for historical forward-return
-studies. The legacy Unicorn breadth archive currently presents an expired TLS
-certificate; certificate verification is disabled for that static archive only.
-All live market-data hosts retain normal TLS verification.
-
-The volatility family is intentionally decomposed into three independently
-explainable signals: VIX term structure, VVIX and SKEW. Each receives its own
-historical rank and forward-return study after the core dataset is built.
+Adds:
+- independent historical extreme episodes instead of counting every consecutive day
+- forward return, maximum drawdown, and maximum favorable excursion by horizon
+- three independently explainable volatility studies: term structure, VVIX, SKEW
+- proprietary Market State / Extreme -> Confirmation -> Trigger synthesis
+- a daily What Changed feed based on the prior committed signal snapshot
 """
+from __future__ import annotations
+
 import io
 import json
 import warnings
 from datetime import datetime, timezone
 
+import numpy as np
 import pandas as pd
 import urllib3
 
@@ -101,7 +102,6 @@ def official_nasdaq_daily():
 
 
 def parse_put_call_csv(text):
-    """Parse Cboe put/call CSVs with preambles/header changes across eras."""
     rows = []
     for line in text.splitlines():
         parts = [x.strip().strip('"') for x in line.split(",")]
@@ -163,8 +163,70 @@ def series_skew_column(self):
     return _ORIGINAL_SERIES_SKEW.__get__(self, pd.Series)
 
 
+def _episode_dates(series: pd.Series, mask: pd.Series, min_gap_sessions: int = 5):
+    positions = np.flatnonzero(mask.values)
+    chosen = []
+    last = -10_000
+    for pos in positions:
+        if pos - last >= min_gap_sessions:
+            chosen.append(series.index[pos])
+            last = pos
+    return chosen
+
+
+def episode_event_study(series: pd.Series, spy: pd.Series, *, high: bool, title: str, rule: str, quantile=.90):
+    """Event study using independent episodes and path-risk statistics."""
+    s = pd.to_numeric(series, errors="coerce").dropna().sort_index()
+    s.index = pd.to_datetime(s.index).tz_localize(None)
+    if len(s) < 40:
+        return None
+    threshold = float(s.quantile(quantile if high else 1 - quantile))
+    mask = s >= threshold if high else s <= threshold
+    event_dates = _episode_dates(s, mask, min_gap_sessions=5)
+    if len(event_dates) < 5:
+        return None
+
+    px = pd.to_numeric(spy, errors="coerce").dropna().sort_index()
+    px.index = pd.to_datetime(px.index).tz_localize(None)
+    loc = {d: i for i, d in enumerate(px.index)}
+    horizons = {}
+    usable_dates = []
+
+    for h in builder.HORIZONS:
+        rets, drawdowns, excursions = [], [], []
+        for d in event_dates:
+            i = loc.get(d)
+            if i is None or i + h >= len(px):
+                continue
+            start = float(px.iloc[i])
+            path = px.iloc[i:i + h + 1].astype(float)
+            rets.append(100 * (float(path.iloc[-1]) / start - 1))
+            drawdowns.append(100 * (float(path.min()) / start - 1))
+            excursions.append(100 * (float(path.max()) / start - 1))
+            if h == 21:
+                usable_dates.append(str(d.date()))
+        st = builder.stats(rets)
+        if not st:
+            continue
+        st["median_max_drawdown"] = round(float(np.median(drawdowns)), 3)
+        st["median_max_favorable"] = round(float(np.median(excursions)), 3)
+        horizons[str(h)] = st
+
+    if not horizons:
+        return None
+    return {
+        "title": title,
+        "rule": rule,
+        "threshold": round(threshold, 4),
+        "direction": "high" if high else "low",
+        "historical_sample": len(event_dates),
+        "episode_method": "Independent episodes separated by at least 5 signal sessions.",
+        "horizons": horizons,
+        "prior_dates": usable_dates[-12:][::-1],
+    }
+
+
 def enrich_volatility_family():
-    """Attach separate ranks and studies for term structure, VVIX and SKEW."""
     out = builder.OUT
     payload = json.loads(out.read_text())
     vol = payload["signals"]["vol"]
@@ -180,30 +242,24 @@ def enrich_volatility_family():
 
     term_study = builder.require_study(
         "VIX term structure",
-        builder.event_study(
-            frame["term"],
-            spy,
-            high=True,
+        episode_event_study(
+            frame["term"], spy, high=True,
             title="VIX term-structure stress",
             rule="VIX/VIX3M ratio in the top decile of history. Higher ratios mean near-term fear is unusually urgent; readings above 1.00 indicate inversion.",
         ),
     )
     vvix_study = builder.require_study(
         "VVIX",
-        builder.event_study(
-            frame["vvix"],
-            spy,
-            high=True,
+        episode_event_study(
+            frame["vvix"], spy, high=True,
             title="VVIX fear-of-fear extremes",
             rule="VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
         ),
     )
     skew_study = builder.require_study(
         "SKEW",
-        builder.event_study(
-            frame["skew"],
-            spy,
-            high=True,
+        episode_event_study(
+            frame["skew"], spy, high=True,
             title="SKEW tail-risk extremes",
             rule="Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
         ),
@@ -219,18 +275,183 @@ def enrich_volatility_family():
         "skew_study": skew_study,
     })
     payload["methodology"]["volatility_family"] = (
-        "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. "
-        "Raw VIX is supporting context only."
+        "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. Raw VIX is supporting context only."
     )
     out.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
 
+def _pct(row, key="percentile_252d", default=50.0):
+    try:
+        return float(row.get(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def derive_market_state(payload, previous):
+    s = payload["signals"]
+    cpce = _pct(s["cpce"])
+    vol = s["vol"]
+    vol_peak = max(_pct(vol, "term_percentile_252d"), _pct(vol, "vvix_percentile_252d"), _pct(vol, "skew_percentile_252d"))
+    nymo = _pct(s["nymo"])
+    namo = _pct(s["namo"])
+    breadth = _pct(s["breadth"])
+    newlows = _pct(s["newlows"])
+    trin = _pct(s["trin"])
+    trinq = _pct(s["trinq"])
+
+    fear_score = max(cpce, vol_peak)
+    breadth_stress = max(100 - nymo, 100 - namo, 100 - breadth, newlows)
+    capitulation_score = max(trin, trinq)
+
+    if fear_score >= 90:
+        fear_label = "Extreme"
+    elif fear_score >= 75:
+        fear_label = "Elevated"
+    else:
+        fear_label = "Contained"
+
+    if breadth_stress >= 97.5:
+        internals_label = "Severe washout"
+    elif breadth_stress >= 90:
+        internals_label = "Washout"
+    elif breadth_stress >= 75:
+        internals_label = "Weak"
+    else:
+        internals_label = "Healthy"
+
+    if capitulation_score >= 90:
+        capitulation_label = "Confirmed"
+    elif capitulation_score >= 75:
+        capitulation_label = "Building"
+    else:
+        capitulation_label = "Not confirmed"
+
+    extreme = breadth_stress >= 90 or fear_score >= 90 or capitulation_score >= 90
+    confirmation = sum([
+        breadth_stress >= 90,
+        fear_score >= 75,
+        newlows >= 75,
+        capitulation_score >= 75,
+    ]) >= 2
+
+    prev_signals = (previous or {}).get("signals", {})
+    prev_nymo = _pct(prev_signals.get("nymo", {})) if prev_signals else None
+    prev_breadth = _pct(prev_signals.get("breadth", {})) if prev_signals else None
+    trigger = False
+    if prev_nymo is not None and prev_breadth is not None:
+        trigger = (nymo > prev_nymo + 5) and (breadth > prev_breadth + 5)
+
+    if breadth_stress >= 97.5 and not trigger:
+        state = "Breadth Washout"
+        summary = "Market internals are severely stretched, but a reversal trigger has not been confirmed yet."
+    elif breadth_stress >= 90 and trigger:
+        state = "Reversal Setup"
+        summary = "Breadth reached a washout and has begun to recover, creating a potential reversal setup."
+    elif capitulation_score >= 90:
+        state = "Capitulation"
+        summary = "Selling pressure has reached panic-like levels across price and volume breadth."
+    elif fear_score >= 90 and breadth_stress < 75:
+        state = "Fear Extreme"
+        summary = "Options markets are unusually defensive, but broad market internals have not broken down."
+    elif breadth_stress >= 75:
+        state = "Early Stress"
+        summary = "Participation is deteriorating beneath the indexes, but the market has not reached a full washout."
+    elif min(nymo, namo, breadth) >= 75:
+        state = "Breadth Thrust"
+        summary = "Participation and breadth momentum are unusually strong across the market."
+    else:
+        state = "Healthy Trend"
+        summary = "No major internal stress regime is dominating the market right now."
+
+    payload["market_state"] = {
+        "name": state,
+        "summary": summary,
+        "dimensions": {
+            "fear": {"label": fear_label, "score": round(fear_score, 1)},
+            "internals": {"label": internals_label, "score": round(breadth_stress, 1)},
+            "capitulation": {"label": capitulation_label, "score": round(capitulation_score, 1)},
+        },
+        "setup": {
+            "extreme": {"confirmed": bool(extreme), "copy": "A historically unusual condition is present." if extreme else "No major historical extreme is present."},
+            "confirmation": {"confirmed": bool(confirmation), "copy": "Independent signal families agree." if confirmation else "Independent confirmation is still limited."},
+            "trigger": {"confirmed": bool(trigger), "copy": "Breadth momentum has started to recover." if trigger else "A reversal trigger is not confirmed yet."},
+        },
+    }
+
+
+def _primary_value(key, row):
+    if key == "breadth":
+        return row.get("above_5d")
+    if key == "vol":
+        return row.get("term_ratio")
+    return row.get("value")
+
+
+def derive_changes(payload, previous):
+    labels = {
+        "cpce": "Options fear",
+        "namo": "Nasdaq breadth",
+        "nymo": "NYSE breadth",
+        "trin": "NYSE selling pressure",
+        "trinq": "Nasdaq selling pressure",
+        "newlows": "New-low pressure",
+        "breadth": "Short-term participation",
+        "vol": "Volatility term structure",
+    }
+    changes = []
+    prior = (previous or {}).get("signals", {})
+    for key, row in payload["signals"].items():
+        if key not in prior:
+            continue
+        cur = _primary_value(key, row)
+        old = _primary_value(key, prior[key])
+        try:
+            cur_f, old_f = float(cur), float(old)
+        except (TypeError, ValueError):
+            continue
+        delta = cur_f - old_f
+        if abs(delta) < (0.01 if key in {"cpce", "trin", "trinq", "vol"} else 1.0):
+            continue
+        direction = "rose" if delta > 0 else "fell"
+        if key == "breadth":
+            copy = f"{labels[key]} {direction} from {old_f:.0f}% to {cur_f:.0f}% above the 5-day trend."
+        elif key == "vol":
+            copy = f"{labels[key]} {direction} from {old_f:.2f} to {cur_f:.2f}."
+        else:
+            copy = f"{labels[key]} {direction} from {old_f:.2f} to {cur_f:.2f}."
+        changes.append({"signal": key, "headline": labels[key], "detail": copy, "magnitude": round(abs(delta), 3)})
+    changes.sort(key=lambda x: x["magnitude"], reverse=True)
+    if not changes:
+        changes = [{"signal": "market", "headline": "No major state change", "detail": "The core signal set is broadly unchanged from the prior completed snapshot.", "magnitude": 0}]
+    payload["what_changed"] = changes[:3]
+
+
+def finalize_product_layer(previous):
+    payload = json.loads(builder.OUT.read_text())
+    derive_market_state(payload, previous)
+    derive_changes(payload, previous)
+    payload["methodology"]["event_studies"] = (
+        "Historical studies use independent extreme episodes separated by at least five signal sessions and report forward return, median maximum drawdown, and median maximum favorable excursion."
+    )
+    builder.OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+
+
 if __name__ == "__main__":
+    previous_payload = None
+    if builder.OUT.exists():
+        try:
+            previous_payload = json.loads(builder.OUT.read_text())
+        except Exception:
+            previous_payload = None
+
     builder.spy_history = github_spy_history
     builder.get = source_get
     builder.read_unicorn_series = archive_series
     builder.nasdaq_daily = official_nasdaq_daily
     builder.local_frames = long_history_frames
+    builder.event_study = episode_event_study
     pd.Series.skew = property(series_skew_column)
+
     builder.main()
     enrich_volatility_family()
+    finalize_product_layer(previous_payload)
