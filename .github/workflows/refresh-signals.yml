@@ -30,7 +30,9 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Build all seven current signals and studies
-        run: python scripts/update_extremes.py
+        run: |
+          set -o pipefail
+          python -u scripts/update_extremes.py 2>&1 | tee refresh.log
       - name: Hard data contract
         run: |
           python - <<'PY'
@@ -47,6 +49,14 @@ jobs:
               assert any(int(v.get('n',0)) >= 5 for v in study['horizons'].values()), f'{name}: thin study'
           print('all seven families have current data and studies')
           PY
+      - name: Upload refresh diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seven-signal-refresh-log
+          path: refresh.log
+          retention-days: 3
+          if-no-files-found: ignore
       - name: Commit refreshed static dataset
         run: |
           git config user.name github-actions[bot]
