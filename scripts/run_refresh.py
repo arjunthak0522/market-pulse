@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""Stable benchmark-price adapter for the seven-signal builder.
+"""Stable runtime adapters for the seven-signal builder.
 
 A versioned public SPY daily dataset is used for historical forward-return
-studies. Keeping the study benchmark on GitHub avoids browser gates and rate
-limits in unattended Actions runs. Individual signal readings retain their own
-listed market-data sources.
+studies. The legacy Unicorn breadth archive currently presents an expired TLS
+certificate; certificate verification is disabled for that static archive only.
+All live market-data hosts retain normal TLS verification.
 """
 import io
+import warnings
 
 import pandas as pd
+import urllib3
 
 import update_extremes as builder
+
+_ORIGINAL_GET = builder.get
 
 
 def github_spy_history():
@@ -33,6 +37,18 @@ def github_spy_history():
     return s[~s.index.duplicated(keep="last")]
 
 
+def source_get(url, timeout=30):
+    if "unicorn.us.com" not in url:
+        return _ORIGINAL_GET(url, timeout=timeout)
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        r = builder.requests.get(url, headers=builder.UA, timeout=timeout, verify=False)
+    r.raise_for_status()
+    return r
+
+
 if __name__ == "__main__":
     builder.spy_history = github_spy_history
+    builder.get = source_get
     builder.main()
