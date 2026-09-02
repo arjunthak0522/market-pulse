@@ -19,7 +19,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
-import yfinance as yf
 from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,13 +107,16 @@ def get(url, timeout=30):
 
 
 def spy_history():
-    df = yf.download("SPY", start="1990-01-01", auto_adjust=True, progress=False, threads=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    if df.empty:
-        raise RuntimeError("SPY history unavailable")
-    s = df["Close"].astype(float)
-    s.index = pd.to_datetime(s.index).tz_localize(None)
+    """Adjusted-like SPY close history from Stooq; avoids Yahoo crumb instability."""
+    url = "https://stooq.com/q/d/l/?s=spy.us&i=d&d1=19930129"
+    df = pd.read_csv(io.BytesIO(get(url, timeout=45).content))
+    cols = {str(c).strip().lower(): c for c in df.columns}
+    if "date" not in cols or "close" not in cols:
+        raise RuntimeError(f"Stooq SPY columns not recognized: {list(df.columns)}")
+    s = pd.Series(pd.to_numeric(df[cols["close"]], errors="coerce").values,
+                  index=pd.to_datetime(df[cols["date"]], errors="coerce")).dropna().sort_index()
+    if len(s) < 1000:
+        raise RuntimeError("Stooq SPY history too short")
     return s
 
 
@@ -133,7 +135,6 @@ def cboe_series(symbol):
 
 
 def parse_cboe_equity_pc():
-    """Current Cboe equity put/call ratio from the daily statistics page."""
     text = get("https://www.cboe.com/markets/us/options/market-statistics/daily/").text
     soup = BeautifulSoup(text, "html.parser")
     clean = " ".join(soup.stripped_strings)
@@ -146,20 +147,18 @@ def parse_cboe_equity_pc():
 def nasdaq_daily():
     year = datetime.now(timezone.utc).year
     url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.csv"
-    raw = get(url).content
-    df = pd.read_csv(io.BytesIO(raw))
+    df = pd.read_csv(io.BytesIO(get(url).content))
     cols = {str(c).strip().lower(): c for c in df.columns}
     date_col = next((c for k, c in cols.items() if "date" in k), None)
     adv_col = next((c for k, c in cols.items() if "advance" in k and "nasdaq" in k), None)
     dec_col = next((c for k, c in cols.items() if "decline" in k and "nasdaq" in k), None)
     if date_col is None or adv_col is None or dec_col is None:
         raise RuntimeError(f"Nasdaq daily file columns not recognized: {list(df.columns)}")
-    out = pd.DataFrame({
+    return pd.DataFrame({
         "date": pd.to_datetime(df[date_col], errors="coerce"),
         "adv": pd.to_numeric(df[adv_col], errors="coerce"),
         "dec": pd.to_numeric(df[dec_col], errors="coerce"),
     }).dropna().set_index("date").sort_index()
-    return out
 
 
 def mcoscillator_current():
@@ -170,15 +169,9 @@ def mcoscillator_current():
     if not date_m:
         raise RuntimeError("McOscillator date missing")
     as_of = pd.to_datetime(date_m.group(1)).strftime("%Y-%m-%d")
-    def first(pattern):
-        m = re.search(pattern, clean, re.I)
-        return float(m.group(1).replace(",", "")) if m else None
-    # HTML order is label, issue count, volume count.
-    adv = first(r"Advances\s+([0-9,]+)")
-    dec = first(r"Declines\s+([0-9,]+)")
-    osc = first(r"McC OSC\s+(-?[0-9,.]+)")
-    # Pull volume from table rows directly to avoid matching the issue count twice.
-    adv_vol = dec_vol = None
+    osc_m = re.search(r"McC OSC\s+(-?[0-9,.]+)", clean, re.I)
+    osc = float(osc_m.group(1).replace(",", "")) if osc_m else None
+    adv = dec = adv_vol = dec_vol = None
     for tr in soup.find_all("tr"):
         cells = [" ".join(td.stripped_strings) for td in tr.find_all(["td", "th"])]
         if not cells:
@@ -191,9 +184,7 @@ def mcoscillator_current():
             dec, dec_vol = float(nums[0]), float(nums[-1])
     if None in (adv, dec, osc):
         raise RuntimeError("McOscillator current breadth parse incomplete")
-    trin = None
-    if adv_vol and dec_vol and dec and adv:
-        trin = (adv / dec) / (adv_vol / dec_vol)
+    trin = (adv / dec) / (adv_vol / dec_vol) if adv_vol and dec_vol else None
     return {"as_of": as_of, "adv": adv, "dec": dec, "adv_vol": adv_vol,
             "dec_vol": dec_vol, "nymo": osc, "trin": trin}
 
@@ -210,14 +201,11 @@ def barchart_trinq():
 
 def mcclellan_from_ad(df):
     rana = 1000 * (df["adv"] - df["dec"]) / (df["adv"] + df["dec"])
-    e10 = rana.ewm(alpha=.10, adjust=False).mean()
-    e5 = rana.ewm(alpha=.05, adjust=False).mean()
-    return e10 - e5
+    return rana.ewm(alpha=.10, adjust=False).mean() - rana.ewm(alpha=.05, adjust=False).mean()
 
 
 def discover_unicorn_series():
-    """Discover the 8 NYSE/Nasdaq CSV series links from Unicorn's historical table."""
-    soup = BeautifulSoup(get("https://unicorn.us.com/advdec/").text, "html.parser")
+    soup = BeautifulSoup(get("https://unicorn.us.com/advdec/", timeout=45).text, "html.parser")
     result = {}
     names = ["adv", "dec", "unch", "adv_vol", "dec_vol", "unch_vol", "new_highs", "new_lows"]
     for tr in soup.find_all("tr"):
@@ -225,11 +213,8 @@ def discover_unicorn_series():
         market = "nyse" if txt.startswith("nyse") else "nasdaq" if txt.startswith("nasdaq") else None
         if not market:
             continue
-        csvs = []
-        for a in tr.find_all("a", href=True):
-            href = a["href"]
-            if href.lower().endswith(".csv"):
-                csvs.append(requests.compat.urljoin("https://unicorn.us.com/advdec/", href))
+        csvs = [requests.compat.urljoin("https://unicorn.us.com/advdec/", a["href"])
+                for a in tr.find_all("a", href=True) if a["href"].lower().endswith(".csv")]
         if len(csvs) >= 8:
             result[market] = dict(zip(names, csvs[:8]))
     if not result:
@@ -238,42 +223,30 @@ def discover_unicorn_series():
 
 
 def read_unicorn_series(url):
-    # files are simple date,value CSVs but tolerate headers and alternate separators
-    raw = get(url).text
-    df = pd.read_csv(io.StringIO(raw), header=None, comment="#")
+    df = pd.read_csv(io.StringIO(get(url, timeout=45).text), header=None, comment="#")
     if df.shape[1] < 2:
         raise RuntimeError(f"Unicorn series invalid: {url}")
-    dates = pd.to_datetime(df.iloc[:, 0], errors="coerce")
-    vals = pd.to_numeric(df.iloc[:, -1], errors="coerce")
-    s = pd.Series(vals.values, index=dates).dropna().sort_index()
-    s = s[~s.index.duplicated(keep="last")]
-    return s
+    s = pd.Series(pd.to_numeric(df.iloc[:, -1], errors="coerce").values,
+                  index=pd.to_datetime(df.iloc[:, 0], errors="coerce")).dropna().sort_index()
+    return s[~s.index.duplicated(keep="last")]
 
 
-def unicorn_market(market):
-    links = discover_unicorn_series()[market]
-    cols = {k: read_unicorn_series(v) for k, v in links.items()}
-    df = pd.concat(cols, axis=1).dropna(subset=["adv", "dec"])
-    return df
+def unicorn_market(market, links):
+    cols = {k: read_unicorn_series(v) for k, v in links[market].items()}
+    return pd.concat(cols, axis=1).dropna(subset=["adv", "dec"])
 
 
-def local_frames(ctx, hist):
-    br = pd.DataFrame(hist.get("breadth", []))
-    if not br.empty:
-        br["date"] = pd.to_datetime(br["date"])
-        br = br.set_index("date").sort_index()
-    market = pd.DataFrame(hist.get("market", []))
-    if not market.empty:
-        market["date"] = pd.to_datetime(market["date"])
-        market = market.set_index("date").sort_index()
-    pc = pd.DataFrame(hist.get("put_call", []))
-    if not pc.empty:
-        pc["date"] = pd.to_datetime(pc["date"])
-        pc = pc.set_index("date").sort_index()
-    return br, market, pc
+def local_frames(hist):
+    def frame(key):
+        df = pd.DataFrame(hist.get(key, []))
+        if df.empty or "date" not in df:
+            return pd.DataFrame()
+        df["date"] = pd.to_datetime(df["date"])
+        return df.set_index("date").sort_index()
+    return frame("breadth"), frame("market"), frame("put_call")
 
 
-def study_or_raise(name, study):
+def require_study(name, study):
     if not study:
         raise RuntimeError(f"{name}: historical study unavailable")
     return study
@@ -282,13 +255,12 @@ def study_or_raise(name, study):
 def main():
     ctx = json.loads(CONTEXT.read_text())
     hist = json.loads(HISTORY.read_text())
-    br, market, pc_local = local_frames(ctx, hist)
+    br, market, pc_local = local_frames(hist)
     spy = spy_history()
 
-    # Long exchange breadth archive for precedent. It stops in 2020, which is fine
-    # for historical event distributions; current readings come from live sources.
-    nyse_hist = unicorn_market("nyse")
-    nas_hist = unicorn_market("nasdaq")
+    links = discover_unicorn_series()
+    nyse_hist = unicorn_market("nyse", links)
+    nas_hist = unicorn_market("nasdaq", links)
     nymo_hist = mcclellan_from_ad(nyse_hist)
     namo_hist = mcclellan_from_ad(nas_hist)
     nyse_trin_hist = (nyse_hist.adv / nyse_hist.dec) / (nyse_hist.adv_vol / nyse_hist.dec_vol)
@@ -305,18 +277,12 @@ def main():
     trinq = barchart_trinq()
 
     cpce = parse_cboe_equity_pc()
-    # Guaranteed local CPCE precedent today; extended Cboe archive can be layered in
-    # later without changing the study contract.
     if pc_local.empty or "value" not in pc_local:
         raise RuntimeError("CPCE local history missing")
     cpce_hist = pd.to_numeric(pc_local.value, errors="coerce").dropna()
 
-    vix = cboe_series("VIX")
-    vix3m = cboe_series("VIX3M")
-    vvix = cboe_series("VVIX")
-    skew = cboe_series("SKEW")
+    vix, vix3m, vvix, skew = (cboe_series(x) for x in ("VIX", "VIX3M", "VVIX", "SKEW"))
     vr = pd.concat({"vix": vix, "vix3m": vix3m, "vvix": vvix, "skew": skew}, axis=1).dropna()
-    # Stress composite: high VIX/VVIX/SKEW percentiles plus term inversion.
     for c in ("vix", "vvix", "skew"):
         vr[c + "_pct"] = vr[c].rolling(252, min_periods=60).rank(pct=True) * 100
     vr["term"] = vr.vix / vr.vix3m
@@ -328,56 +294,46 @@ def main():
     newlow_pct_current = 100 * new_lows_current / issues if new_lows_current is not None and issues else None
 
     studies = {
-        "cpce": study_or_raise("CPCE", event_study(cpce_hist, spy, high=True, title="Equity put/call fear extremes", rule="Equity put/call ratio in the top decile of available history.")),
-        "namo": study_or_raise("NAMO", event_study(namo_hist, spy, high=False, title="Nasdaq McClellan washouts", rule="Ratio-adjusted Nasdaq McClellan Oscillator in the bottom decile of historical readings.")),
-        "nymo": study_or_raise("NYMO", event_study(nymo_hist, spy, high=False, title="NYSE McClellan washouts", rule="Ratio-adjusted NYSE McClellan Oscillator in the bottom decile of historical readings.")),
-        "trin": study_or_raise("TRIN", event_study(nyse_trin_hist, spy, high=True, title="NYSE TRIN capitulation extremes", rule="NYSE Arms Index in the top decile of historical readings.")),
-        "trinq": study_or_raise("TRINQ", event_study(nas_trin_hist, spy, high=True, title="Nasdaq TRINQ capitulation extremes", rule="Nasdaq Arms Index in the top decile of historical readings.")),
-        "newlows": study_or_raise("New lows", event_study(nhnl_pressure, spy, high=True, title="52-week new-low pressure extremes", rule="NYSE new 52-week lows as a share of active issues in the top decile of historical readings.")),
-        "breadth": study_or_raise("Breadth", event_study(breadth_series, spy, high=False, title="Short-term breadth washouts", rule="S&P 500 5-day participation in the bottom decile of recorded Market Pulse history.")),
-        "vol": study_or_raise("Volatility", event_study(vr.stress.dropna(), spy, high=True, title="Volatility stress-cluster extremes", rule="Combined VIX, VVIX, SKEW and term-structure stress score in the top decile of history.")),
+        "cpce": require_study("CPCE", event_study(cpce_hist, spy, high=True, title="Equity put/call fear extremes", rule="Equity put/call ratio in the top decile of available history.")),
+        "namo": require_study("NAMO", event_study(namo_hist, spy, high=False, title="Nasdaq McClellan washouts", rule="Ratio-adjusted Nasdaq McClellan Oscillator in the bottom decile of historical readings.")),
+        "nymo": require_study("NYMO", event_study(nymo_hist, spy, high=False, title="NYSE McClellan washouts", rule="Ratio-adjusted NYSE McClellan Oscillator in the bottom decile of historical readings.")),
+        "trin": require_study("TRIN", event_study(nyse_trin_hist, spy, high=True, title="NYSE TRIN capitulation extremes", rule="NYSE Arms Index in the top decile of historical readings.")),
+        "trinq": require_study("TRINQ", event_study(nas_trin_hist, spy, high=True, title="Nasdaq TRINQ capitulation extremes", rule="Nasdaq Arms Index in the top decile of historical readings.")),
+        "newlows": require_study("New lows", event_study(nhnl_pressure, spy, high=True, title="52-week new-low pressure extremes", rule="NYSE new 52-week lows as a share of active issues in the top decile of historical readings.")),
+        "breadth": require_study("Breadth", event_study(breadth_series, spy, high=False, title="Short-term breadth washouts", rule="S&P 500 5-day participation in the bottom decile of recorded Market Pulse history.")),
+        "vol": require_study("Volatility", event_study(vr.stress.dropna(), spy, high=True, title="Volatility stress-cluster extremes", rule="Combined VIX, VVIX, SKEW and term-structure stress score in the top decile of history.")),
     }
 
-    cpce5 = float(cpce_hist.tail(4).sum() + cpce) / min(5, len(cpce_hist.tail(4)) + 1)
-    cpce_pct = pct_rank(cpce_hist, cpce)
-    namo_pct = pct_rank(namo_hist, namo)
-    nymo_pct = pct_rank(nymo_hist, nymo)
-    trin_pct = pct_rank(nyse_trin_hist, trin)
-    trinq_pct = pct_rank(nas_trin_hist, trinq)
-    newlow_pct_rank = pct_rank(nhnl_pressure, newlow_pct_current)
-    breadth_pct = pct_rank(breadth_series, safe(ctx.get("breadth", {}).get("above_5d")))
+    cpce_tail = cpce_hist.tail(4)
+    cpce5 = float((cpce_tail.sum() + cpce) / (len(cpce_tail) + 1))
     latest_vr = vr.iloc[-1]
-
     signals = {
-        "cpce": {"value": round(cpce, 3), "average_5d": round(cpce5, 3), "percentile_252d": cpce_pct, "as_of": ctx.get("market_date"), "source": "Cboe Daily Market Statistics", "study": studies["cpce"]},
-        "namo": {"value": round(namo, 2), "percentile_252d": namo_pct, "as_of": nas_asof, "source": "Nasdaq Trader advances/declines; ratio-adjusted McClellan calculation", "study": studies["namo"]},
-        "nymo": {"value": round(nymo, 2), "percentile_252d": nymo_pct, "as_of": ny_live["as_of"], "source": "McClellan Financial final NYSE breadth", "study": studies["nymo"]},
-        "trin": {"value": None if trin is None else round(trin, 3), "percentile_252d": trin_pct, "as_of": ny_live["as_of"], "source": "McClellan Financial NYSE issues and volume; Arms formula", "study": studies["trin"]},
-        "trinq": {"value": round(trinq, 3), "percentile_252d": trinq_pct, "as_of": nas_asof, "source": "Barchart $TRIQ current; Unicorn Nasdaq breadth history", "study": studies["trinq"]},
-        "newlows": {"value": new_lows_current, "new_highs": safe(ctx.get("breadth", {}).get("new_highs_52w")), "new_low_pct": None if newlow_pct_current is None else round(newlow_pct_current, 2), "percentile_252d": newlow_pct_rank, "as_of": ctx.get("market_date"), "source": "S&P 500 constituent highs/lows; NYSE archive for precedent", "study": studies["newlows"]},
-        "breadth": {"above_5d": safe(ctx.get("breadth", {}).get("above_5d")), "above_20d": safe(ctx.get("breadth", {}).get("above_20d")), "above_50d": safe(ctx.get("breadth", {}).get("above_50d")), "above_200d": safe(ctx.get("breadth", {}).get("above_200d")), "percentile_252d": breadth_pct, "as_of": ctx.get("market_date"), "source": ctx.get("breadth", {}).get("source", "S&P 500 constituent breadth"), "study": studies["breadth"]},
+        "cpce": {"value": round(cpce, 3), "average_5d": round(cpce5, 3), "percentile_252d": pct_rank(cpce_hist, cpce), "as_of": ctx.get("market_date"), "source": "Cboe Daily Market Statistics", "study": studies["cpce"]},
+        "namo": {"value": round(namo, 2), "percentile_252d": pct_rank(namo_hist, namo), "as_of": nas_asof, "source": "Nasdaq Trader advances/declines; ratio-adjusted McClellan calculation", "study": studies["namo"]},
+        "nymo": {"value": round(nymo, 2), "percentile_252d": pct_rank(nymo_hist, nymo), "as_of": ny_live["as_of"], "source": "McClellan Financial final NYSE breadth", "study": studies["nymo"]},
+        "trin": {"value": None if trin is None else round(trin, 3), "percentile_252d": pct_rank(nyse_trin_hist, trin), "as_of": ny_live["as_of"], "source": "McClellan Financial NYSE issues and volume; Arms formula", "study": studies["trin"]},
+        "trinq": {"value": round(trinq, 3), "percentile_252d": pct_rank(nas_trin_hist, trinq), "as_of": nas_asof, "source": "Barchart $TRIQ current; Unicorn Nasdaq breadth history", "study": studies["trinq"]},
+        "newlows": {"value": new_lows_current, "new_highs": safe(ctx.get("breadth", {}).get("new_highs_52w")), "new_low_pct": None if newlow_pct_current is None else round(newlow_pct_current, 2), "percentile_252d": pct_rank(nhnl_pressure, newlow_pct_current), "as_of": ctx.get("market_date"), "source": "S&P 500 constituent highs/lows; NYSE archive for precedent", "study": studies["newlows"]},
+        "breadth": {"above_5d": safe(ctx.get("breadth", {}).get("above_5d")), "above_20d": safe(ctx.get("breadth", {}).get("above_20d")), "above_50d": safe(ctx.get("breadth", {}).get("above_50d")), "above_200d": safe(ctx.get("breadth", {}).get("above_200d")), "percentile_252d": pct_rank(breadth_series, safe(ctx.get("breadth", {}).get("above_5d"))), "as_of": ctx.get("market_date"), "source": ctx.get("breadth", {}).get("source", "S&P 500 constituent breadth"), "study": studies["breadth"]},
         "vol": {"vix": round(float(latest_vr.vix), 2), "vix3m": round(float(latest_vr.vix3m), 2), "term_ratio": round(float(latest_vr.term), 3), "vvix": round(float(latest_vr.vvix), 2), "skew": round(float(latest_vr.skew), 2), "stress_score": round(float(latest_vr.stress), 1), "percentile_252d": pct_rank(vr.stress, float(latest_vr.stress)), "as_of": str(vr.index[-1].date()), "source": "Cboe Global Indices daily history", "study": studies["vol"]},
     }
-
     for key, row in signals.items():
         primary = row.get("value", row.get("above_5d", row.get("vix")))
-        if primary is None:
-            raise RuntimeError(f"{key}: current value missing")
-        if not row.get("study"):
-            raise RuntimeError(f"{key}: study missing")
+        if primary is None or not row.get("study"):
+            raise RuntimeError(f"{key}: incomplete current/study contract")
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "market_date": ctx.get("market_date"),
         "methodology": {
             "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
-            "breadth_archive": "Unicorn historical breadth archive is used for long-run NYSE/Nasdaq precedent; its live feed ended in 2020. Current readings come from current sources listed per signal.",
-            "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, equivalent to 19/39-day convention.",
+            "breadth_archive": "Unicorn historical breadth archive supplies long-run NYSE/Nasdaq precedent; current readings use the current sources listed per signal.",
+            "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention.",
         },
         "signals": signals,
     }
     OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
-    print(json.dumps({k: {x: v for x, v in row.items() if x != "study"} for k, row in signals.items()}, indent=2))
+    print("built", ", ".join(signals))
 
 
 if __name__ == "__main__":
