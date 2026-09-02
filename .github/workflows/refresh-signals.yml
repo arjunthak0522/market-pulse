@@ -1,0 +1,57 @@
+name: Refresh seven signals
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [signal-quality-review]
+    paths:
+      - 'scripts/update_extremes.py'
+      - 'requirements.txt'
+      - '.github/workflows/refresh-signals.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-seven-signals
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: signal-quality-review
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Build all seven current signals and studies
+        run: python scripts/update_extremes.py
+      - name: Hard data contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('data/signal_data.json').read_text())
+          required={'cpce','namo','nymo','trin','trinq','newlows','breadth','vol'}
+          assert required == set(p['signals']), (required, set(p['signals']))
+          for name,row in p['signals'].items():
+              primary=row.get('value', row.get('above_5d', row.get('vix')))
+              assert primary is not None, f'{name}: no current value'
+              study=row.get('study')
+              assert study and study.get('horizons'), f'{name}: no study'
+              assert any(int(v.get('n',0)) >= 5 for v in study['horizons'].values()), f'{name}: thin study'
+          print('all seven families have current data and studies')
+          PY
+      - name: Commit refreshed static dataset
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/signal_data.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Refresh seven-signal dataset'
+          git push origin HEAD:signal-quality-review
