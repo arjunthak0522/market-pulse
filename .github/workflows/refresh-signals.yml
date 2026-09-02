@@ -4,8 +4,6 @@ name: Refresh seven signals
 on:
   workflow_dispatch:
   schedule:
-    # Weekday intraday refresh window. GitHub cron is UTC; this intentionally
-    # covers the full US cash session plus surrounding time across DST shifts.
     - cron: '*/5 13-21 * * 1-5'
   push:
     branches: [signal-quality-review]
@@ -13,6 +11,7 @@ on:
       - 'scripts/update_extremes.py'
       - 'scripts/run_refresh.py'
       - 'scripts/live_refresh.py'
+      - 'scripts/trace_stockcharts.py'
       - 'requirements.txt'
       - '.github/workflows/refresh-signals.yml'
 
@@ -36,6 +35,10 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Trace StockCharts quote transport
+        continue-on-error: true
+        run: |
+          python -u scripts/trace_stockcharts.py > trace-stockcharts.log 2>&1
       - name: Build intraday market state and studies
         run: |
           set -o pipefail
@@ -90,6 +93,7 @@ jobs:
         with:
           name: seven-signal-refresh-diagnostic
           path: |
+            trace-stockcharts.log
             refresh.log
             contract.log
             data/signal_data.json
