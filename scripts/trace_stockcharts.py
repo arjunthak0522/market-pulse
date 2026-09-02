@@ -1,32 +1,18 @@
 #!/usr/bin/env python3
-import re
-from urllib.parse import urljoin
+import time
 import requests
 
-UA={"User-Agent":"Mozilla/5.0"}
-page="https://stockcharts.com/sc3/ui/?s=%24TRIN"
-r=requests.get(page,headers=UA,timeout=30)
-r.raise_for_status()
-print("PAGE",r.status_code,len(r.text),r.url)
-scripts=re.findall(r'<script[^>]+src=["\']([^"\']+)',r.text,re.I)
-print("SCRIPTS",scripts)
-for src in scripts:
-    url=urljoin(r.url,src)
+UA={"User-Agent":"Mozilla/5.0","Accept":"application/json,text/plain,*/*","Referer":"https://stockcharts.com/"}
+url="https://stockcharts.com/quotebrain/quotes"
+symbols=[
+    "$TRIN","$TRINQ","$CPCE","$NAMO","$NYMO",
+    "$NYHGH","$NYLOW","$NAHGH","$NALOW",
+    "$SPXA20R","$SPXA50R","$SPXA200R",
+    "$VIX","$VIX3M","$VVIX","$SKEW",
+]
+for symbol in symbols:
     try:
-        x=requests.get(url,headers=UA,timeout=30)
-        print("SCRIPT",url,x.status_code,len(x.text))
-        text=x.text
-        needles=["quotebrain/quotes","quotebrain/pastdata","quotebrain/ismarketopen"]
-        for needle in needles:
-            start=0
-            while True:
-                i=text.find(needle,start)
-                if i<0: break
-                lo=max(0,i-1800); hi=min(len(text),i+2200)
-                print("CONTEXT",needle,text[lo:hi])
-                start=i+len(needle)
-        for pat in [r'new URLSearchParams\([^;]{0,1000}',r'URLSearchParams\([^;]{0,1000}',r'quotebrain[^`"\']{0,500}']:
-            for hit in re.findall(pat,text,re.I)[:50]:
-                print("PARAM_HIT",hit[:1200])
+        r=requests.get(url,params={"s":symbol,"f":"json","randomNumber":str(int(time.time()*1000))},headers=UA,timeout=20)
+        print("SYMBOL",symbol,"HTTP",r.status_code,"TEXT",r.text[:1200])
     except Exception as exc:
-        print("SCRIPT_ERROR",url,exc)
+        print("ERROR",symbol,repr(exc))
