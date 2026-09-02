@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T19:37:27.357365+00:00",
+  "generated_at": "2026-09-02T19:41:58.689040+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -805,10 +805,10 @@
   },
   "what_changed": [
     {
-      "signal": "trinq",
-      "headline": "Nasdaq selling pressure",
-      "detail": "Nasdaq selling pressure fell from 0.63 to 0.61.",
-      "magnitude": 0.02
+      "signal": "market",
+      "headline": "No major state change",
+      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
+      "magnitude": 0
     }
   ]
 }
