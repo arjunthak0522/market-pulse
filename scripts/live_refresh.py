@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """Intraday Market Pulse refresh.
 
-Uses StockCharts $TRIN/$TRINQ as the canonical Arms-index definition and attempts
-StockCharts quote extraction first. If StockCharts does not expose a parseable
-quote in server HTML, uses the same raw Arms definition from a current quote
-source rather than falling back to a prior-session value.
-
-The historical event studies remain EOD/history based; only the current signal
-snapshot is intraday-sensitive.
+StockCharts $TRIN/$TRINQ remain the canonical Arms-index definitions. Current
+transport prefers a machine-readable intraday quote endpoint and never substitutes
+an older completed-session value during an intraday refresh.
 """
 from __future__ import annotations
 
 import json
 import re
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 import pandas as pd
 
@@ -22,12 +19,11 @@ import run_refresh as base
 builder = base.builder
 
 
-def _extract_quote(text: str, symbol: str) -> float | None:
+def _extract_quote(text: str) -> float | None:
     patterns = [
         r'"lastPrice"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
+        r'"regularMarketPrice"\s*:\s*(?:\{"raw":)?\s*([0-9]+(?:\.[0-9]+)?)',
         r'"last"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
-        r'"close"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
-        r'Last Price\s*</?[^>]*>*\s*([0-9]+(?:\.[0-9]+)?)',
         r'Last Price\s+([0-9]+(?:\.[0-9]+)?)',
     ]
     for pat in patterns:
@@ -41,24 +37,42 @@ def _extract_quote(text: str, symbol: str) -> float | None:
 
 def stockcharts_quote(symbol: str) -> tuple[float, str, str]:
     encoded = "%24" + symbol.lstrip("$")
-    urls = [
-        f"https://stockcharts.com/sc3/ui/?s={encoded}",
-        f"https://stockcharts.com/h-sc/ui?s={encoded}",
-    ]
+    url = f"https://stockcharts.com/sc3/ui/?s={encoded}"
+    r = builder.requests.get(url, headers=builder.UA, timeout=25)
+    r.raise_for_status()
+    value = _extract_quote(r.text)
+    if value is None:
+        raise RuntimeError(f"StockCharts {symbol} interactive shell does not expose quote server-side")
+    return value, datetime.now(timezone.utc).isoformat(), f"StockCharts {symbol} intraday"
+
+
+def yahoo_chart_quote(symbols: list[str], canonical: str) -> tuple[float, str, str]:
     errors = []
-    for url in urls:
+    for sym in symbols:
         try:
-            r = builder.requests.get(url, headers=builder.UA, timeout=25)
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(sym, safe='')}?interval=1m&range=1d"
+            r = builder.requests.get(url, headers=builder.UA, timeout=20)
             r.raise_for_status()
-            value = _extract_quote(r.text, symbol)
-            if value is not None:
-                now = datetime.now(timezone.utc).isoformat()
-                return value, now, f"StockCharts {symbol} intraday"
-            snippet = re.sub(r"\s+", " ", r.text[:1800])
-            errors.append(f"{url}: no parseable quote; html={len(r.text)} bytes; head={snippet}")
+            payload = r.json()
+            result = payload.get("chart", {}).get("result") or []
+            if not result:
+                errors.append(f"{sym}: no result")
+                continue
+            meta = result[0].get("meta", {})
+            value = meta.get("regularMarketPrice")
+            ts = meta.get("regularMarketTime")
+            if value is None:
+                closes = (result[0].get("indicators", {}).get("quote") or [{}])[0].get("close") or []
+                value = next((x for x in reversed(closes) if x is not None), None)
+            value = float(value) if value is not None else None
+            if value is None or not (0.02 <= value <= 25):
+                errors.append(f"{sym}: invalid value {value}")
+                continue
+            asof = datetime.fromtimestamp(int(ts), timezone.utc).isoformat() if ts else datetime.now(timezone.utc).isoformat()
+            return value, asof, f"Yahoo {sym} intraday transport; StockCharts {canonical} definition"
         except Exception as exc:
-            errors.append(f"{url}: {exc}")
-    raise RuntimeError(f"StockCharts {symbol} quote unavailable: {' | '.join(errors)}")
+            errors.append(f"{sym}: {exc}")
+    raise RuntimeError("Yahoo Arms quote unavailable: " + " | ".join(errors))
 
 
 def barchart_quote(symbol: str) -> tuple[float, str, str]:
@@ -68,17 +82,21 @@ def barchart_quote(symbol: str) -> tuple[float, str, str]:
     clean = " ".join(builder.BeautifulSoup(text, "html.parser").stripped_strings)
     m = re.search(r"Last Price\s+([0-9]+(?:\.[0-9]+)?)", clean, re.I)
     if not m:
-        snippet = re.sub(r"\s+", " ", text[:1200])
-        raise RuntimeError(f"Barchart {symbol}: last price not found; head={snippet}")
-    return float(m.group(1)), datetime.now(timezone.utc).isoformat(), f"Barchart {symbol} current; StockCharts Arms definition"
+        raise RuntimeError(f"Barchart {symbol}: last price not found")
+    return float(m.group(1)), datetime.now(timezone.utc).isoformat(), f"Barchart {symbol} intraday transport; StockCharts Arms definition"
 
 
 def live_quote(symbol: str) -> tuple[float, str, str]:
     try:
         return stockcharts_quote(symbol)
     except Exception as exc:
-        print(f"{symbol} StockCharts direct quote warning: {exc}")
-        return barchart_quote(symbol)
+        print(f"{symbol} StockCharts transport warning: {exc}")
+    candidates = ["C:TRIN", "^TRIN"] if symbol == "$TRIN" else ["C:TRINQ", "^TRINQ", "C:TRIN.NQ"]
+    try:
+        return yahoo_chart_quote(candidates, symbol)
+    except Exception as exc:
+        print(f"{symbol} Yahoo transport warning: {exc}")
+    return barchart_quote(symbol)
 
 
 def live_mcoscillator_current():
@@ -119,7 +137,7 @@ def stamp_live_metadata():
     })
     payload["generated_at"] = now
     payload.setdefault("methodology", {})["live_data"] = (
-        "TRIN and TRINQ use the StockCharts Arms-index definition and an intraday quote path; prior-session values are not accepted as current substitutes."
+        "TRIN and TRINQ use the StockCharts Arms-index definition with machine-readable intraday transport. Prior-session values are not accepted as current substitutes."
     )
     builder.OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
