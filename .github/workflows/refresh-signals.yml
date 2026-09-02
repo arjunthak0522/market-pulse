@@ -36,6 +36,7 @@ jobs:
           python -u scripts/run_refresh.py 2>&1 | tee refresh.log
       - name: Hard data contract
         run: |
+          set -o pipefail
           python - <<'PY' 2>&1 | tee contract.log
           import json
           from pathlib import Path
@@ -48,8 +49,10 @@ jobs:
               study=row.get('study')
               assert study and study.get('horizons'), f'{name}: no study'
               assert all(str(h) in study['horizons'] for h in (5,10,21,60)), f'{name}: missing horizon'
-              assert any(int(v.get('n',0)) >= 5 for v in study['horizons'].values()), f'{name}: thin study'
-          print('all seven families have current data and studies')
+              for h in (5,10,21,60):
+                  n=int(study['horizons'][str(h)].get('n',0))
+                  assert n >= 5, f'{name}: {h}d study too thin (n={n})'
+          print('all seven families have current data and 5/10/21/60 studies')
           PY
       - name: Upload refresh diagnostic
         if: always()
