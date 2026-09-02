@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T22:09:45.481892+00:00",
+  "generated_at": "2026-09-02T22:14:29.888269+00:00",
   "market_date": "2026-09-02",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -475,11 +475,11 @@
       "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 36.12,
+      "above_5d": 39.39,
       "above_20d": 38.6,
       "above_50d": 48.4,
       "above_200d": 66.0,
-      "percentile_252d": 14.0,
+      "percentile_252d": 18.4,
       "as_of": "2026-09-02",
       "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
@@ -825,7 +825,7 @@
   "data_status": {
     "session_date": "2026-09-02",
     "market_open": false,
-    "generated_at": "2026-09-02T22:09:45.481892+00:00"
+    "generated_at": "2026-09-02T22:14:29.888269+00:00"
   },
   "market_state": {
     "name": "Breadth Washout",
@@ -861,22 +861,10 @@
   },
   "what_changed": [
     {
-      "signal": "newlows",
-      "headline": "New-low pressure",
-      "detail": "New-low pressure rose from 14.00 to 115.00.",
-      "magnitude": 101.0
-    },
-    {
-      "signal": "nymo",
-      "headline": "NYSE breadth",
-      "detail": "NYSE breadth rose from -78.00 to -28.53.",
-      "magnitude": 49.47
-    },
-    {
       "signal": "breadth",
       "headline": "Short-term participation",
-      "detail": "Short-term participation rose from 26% to 36% above the 5-day trend.",
-      "magnitude": 10.59
+      "detail": "Short-term participation rose from 36% to 39% above the 5-day trend.",
+      "magnitude": 3.27
     }
   ]
 }
