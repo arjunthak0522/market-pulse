@@ -8,6 +8,8 @@ const SYMBOLS = [
   "$VIX", "$VIX3M", "$VVIX", "$SKEW"
 ];
 
+const CRITICAL = ["$TRIN", "$TRINQ", "$NYHGH", "$NYLOW", "$NAHGH", "$NALOW", "$VIX", "$VIX3M"];
+
 const UPSTREAM_HEADERS = {
   "user-agent": "Mozilla/5.0 MarketPulse/1.0",
   "accept": "application/json,text/plain,*/*",
@@ -54,53 +56,79 @@ async function getQuote(symbol) {
 
 function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
-  const allowed = origin === "https://arjunthak0522.github.io" || origin === "null";
+  const allowedOrigins = new Set([
+    "https://market-pulse.arjunthak.workers.dev",
+    "https://arjunthak0522.github.io"
+  ]);
+  const allowOrigin = allowedOrigins.has(origin) ? origin : "https://market-pulse.arjunthak.workers.dev";
   return {
-    "access-control-allow-origin": allowed ? origin : "https://arjunthak0522.github.io",
+    "access-control-allow-origin": allowOrigin,
     "access-control-allow-methods": "GET, OPTIONS",
     "access-control-allow-headers": "content-type",
     "vary": "Origin"
   };
 }
 
+function jsonResponse(request, payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      ...corsHeaders(request),
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    }
+  });
+}
+
+async function liveQuotes(request) {
+  const settled = await Promise.allSettled(SYMBOLS.map(getQuote));
+  const quotes = {};
+  const errors = [];
+
+  settled.forEach((result, index) => {
+    const symbol = SYMBOLS[index];
+    if (result.status === "fulfilled") quotes[symbol] = result.value;
+    else errors.push({ symbol, error: String(result.reason?.message || result.reason) });
+  });
+
+  const missingCritical = CRITICAL.filter((symbol) => !quotes[symbol]);
+  return jsonResponse(request, {
+    generated_at: new Date().toISOString(),
+    source: "StockCharts QuoteBrain via Market Pulse Cloudflare Worker",
+    refresh_guidance_seconds: 300,
+    quotes,
+    errors,
+    complete: errors.length === 0,
+    missing_critical: missingCritical
+  }, missingCritical.length ? 503 : 200);
+}
+
 export default {
-  async fetch(request) {
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: corsHeaders(request) });
-    }
-    if (request.method !== "GET") {
-      return new Response("Method not allowed", { status: 405, headers: corsHeaders(request) });
-    }
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
-    const settled = await Promise.allSettled(SYMBOLS.map(getQuote));
-    const quotes = {};
-    const errors = [];
-
-    settled.forEach((result, index) => {
-      const symbol = SYMBOLS[index];
-      if (result.status === "fulfilled") quotes[symbol] = result.value;
-      else errors.push({ symbol, error: String(result.reason?.message || result.reason) });
-    });
-
-    const critical = ["$TRIN", "$TRINQ", "$NYHGH", "$NYLOW", "$NAHGH", "$NALOW", "$VIX", "$VIX3M"];
-    const missingCritical = critical.filter((symbol) => !quotes[symbol]);
-    const status = missingCritical.length ? 503 : 200;
-
-    return new Response(JSON.stringify({
-      generated_at: new Date().toISOString(),
-      source: "StockCharts QuoteBrain via Market Pulse Cloudflare Worker",
-      refresh_guidance_seconds: 300,
-      quotes,
-      errors,
-      complete: errors.length === 0,
-      missing_critical: missingCritical
-    }), {
-      status,
-      headers: {
-        ...corsHeaders(request),
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "public, max-age=30, s-maxage=60"
+    if (url.pathname === "/api/live") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers: corsHeaders(request) });
       }
-    });
+      if (request.method !== "GET") {
+        return jsonResponse(request, { error: "Method not allowed" }, 405);
+      }
+      return liveQuotes(request);
+    }
+
+    if (url.pathname === "/api/health") {
+      if (request.method !== "GET") {
+        return jsonResponse(request, { error: "Method not allowed" }, 405);
+      }
+      return jsonResponse(request, {
+        ok: true,
+        service: "market-pulse",
+        live_endpoint: "/api/live",
+        generated_at: new Date().toISOString()
+      });
+    }
+
+    return env.ASSETS.fetch(request);
   }
 };
