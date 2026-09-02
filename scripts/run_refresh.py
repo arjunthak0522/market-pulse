@@ -49,6 +49,30 @@ def source_get(url, timeout=30):
     return r
 
 
+def parse_archive_dates(values):
+    raw = pd.Series(values).astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+    compact = raw.str.fullmatch(r"\d{8}")
+    dates = pd.Series(pd.NaT, index=raw.index, dtype="datetime64[ns]")
+    if compact.any():
+        dates.loc[compact] = pd.to_datetime(raw.loc[compact], format="%Y%m%d", errors="coerce")
+    if (~compact).any():
+        dates.loc[~compact] = pd.to_datetime(raw.loc[~compact], errors="coerce")
+    return dates
+
+
+def archive_series(url):
+    df = pd.read_csv(io.StringIO(source_get(url, timeout=45).text), header=None, comment="#")
+    if df.shape[1] < 2:
+        raise RuntimeError(f"Breadth archive series invalid: {url}")
+    dates = parse_archive_dates(df.iloc[:, 0])
+    vals = pd.to_numeric(df.iloc[:, -1], errors="coerce")
+    s = pd.Series(vals.values, index=dates).dropna().sort_index()
+    s = s[~s.index.isna()]
+    if len(s) < 100:
+        raise RuntimeError(f"Breadth archive series too short after date parse: {url}")
+    return s[~s.index.duplicated(keep="last")]
+
+
 def official_nasdaq_daily():
     year = datetime.now(timezone.utc).year
     url = f"https://www.nasdaqtrader.com/dynamic/dailyfiles/daily{year}.csv"
@@ -72,5 +96,6 @@ def official_nasdaq_daily():
 if __name__ == "__main__":
     builder.spy_history = github_spy_history
     builder.get = source_get
+    builder.read_unicorn_series = archive_series
     builder.nasdaq_daily = official_nasdaq_daily
     builder.main()
