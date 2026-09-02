@@ -14,7 +14,7 @@ for symbol in SYMBOLS:
     try:
         params={"s":symbol,"f":"json","randomNumber":str(int(time.time()*1000))}
         r=requests.get("https://stockcharts.com/quotebrain/quotes",params=params,headers=UA,timeout=20)
-        print("HTTP",symbol,r.status_code)
+        print("HTTP",symbol,r.status_code,"ACAO=",r.headers.get("access-control-allow-origin"),"ACAC=",r.headers.get("access-control-allow-credentials"))
         print("QUOTE",symbol,r.text[:1600])
     except Exception as exc:
         print("ERROR",symbol,repr(exc))
