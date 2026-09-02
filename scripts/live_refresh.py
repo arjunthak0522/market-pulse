@@ -124,22 +124,41 @@ def current_mcclellan(market: str, adv: float, dec: float, session_date: str):
     d = pd.Timestamp(session_date)
     hist = hist[hist.index < d]
     hist.loc[d, ["adv", "dec"]] = [adv, dec]
-    return float(builder.mcclellan_from_ad(hist).iloc[-1]), builder.mcclellan_from_ad(hist)
+    series = builder.mcclellan_from_ad(hist)
+    return float(series.iloc[-1]), series
 
 
 def sp500_live_5d():
+    """Current S&P 500 % above 5-day SMA using resilient batched current daily bars."""
     html = builder.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", timeout=30).text
     table = pd.read_html(io.StringIO(html))[0]
     tickers = table["Symbol"].astype(str).str.replace(".", "-", regex=False).tolist()
-    px = yf.download(tickers, period="10d", interval="1d", auto_adjust=False, progress=False, threads=True, timeout=35)
-    close = px["Close"] if isinstance(px.columns, pd.MultiIndex) else px[["Close"]]
-    close = close.dropna(how="all")
+    frames = []
+    failures = []
+    for i in range(0, len(tickers), 50):
+        chunk = tickers[i:i+50]
+        try:
+            px = yf.download(chunk, period="10d", interval="1d", auto_adjust=False, progress=False, threads=True, timeout=30)
+            if px.empty:
+                failures.append(f"chunk {i//50+1}: empty")
+                continue
+            close = px["Close"] if isinstance(px.columns, pd.MultiIndex) else px[["Close"]].rename(columns={"Close": chunk[0]})
+            frames.append(close)
+        except Exception as exc:
+            failures.append(f"chunk {i//50+1}: {exc}")
+        time.sleep(0.35)
+    if not frames:
+        raise RuntimeError("S&P 500 live 5-day breadth returned no constituent batches")
+    close = pd.concat(frames, axis=1)
+    close = close.loc[:, ~close.columns.duplicated()].dropna(how="all")
     if len(close) < 5:
-        raise RuntimeError("S&P 500 live 5-day breadth price history too short")
+        raise RuntimeError("S&P 500 live 5-day breadth history too short")
     tail = close.tail(5)
     valid = tail.count() >= 5
-    if int(valid.sum()) < 450:
-        raise RuntimeError(f"S&P 500 live 5-day breadth has only {int(valid.sum())} valid constituents")
+    nvalid = int(valid.sum())
+    print(f"S&P 500 5D breadth valid={nvalid}; batch_failures={failures}")
+    if nvalid < 450:
+        raise RuntimeError(f"S&P 500 live 5-day breadth has only {nvalid} valid constituents")
     latest = tail.iloc[-1]
     ma5 = tail.mean()
     return round(100 * float((latest[valid] > ma5[valid]).mean()), 2)
@@ -161,8 +180,9 @@ def overlay_current_session():
 
     def stamp(row, symbol, *, frequency="intraday"):
         _v, ts, src, raw = q[symbol]
+        provider_date = str(datetime.fromisoformat(ts).astimezone(ET).date())
         row.update({
-            "as_of": session,
+            "as_of": provider_date,
             "as_of_timestamp": ts,
             "source": src,
             "freshness": "intraday" if frequency == "intraday" and clock["open"] else ("session_close" if frequency == "intraday" else "eod"),
@@ -171,13 +191,10 @@ def overlay_current_session():
             "provider_realtime_flag": bool(raw.get("realtime")),
         })
 
-    # CPCE is an EOD indicator on StockCharts. Always use the latest same-session
-    # publication, but never label it as intraday.
     cpce = q["$CPCE"][0]
     sig["cpce"]["value"] = round(cpce, 3)
     stamp(sig["cpce"], "$CPCE", frequency="eod")
 
-    # TRIN / TRINQ are native intraday market internals.
     sig["trin"]["value"] = round(q["$TRIN"][0], 3)
     sig["trin"]["definition"] = "StockCharts $TRIN / classic NYSE Arms Index"
     stamp(sig["trin"], "$TRIN")
@@ -185,9 +202,6 @@ def overlay_current_session():
     sig["trinq"]["definition"] = "StockCharts $TRINQ / classic Nasdaq Arms Index"
     stamp(sig["trinq"], "$TRINQ")
 
-    # NYMO/NAMO are published EOD by StockCharts. During the cash session we
-    # calculate the same ratio-adjusted oscillator from live A/D counts; after
-    # the close we use the official published EOD values.
     if clock["open"]:
         nymo, nymo_hist = current_mcclellan("nyse", q["$NYADV"][0], q["$NYDEC"][0], session)
         namo, namo_hist = current_mcclellan("nasdaq", q["$NAADV"][0], q["$NADEC"][0], session)
@@ -199,26 +213,25 @@ def overlay_current_session():
         sig["namo"]["value"] = round(q["$NAMO"][0], 2)
         stamp(sig["namo"], "$NAMO", frequency="eod")
 
-    # Structural internal damage: NYSE is the primary study universe; Nasdaq is
-    # carried alongside it as same-session context.
     ny_lows, ny_highs, ny_tot = q["$NYLOW"][0], q["$NYHGH"][0], q["$NYTOT"][0]
     na_lows, na_highs, na_tot = q["$NALOW"][0], q["$NAHGH"][0], q["$NATOT"][0]
     ny_low_pct = 100 * ny_lows / ny_tot if ny_tot else None
+    ny_ts = q["$NYLOW"][1]
     sig["newlows"].update({
         "value": round(ny_lows), "new_highs": round(ny_highs), "new_low_pct": round(ny_low_pct, 2),
         "nasdaq_new_lows": round(na_lows), "nasdaq_new_highs": round(na_highs), "nasdaq_new_low_pct": round(100 * na_lows / na_tot, 2) if na_tot else None,
-        "as_of": session, "as_of_timestamp": q["$NYLOW"][1], "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows", "freshness": "intraday" if clock["open"] else "session_close", "frequency": "intraday"
+        "as_of": str(datetime.fromisoformat(ny_ts).astimezone(ET).date()), "as_of_timestamp": ny_ts,
+        "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows", "freshness": "intraday" if clock["open"] else "session_close", "frequency": "intraday"
     })
 
-    # S&P 500 participation. 20/50/200 come from StockCharts current session;
-    # 5-day participation is computed from current constituent daily bars.
     live5 = sp500_live_5d()
+    breadth_ts = q["$SPXA20R"][1]
     sig["breadth"].update({
         "above_5d": live5,
         "above_20d": round(q["$SPXA20R"][0], 2),
         "above_50d": round(q["$SPXA50R"][0], 2),
         "above_200d": round(q["$SPXA200R"][0], 2),
-        "as_of": session, "as_of_timestamp": q["$SPXA20R"][1],
+        "as_of": str(datetime.fromisoformat(breadth_ts).astimezone(ET).date()), "as_of_timestamp": breadth_ts,
         "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
         "freshness": "intraday" if clock["open"] else "session_close", "frequency": "intraday"
     })
@@ -227,8 +240,6 @@ def overlay_current_session():
     if not br.empty and "above_5d" in br:
         sig["breadth"]["percentile_252d"] = builder.pct_rank(pd.to_numeric(br["above_5d"], errors="coerce"), live5)
 
-    # Volatility family. Term structure, VIX and VVIX use current-session quotes;
-    # SKEW is explicitly EOD on StockCharts and remains labeled as such.
     vix, vix3m, vvix, skew = q["$VIX"][0], q["$VIX3M"][0], q["$VVIX"][0], q["$SKEW"][0]
     term = vix / vix3m
     vh = builder.cboe_series("VIX")
@@ -236,11 +247,15 @@ def overlay_current_session():
     vvh = builder.cboe_series("VVIX")
     skh = builder.cboe_series("SKEW")
     termh = pd.concat([vh.rename("v"), v3h.rename("v3")], axis=1).dropna().eval("v/v3")
+    vol_ts = q["$VIX"][1]
+    skew_ts = q["$SKEW"][1]
     sig["vol"].update({
         "vix": round(vix, 2), "vix3m": round(vix3m, 2), "term_ratio": round(term, 3), "vvix": round(vvix, 2), "skew": round(skew, 2),
         "term_percentile_252d": builder.pct_rank(termh, term), "vvix_percentile_252d": builder.pct_rank(vvh, vvix), "skew_percentile_252d": builder.pct_rank(skh, skew),
-        "as_of": session, "as_of_timestamp": q["$VIX"][1], "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
-        "freshness": "intraday" if clock["open"] else "session_close", "frequency": "mixed_intraday_eod", "skew_freshness": "eod"
+        "as_of": str(datetime.fromisoformat(vol_ts).astimezone(ET).date()), "as_of_timestamp": vol_ts,
+        "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
+        "freshness": "intraday" if clock["open"] else "session_close", "frequency": "mixed_intraday_eod",
+        "skew_freshness": "eod", "skew_as_of": str(datetime.fromisoformat(skew_ts).astimezone(ET).date()), "skew_as_of_timestamp": skew_ts
     })
 
     payload["market_date"] = session
