@@ -1,10 +1,1 @@
-{
-  "name":"Market Pulse Dashboard",
-  "short_name":"Market Pulse",
-  "start_url":"./",
-  "display":"standalone",
-  "background_color":"#0b1020",
-  "theme_color":"#0b1020",
-  "description":"A simple market breadth, momentum, fear and positioning dashboard.",
-  "icons":[]
-}
+{"name":"Market Pulse","short_name":"Market Pulse","start_url":"./","display":"standalone","background_color":"#f4f6f8","theme_color":"#f4f6f8"}

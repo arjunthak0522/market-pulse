@@ -1,0 +1,35 @@
+name: Validate clean Market Pulse
+on:
+  workflow_dispatch:
+  push:
+    branches: [signal-quality-review]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: JavaScript syntax
+        run: node --check pulse.js
+      - name: Python syntax
+        run: python -m py_compile scripts/update_extremes.py tests/test_extremes.py
+      - name: Unit tests
+        run: python -m unittest tests/test_extremes.py -v
+      - name: Clean product guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          allowed={'README.md','index.html','pulse.css','pulse.js','manifest.webmanifest','requirements.txt'}
+          roots={p.name for p in Path('.').iterdir() if p.is_file()}
+          extras=roots-allowed
+          assert not extras, f'unexpected root product files: {sorted(extras)}'
+          html=Path('index.html').read_text()
+          assert html.count('<script ')==1 and 'pulse.js' in html
+          assert html.count('stylesheet')==1 and 'pulse.css' in html
+          print('clean UI guard passed')
+          PY
