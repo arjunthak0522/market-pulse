@@ -18,6 +18,7 @@ jobs:
         run: |
           node --check pulse-v5.js
           node --check live-ui.js
+          node --check netlify/functions/live-market.mts
       - name: Python syntax
         run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py tests/test_extremes.py
       - name: Unit tests
@@ -45,5 +46,8 @@ jobs:
           live=Path('live-ui.js').read_text()
           for text in ['setInterval(refresh, 60_000)','intraday_extreme_occurred','SESSION CLOSE','INTRADAY']:
               assert text in live, f'missing live-data behavior: {text}'
+          relay=Path('netlify/functions/live-market.mts').read_text()
+          for text in ['$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','/api/live-market','no-store']:
+              assert text in relay, f'missing live relay contract: {text}'
           print('clean final V5 live-data guard passed')
           PY
