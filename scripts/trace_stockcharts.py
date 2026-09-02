@@ -7,7 +7,7 @@ url="https://stockcharts.com/quotebrain/quotes"
 symbols=[
     "$TRIN","$TRINQ","$CPCE","$NAMO","$NYMO",
     "$NYHGH","$NYLOW","$NAHGH","$NALOW",
-    "$SPXA20R","$SPXA50R","$SPXA200R",
+    "$SPXA5R","$SPXA5","$SPXA10R","$SPXA20R","$SPXA50R","$SPXA200R",
     "$VIX","$VIX3M","$VVIX","$SKEW",
 ]
 for symbol in symbols:
