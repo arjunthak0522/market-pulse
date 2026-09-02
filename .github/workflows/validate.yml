@@ -15,21 +15,24 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: JavaScript syntax
-        run: node --check pulse-v5.js
+        run: |
+          node --check pulse-v5.js
+          node --check live-ui.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py tests/test_extremes.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py tests/test_extremes.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py -v
       - name: Clean V5 product guard
         run: |
           python - <<'PY'
           from pathlib import Path
-          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','manifest.webmanifest','requirements.txt'}
+          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','live-ui.js','manifest.webmanifest','requirements.txt'}
           roots={p.name for p in Path('.').iterdir() if p.is_file()}
           extras=roots-allowed
           assert not extras, f'unexpected root product files: {sorted(extras)}'
           html=Path('index.html').read_text()
-          assert html.count('<script ')==1 and 'pulse-v5.js' in html
+          assert html.count('<script ')==2, 'expected exactly the V5 app script and live-data overlay'
+          assert 'pulse-v5.js' in html and 'live-ui.js' in html
           assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
           required=["TODAY'S MARKET STATE",'MARKET PRESSURE','What changed?','What matters underneath the market']
           for text in required:
@@ -39,5 +42,8 @@ jobs:
           for text in ['View historical study','data-watch','median_max_drawdown','median_max_favorable','STANDS OUT']:
               assert text in js, f'missing V5 behavior: {text}'
           assert 'weight = {severe:0,extreme:1,watch:2,normal:3}' in js, 'signal priority ordering missing'
-          print('clean final V5 guard passed')
+          live=Path('live-ui.js').read_text()
+          for text in ['setInterval(refresh, 60_000)','intraday_extreme_occurred','SESSION CLOSE','INTRADAY']:
+              assert text in live, f'missing live-data behavior: {text}'
+          print('clean final V5 live-data guard passed')
           PY
