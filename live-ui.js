@@ -2,6 +2,22 @@
   const ET = "America/New_York";
   let timer = null;
 
+  const installStyles = () => {
+    if (document.getElementById("liveDataStyles")) return;
+    const style = document.createElement("style");
+    style.id = "liveDataStyles";
+    style.textContent = `
+      .freshness-tag{display:inline-flex;align-items:center;margin-left:8px;padding:3px 7px;border:1px solid rgba(255,255,255,.14);border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.09em;color:rgba(235,241,250,.72);vertical-align:middle}
+      .freshness-tag.intraday{color:#dff9e8;border-color:rgba(116,227,156,.28);background:rgba(116,227,156,.08)}
+      .freshness-tag.session_close{color:#e8eef8;background:rgba(255,255,255,.045)}
+      .freshness-tag.eod{color:rgba(235,241,250,.62);background:rgba(255,255,255,.025)}
+      .intraday-event{display:flex;gap:10px;align-items:flex-start;margin-top:13px;padding:11px 12px;border-radius:12px;background:rgba(255,151,94,.08);border:1px solid rgba(255,151,94,.22);font-size:12px;line-height:1.42;color:rgba(244,247,252,.84)}
+      .intraday-event strong{flex:0 0 auto;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffd4bd}
+      @media(max-width:640px){.freshness-tag{font-size:8px;padding:3px 6px}.intraday-event{display:block}.intraday-event strong{display:block;margin-bottom:4px}}
+    `;
+    document.head.appendChild(style);
+  };
+
   const fmtET = (iso) => {
     if (!iso) return "";
     try {
@@ -67,6 +83,12 @@
         note.innerHTML = `<strong>Intraday event</strong><span>TRIN reached ${high.toFixed(2)} today${Number.isFinite(current) ? ` before easing to ${current.toFixed(2)}` : ""}.</span>`;
         if (insight) insight.insertAdjacentElement("afterend", note);
       }
+
+      const summary = document.getElementById("stateSummary");
+      if (summary && !summary.dataset.intradayTrin) {
+        summary.dataset.intradayTrin = "1";
+        summary.textContent = `${summary.textContent.replace(/\s+$/, "")} TRIN reached capitulation levels intraday before selling pressure eased.`;
+      }
     }
   };
 
@@ -88,6 +110,7 @@
 
   const patch = async () => {
     try {
+      installStyles();
       const data = await getData();
       setTopFreshness(data);
       patchTrin(data);
@@ -104,6 +127,7 @@
   };
 
   window.addEventListener("DOMContentLoaded", () => {
+    installStyles();
     window.setTimeout(patch, 900);
     timer = window.setInterval(refresh, 60_000);
     document.addEventListener("visibilitychange", () => {
