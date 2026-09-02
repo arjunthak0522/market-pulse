@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-09-02T22:00:37.052289+00:00",
-  "market_date": "2026-09-01",
+  "generated_at": "2026-09-02T22:09:45.481892+00:00",
+  "market_date": "2026-09-02",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
     "breadth_archive": "Unicorn historical breadth archive supplies long-run NYSE/Nasdaq precedent; current readings use the current sources listed per signal.",
     "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention.",
     "volatility_family": "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. Raw VIX is supporting context only.",
-    "live_data": "TRIN and TRINQ are fetched from StockCharts QuoteBrain, the quote service used by its chart app. Prior-session values are not accepted as current substitutes.",
+    "live_data": "Market Pulse uses same-session current inputs. TRIN/TRINQ, exchange breadth, new highs/lows and VIX-family inputs refresh intraday; NYMO/NAMO are calculated intraday from live A/D counts; CPCE and SKEW are explicitly EOD publications and are never mislabeled as intraday.",
     "event_studies": "Historical studies use independent extreme episodes separated by at least five signal sessions and report forward return, median maximum drawdown, and median maximum favorable excursion."
   },
   "signals": {
     "cpce": {
-      "value": 0.67,
+      "value": 0.71,
       "average_5d": 0.6,
       "percentile_252d": 74.6,
-      "as_of": "2026-09-01",
-      "source": "Cboe Daily Market Statistics",
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $CPCE",
       "study": {
         "title": "Equity put/call fear extremes",
         "rule": "Equity put/call ratio in the top decile of available history.",
@@ -79,13 +79,18 @@
           "2018-11-20",
           "2018-11-09"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
     },
     "namo": {
-      "value": -24.06,
+      "value": -23.48,
       "percentile_252d": 20.6,
-      "as_of": "2026-08-31",
-      "source": "Nasdaq Trader advances/declines; ratio-adjusted McClellan calculation",
+      "as_of": "2026-09-02",
+      "source": "StockCharts QuoteBrain $NAMO",
       "study": {
         "title": "Nasdaq McClellan washouts",
         "rule": "Ratio-adjusted Nasdaq McClellan Oscillator in the bottom decile of historical readings.",
@@ -149,13 +154,18 @@
           "2019-03-06",
           "2018-12-21"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
     },
     "nymo": {
-      "value": -78.0,
+      "value": -28.53,
       "percentile_252d": 0.4,
       "as_of": "2026-09-02",
-      "source": "McClellan Financial final NYSE breadth",
+      "source": "StockCharts QuoteBrain $NYMO",
       "study": {
         "title": "NYSE McClellan washouts",
         "rule": "Ratio-adjusted NYSE McClellan Oscillator in the bottom decile of historical readings.",
@@ -219,7 +229,12 @@
           "2018-10-24",
           "2018-10-11"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "eod",
+      "frequency": "eod",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
     },
     "trin": {
       "value": 0.837,
@@ -290,15 +305,21 @@
           "2019-05-01"
         ]
       },
-      "as_of_timestamp": "2026-09-02T22:00:37.143416+00:00",
-      "freshness": "intraday",
+      "session_open": 2.1117,
+      "session_high": 2.1117,
+      "session_low": 0.7604,
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
-      "quote_transport": "StockCharts QuoteBrain"
+      "intraday_extreme_occurred": true,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
     },
     "trinq": {
       "value": 0.578,
       "percentile_252d": 2.8,
-      "as_of": "2026-08-31",
+      "as_of": "2026-09-02",
       "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
         "title": "Nasdaq TRINQ capitulation extremes",
@@ -364,18 +385,24 @@
           "2018-04-20"
         ]
       },
-      "as_of_timestamp": "2026-09-02T22:00:37.244201+00:00",
-      "freshness": "intraday",
+      "session_open": 0.7166,
+      "session_high": 0.9887,
+      "session_low": 0.5736,
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
-      "quote_transport": "StockCharts QuoteBrain"
+      "intraday_extreme_occurred": false,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday",
+      "quote_transport": "StockCharts QuoteBrain",
+      "provider_realtime_flag": false
     },
     "newlows": {
-      "value": 14.0,
-      "new_highs": 7.0,
-      "new_low_pct": 2.79,
+      "value": 115,
+      "new_highs": 58,
+      "new_low_pct": 4.08,
       "percentile_252d": 84.5,
-      "as_of": "2026-09-01",
-      "source": "S&P 500 constituent highs/lows; NYSE archive for precedent",
+      "as_of": "2026-09-02",
+      "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows",
       "study": {
         "title": "52-week new-low pressure extremes",
         "rule": "NYSE new 52-week lows as a share of active issues in the top decile of historical readings.",
@@ -439,16 +466,22 @@
           "2018-11-14",
           "2018-10-29"
         ]
-      }
+      },
+      "nasdaq_new_lows": 235,
+      "nasdaq_new_highs": 86,
+      "nasdaq_new_low_pct": 4.76,
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 25.53,
-      "above_20d": 36.17,
-      "above_50d": 36.17,
-      "above_200d": 55.32,
-      "percentile_252d": 3.9,
-      "as_of": "2026-09-01",
-      "source": "S&P 500 constituent closes and volume via Yahoo Finance",
+      "above_5d": 36.12,
+      "above_20d": 38.6,
+      "above_50d": 48.4,
+      "above_200d": 66.0,
+      "percentile_252d": 14.0,
+      "as_of": "2026-09-02",
+      "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
         "title": "Short-term breadth washouts",
         "rule": "S&P 500 5-day participation in the bottom decile of recorded Market Pulse history.",
@@ -507,18 +540,21 @@
           "2026-01-20",
           "2025-12-31"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "intraday"
     },
     "vol": {
-      "vix": 16.34,
-      "vix3m": 18.33,
-      "term_ratio": 0.891,
-      "vvix": 91.25,
+      "vix": 15.2,
+      "vix3m": 17.73,
+      "term_ratio": 0.857,
+      "vvix": 86.25,
       "skew": 149.23,
       "stress_score": 32.7,
       "percentile_252d": 36.9,
-      "as_of": "2026-09-01",
-      "source": "Cboe Global Indices daily history",
+      "as_of": "2026-09-02",
+      "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
       "study": {
         "title": "Volatility stress-cluster extremes",
         "rule": "Combined VIX, VVIX, SKEW and term-structure stress score in the top decile of history.",
@@ -583,8 +619,8 @@
           "2025-03-06"
         ]
       },
-      "term_percentile_252d": 67.1,
-      "vvix_percentile_252d": 21.8,
+      "term_percentile_252d": 47.2,
+      "vvix_percentile_252d": 5.2,
       "skew_percentile_252d": 79.8,
       "term_study": {
         "title": "VIX term-structure stress",
@@ -777,8 +813,19 @@
           "2025-12-03",
           "2025-11-21"
         ]
-      }
+      },
+      "as_of_timestamp": "2026-09-02T20:00:00+00:00",
+      "freshness": "session_close",
+      "frequency": "mixed_intraday_eod",
+      "skew_freshness": "eod",
+      "skew_as_of": "2026-09-02",
+      "skew_as_of_timestamp": "2026-09-02T20:00:00+00:00"
     }
+  },
+  "data_status": {
+    "session_date": "2026-09-02",
+    "market_open": false,
+    "generated_at": "2026-09-02T22:09:45.481892+00:00"
   },
   "market_state": {
     "name": "Breadth Washout",
@@ -814,10 +861,22 @@
   },
   "what_changed": [
     {
-      "signal": "market",
-      "headline": "No major state change",
-      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
-      "magnitude": 0
+      "signal": "newlows",
+      "headline": "New-low pressure",
+      "detail": "New-low pressure rose from 14.00 to 115.00.",
+      "magnitude": 101.0
+    },
+    {
+      "signal": "nymo",
+      "headline": "NYSE breadth",
+      "detail": "NYSE breadth rose from -78.00 to -28.53.",
+      "magnitude": 49.47
+    },
+    {
+      "signal": "breadth",
+      "headline": "Short-term participation",
+      "detail": "Short-term participation rose from 26% to 36% above the 5-day trend.",
+      "magnitude": 10.59
     }
   ]
 }
