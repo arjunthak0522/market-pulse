@@ -36,7 +36,7 @@ jobs:
           python -u scripts/run_refresh.py 2>&1 | tee refresh.log
       - name: Hard data contract
         run: |
-          python - <<'PY'
+          python - <<'PY' 2>&1 | tee contract.log
           import json
           from pathlib import Path
           p=json.loads(Path('data/signal_data.json').read_text())
@@ -55,8 +55,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: seven-signal-refresh-log
-          path: refresh.log
+          name: seven-signal-refresh-diagnostic
+          path: |
+            refresh.log
+            contract.log
+            data/signal_data.json
           retention-days: 3
           if-no-files-found: ignore
       - name: Commit refreshed static dataset
