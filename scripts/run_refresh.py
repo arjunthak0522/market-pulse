@@ -16,6 +16,7 @@ import urllib3
 import update_extremes as builder
 
 _ORIGINAL_GET = builder.get
+_ORIGINAL_SERIES_SKEW = pd.Series.skew
 
 
 def github_spy_history():
@@ -93,9 +94,17 @@ def official_nasdaq_daily():
     return out
 
 
+def series_skew_column(self):
+    """Allow builder row.skew to mean the Cboe SKEW column, not Series.skew()."""
+    if "skew" in self.index:
+        return self["skew"]
+    return _ORIGINAL_SERIES_SKEW.__get__(self, pd.Series)
+
+
 if __name__ == "__main__":
     builder.spy_history = github_spy_history
     builder.get = source_get
     builder.read_unicorn_series = archive_series
     builder.nasdaq_daily = official_nasdaq_daily
+    pd.Series.skew = property(series_skew_column)
     builder.main()
