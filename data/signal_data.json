@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T15:31:55.040232+00:00",
+  "generated_at": "2026-09-02T15:35:56.654977+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -10,34 +10,63 @@
     "cpce": {
       "value": 0.67,
       "average_5d": 0.6,
-      "percentile_252d": 84.6,
+      "percentile_252d": 74.6,
       "as_of": "2026-09-01",
       "source": "Cboe Daily Market Statistics",
       "study": {
         "title": "Equity put/call fear extremes",
         "rule": "Equity put/call ratio in the top decile of available history.",
-        "threshold": 0.69,
+        "threshold": 0.79,
         "direction": "high",
-        "historical_sample": 9,
+        "historical_sample": 358,
         "horizons": {
           "5": {
-            "n": 5,
-            "average": 0.938,
-            "median": 0.798,
-            "positive_rate": 80.0,
-            "best": 3.058,
-            "worst": -0.98
+            "n": 357,
+            "average": 0.374,
+            "median": 0.489,
+            "positive_rate": 57.1,
+            "best": 19.404,
+            "worst": -18.909
           },
           "10": {
-            "n": 4,
-            "average": 0.945,
-            "median": 0.467,
-            "positive_rate": 100.0,
-            "best": 2.768,
-            "worst": 0.076
+            "n": 357,
+            "average": 0.586,
+            "median": 0.925,
+            "positive_rate": 61.6,
+            "best": 16.541,
+            "worst": -26.769
+          },
+          "21": {
+            "n": 355,
+            "average": 1.061,
+            "median": 2.317,
+            "positive_rate": 65.9,
+            "best": 23.348,
+            "worst": -30.534
+          },
+          "60": {
+            "n": 355,
+            "average": 1.594,
+            "median": 4.099,
+            "positive_rate": 64.5,
+            "best": 38.733,
+            "worst": -35.653
           }
         },
-        "prior_dates": []
+        "prior_dates": [
+          "2019-10-02",
+          "2019-08-23",
+          "2019-08-15",
+          "2019-08-14",
+          "2019-08-05",
+          "2019-08-02",
+          "2019-05-31",
+          "2019-05-23",
+          "2019-05-17",
+          "2019-05-13",
+          "2019-05-10",
+          "2018-12-24"
+        ]
       }
     },
     "namo": {
