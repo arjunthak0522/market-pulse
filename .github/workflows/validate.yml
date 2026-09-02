@@ -35,6 +35,7 @@ jobs:
           assert html.count('<script ')==2, 'expected exactly the V5 app script and live-data overlay'
           assert 'pulse-v5.js' in html and 'live-ui.js' in html
           assert 'market-pulse-live-endpoint' in html, 'missing configurable live endpoint'
+          assert 'https://market-pulse.arjunthak.workers.dev' in html, 'deployed Cloudflare endpoint not wired'
           assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
           required=["TODAY'S MARKET STATE",'MARKET PRESSURE','What changed?','What matters underneath the market']
           for text in required:
@@ -52,4 +53,43 @@ jobs:
               assert text in relay, f'missing Cloudflare relay contract: {text}'
           assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
           print('clean final V5 Cloudflare live-data guard passed')
+          PY
+      - name: Deployed Cloudflare endpoint smoke test
+        run: |
+          set -euo pipefail
+          endpoint='https://market-pulse.arjunthak.workers.dev'
+          curl -fsS \
+            --retry 9 \
+            --retry-all-errors \
+            --retry-delay 10 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            -H 'Origin: https://arjunthak0522.github.io' \
+            -D /tmp/market-pulse-headers.txt \
+            "$endpoint?t=$(date +%s)" \
+            -o /tmp/market-pulse-live.json
+          python - <<'PY'
+          import json, math
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload=json.loads(Path('/tmp/market-pulse-live.json').read_text())
+          headers=Path('/tmp/market-pulse-headers.txt').read_text().lower()
+          assert 'access-control-allow-origin: https://arjunthak0522.github.io' in headers, 'live endpoint CORS contract failed'
+          assert 'content-type: application/json' in headers, 'live endpoint did not return JSON'
+          assert payload.get('refresh_guidance_seconds') == 300, 'unexpected live refresh guidance'
+          assert 'StockCharts QuoteBrain' in payload.get('source',''), 'unexpected live provider source'
+          quotes=payload.get('quotes') or {}
+          critical=['$TRIN','$TRINQ','$NYHGH','$NYLOW','$NAHGH','$NALOW','$VIX','$VIX3M']
+          missing=[]
+          for symbol in critical:
+              row=quotes.get(symbol)
+              if not row or not math.isfinite(float(row.get('value'))):
+                  missing.append(symbol)
+          assert not missing, f'missing critical live quotes: {missing}'
+          generated=datetime.fromisoformat(payload['generated_at'].replace('Z','+00:00'))
+          age=(datetime.now(timezone.utc)-generated).total_seconds()
+          assert -60 <= age <= 180, f'live relay generated_at is stale: {age:.0f}s'
+          assert not payload.get('missing_critical'), f"relay reports missing critical symbols: {payload.get('missing_critical')}"
+          print('deployed Cloudflare live endpoint passed:', {s: quotes[s]['value'] for s in critical})
           PY
