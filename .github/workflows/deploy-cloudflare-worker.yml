@@ -2,6 +2,18 @@ name: Deploy Market Pulse unified Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+      - 'index.html'
+      - 'pulse-v5.css'
+      - 'pulse-v5.js'
+      - 'live-ui.js'
+      - 'manifest.webmanifest'
+      - '.assetsignore'
+      - 'data/**'
+      - '.github/workflows/deploy-cloudflare-worker.yml'
 
 permissions:
   contents: read
@@ -12,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: signal-quality-review
+          ref: main
       - name: Deploy Market Pulse Worker + static assets
         uses: cloudflare/wrangler-action@v3
         with:
