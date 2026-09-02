@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090d16">
 <title>Market Pulse</title>
-<link rel="stylesheet" href="pulse-v5.css?v=1">
+<link rel="stylesheet" href="pulse-v5.css?v=2">
 </head>
 <body>
 <div class="shell">
@@ -35,20 +35,11 @@
     </aside>
   </section>
 
-  <section class="secondary-grid">
-    <article class="change-card">
-      <div class="section-head">
-        <div><div class="kicker">SINCE THE LAST READ</div><h2>What changed?</h2></div>
-      </div>
-      <div id="changedList" class="change-list"></div>
-    </article>
-
-    <article class="setup-card">
-      <div class="section-head">
-        <div><div class="kicker">TURNING-POINT FRAMEWORK</div><h2>Extreme → Confirmation → Trigger</h2></div>
-      </div>
-      <div id="setupPath" class="setup-path"></div>
-    </article>
+  <section class="change-card change-card-wide">
+    <div class="section-head">
+      <div><div class="kicker">SINCE THE LAST READ</div><h2>What changed?</h2></div>
+    </div>
+    <div id="changedList" class="change-list"></div>
   </section>
 
   <section class="signals-head">
@@ -56,7 +47,7 @@
       <div class="kicker">THE EVIDENCE</div>
       <h2>Seven signals behind the state</h2>
     </div>
-    <p>Each signal answers one market question, explains how unusual the reading is, and shows what happened after comparable historical episodes.</p>
+    <p>Each signal answers one market question and shows what happened after comparable historical episodes.</p>
   </section>
 
   <section id="signalBoard" class="signal-board" aria-live="polite"></section>
@@ -67,8 +58,8 @@
   </section>
 </main>
 
-<footer>Historical precedent is context, not a forecast. Market State is a synthesis of the seven signal families shown above.</footer>
+<footer>Historical precedent is context, not a forecast.</footer>
 </div>
-<script src="pulse-v5.js?v=1" defer></script>
+<script src="pulse-v5.js?v=2" defer></script>
 </body>
 </html>
