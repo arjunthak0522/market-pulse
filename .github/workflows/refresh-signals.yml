@@ -1,5 +1,6 @@
 name: Refresh seven signals
 
+# Buyer-ready contract v2
 on:
   workflow_dispatch:
   push:
@@ -87,4 +88,5 @@ jobs:
           git add data/signal_data.json
           git diff --cached --quiet && exit 0
           git commit -m 'Refresh buyer-ready Market Pulse dataset'
+          git pull --rebase origin signal-quality-review
           git push origin HEAD:signal-quality-review
