@@ -17,7 +17,6 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pandas_market_calendars as mcal
-import yfinance as yf
 
 import run_refresh as base
 
@@ -128,40 +127,78 @@ def current_mcclellan(market: str, adv: float, dec: float, session_date: str):
     return float(series.iloc[-1]), series
 
 
+def _spark_closes(symbols):
+    """Return {symbol: latest five valid daily closes} from Yahoo's multi-symbol spark endpoint."""
+    out = {}
+    url = "https://query1.finance.yahoo.com/v7/finance/spark"
+    for i in range(0, len(symbols), 80):
+        chunk = symbols[i:i + 80]
+        params = {
+            "symbols": ",".join(chunk),
+            "range": "10d",
+            "interval": "1d",
+            "indicators": "close",
+            "includeTimestamps": "true",
+            "includePrePost": "false",
+            "corsDomain": "finance.yahoo.com",
+            ".tsrc": "finance",
+        }
+        try:
+            r = builder.requests.get(url, params=params, headers=builder.UA, timeout=30)
+            r.raise_for_status()
+            result = (r.json().get("spark", {}) or {}).get("result") or []
+            for item in result:
+                symbol = item.get("symbol")
+                response = item.get("response") or []
+                if not symbol or not response:
+                    continue
+                closes = (((response[0].get("indicators") or {}).get("quote") or [{}])[0].get("close") or [])
+                vals = [float(x) for x in closes if x is not None and math.isfinite(float(x))]
+                if len(vals) >= 5:
+                    out[symbol] = vals[-5:]
+        except Exception as exc:
+            print(f"Yahoo spark breadth chunk {i // 80 + 1} warning: {exc}")
+        time.sleep(0.2)
+    return out
+
+
+def _chart_fallback(symbols, out):
+    """Retry only missing constituents through the public chart endpoint."""
+    for symbol in symbols:
+        if symbol in out:
+            continue
+        try:
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+            r = builder.requests.get(url, params={"range": "10d", "interval": "1d"}, headers=builder.UA, timeout=12)
+            r.raise_for_status()
+            result = (r.json().get("chart", {}).get("result") or [])
+            if not result:
+                continue
+            closes = (((result[0].get("indicators") or {}).get("quote") or [{}])[0].get("close") or [])
+            vals = [float(x) for x in closes if x is not None and math.isfinite(float(x))]
+            if len(vals) >= 5:
+                out[symbol] = vals[-5:]
+        except Exception:
+            continue
+        if len(out) >= 490:
+            break
+    return out
+
+
 def sp500_live_5d():
-    """Current S&P 500 % above 5-day SMA using resilient batched current daily bars."""
+    """Current S&P 500 % above 5-day SMA from machine-readable current daily bars."""
     html = builder.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", timeout=30).text
     table = pd.read_html(io.StringIO(html))[0]
     tickers = table["Symbol"].astype(str).str.replace(".", "-", regex=False).tolist()
-    frames = []
-    failures = []
-    for i in range(0, len(tickers), 50):
-        chunk = tickers[i:i+50]
-        try:
-            px = yf.download(chunk, period="10d", interval="1d", auto_adjust=False, progress=False, threads=True, timeout=30)
-            if px.empty:
-                failures.append(f"chunk {i//50+1}: empty")
-                continue
-            close = px["Close"] if isinstance(px.columns, pd.MultiIndex) else px[["Close"]].rename(columns={"Close": chunk[0]})
-            frames.append(close)
-        except Exception as exc:
-            failures.append(f"chunk {i//50+1}: {exc}")
-        time.sleep(0.35)
-    if not frames:
-        raise RuntimeError("S&P 500 live 5-day breadth returned no constituent batches")
-    close = pd.concat(frames, axis=1)
-    close = close.loc[:, ~close.columns.duplicated()].dropna(how="all")
-    if len(close) < 5:
-        raise RuntimeError("S&P 500 live 5-day breadth history too short")
-    tail = close.tail(5)
-    valid = tail.count() >= 5
-    nvalid = int(valid.sum())
-    print(f"S&P 500 5D breadth valid={nvalid}; batch_failures={failures}")
+    closes = _spark_closes(tickers)
+    if len(closes) < 450:
+        closes = _chart_fallback(tickers, closes)
+    nvalid = len(closes)
+    print(f"S&P 500 5D breadth machine-readable valid={nvalid}")
     if nvalid < 450:
         raise RuntimeError(f"S&P 500 live 5-day breadth has only {nvalid} valid constituents")
-    latest = tail.iloc[-1]
-    ma5 = tail.mean()
-    return round(100 * float((latest[valid] > ma5[valid]).mean()), 2)
+    above = sum(1 for vals in closes.values() if vals[-1] > sum(vals) / 5)
+    return round(100 * above / nvalid, 2)
 
 
 def overlay_current_session():
@@ -195,11 +232,34 @@ def overlay_current_session():
     sig["cpce"]["value"] = round(cpce, 3)
     stamp(sig["cpce"], "$CPCE", frequency="eod")
 
-    sig["trin"]["value"] = round(q["$TRIN"][0], 3)
-    sig["trin"]["definition"] = "StockCharts $TRIN / classic NYSE Arms Index"
+    trin_raw = q["$TRIN"][3]
+    trinq_raw = q["$TRINQ"][3]
+    sig["trin"].update({
+        "value": round(q["$TRIN"][0], 3),
+        "session_open": builder.safe(trin_raw.get("open")),
+        "session_high": builder.safe(trin_raw.get("high")),
+        "session_low": builder.safe(trin_raw.get("low")),
+        "definition": "StockCharts $TRIN / classic NYSE Arms Index",
+    })
+    sig["trin"]["intraday_extreme_occurred"] = bool(
+        sig["trin"].get("session_high") is not None and
+        sig["trin"].get("study", {}).get("threshold") is not None and
+        sig["trin"]["session_high"] >= sig["trin"]["study"]["threshold"]
+    )
     stamp(sig["trin"], "$TRIN")
-    sig["trinq"]["value"] = round(q["$TRINQ"][0], 3)
-    sig["trinq"]["definition"] = "StockCharts $TRINQ / classic Nasdaq Arms Index"
+
+    sig["trinq"].update({
+        "value": round(q["$TRINQ"][0], 3),
+        "session_open": builder.safe(trinq_raw.get("open")),
+        "session_high": builder.safe(trinq_raw.get("high")),
+        "session_low": builder.safe(trinq_raw.get("low")),
+        "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
+    })
+    sig["trinq"]["intraday_extreme_occurred"] = bool(
+        sig["trinq"].get("session_high") is not None and
+        sig["trinq"].get("study", {}).get("threshold") is not None and
+        sig["trinq"]["session_high"] >= sig["trinq"]["study"]["threshold"]
+    )
     stamp(sig["trinq"], "$TRINQ")
 
     if clock["open"]:
