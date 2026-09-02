@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Intraday Market Pulse refresh.
 
-StockCharts $TRIN/$TRINQ remain the canonical Arms-index definitions. Current
-transport calculates the same classic Arms formula from intraday NYSE/Nasdaq
-advancing/declining issues and advancing/declining volume. Prior-session values
-are never substituted for an intraday snapshot.
+TRIN and TRINQ are fetched from the same StockCharts QuoteBrain service used by
+its current chart application. Historical event studies remain history/EOD based.
+No prior-session quote is accepted as an intraday substitute.
 """
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime, timezone
 
 import pandas as pd
@@ -19,52 +19,53 @@ builder = base.builder
 ORIGINAL_MCOSCILLATOR = builder.mcoscillator_current
 
 
-def tradingview_components(market: str) -> tuple[float, str, str, dict]:
-    suffix = "NY" if market == "nyse" else "NQ"
-    canonical = "$TRIN" if market == "nyse" else "$TRINQ"
-    symbols = {
-        "adv": f"USI:ADVN.{suffix}",
-        "dec": f"USI:DECL.{suffix}",
-        "upvol": f"USI:UPVOL.{suffix}",
-        "dnvol": f"USI:DNVOL.{suffix}",
-    }
-    url = "https://scanner.tradingview.com/america/scan"
-    body = {
-        "symbols": {"tickers": list(symbols.values()), "query": {"types": []}},
-        "columns": ["close", "update_mode"],
-    }
-    r = builder.requests.post(url, json=body, headers=builder.UA, timeout=20)
+def _quote_time(row: dict) -> tuple[str, dict]:
+    """Return best available quote timestamp plus the raw time metadata."""
+    keys = ("timestamp", "quoteTimestamp", "lastTimestamp", "lastTime", "dateTime", "datetime", "date", "time")
+    raw = {k: row.get(k) for k in keys if row.get(k) not in (None, "")}
+    for k, value in raw.items():
+        try:
+            if isinstance(value, (int, float)):
+                # tolerate seconds or milliseconds
+                v = float(value)
+                if v > 10_000_000_000:
+                    v /= 1000
+                return datetime.fromtimestamp(v, timezone.utc).isoformat(), raw
+            dt = pd.to_datetime(value, utc=True, errors="coerce")
+            if not pd.isna(dt):
+                return dt.to_pydatetime().isoformat(), raw
+        except Exception:
+            pass
+    # QuoteBrain does not necessarily expose a timestamp field in all symbol
+    # payloads. In that case retain retrieval time but separately record that it
+    # is retrieval time, not an exchange timestamp.
+    return datetime.now(timezone.utc).isoformat(), raw
+
+
+def stockcharts_quotebrain(symbol: str) -> tuple[float, str, str, dict]:
+    url = "https://stockcharts.com/quotebrain/quotes"
+    params = {"s": symbol, "f": "json", "randomNumber": str(int(time.time() * 1000))}
+    headers = dict(builder.UA)
+    headers.update({"Referer": f"https://stockcharts.com/sc3/ui/?s=%24{symbol.lstrip('$')}", "Accept": "application/json,text/plain,*/*"})
+    r = builder.requests.get(url, params=params, headers=headers, timeout=20)
     r.raise_for_status()
-    rows = r.json().get("data") or []
-    by_symbol = {row.get("s"): row.get("d") for row in rows if row.get("s") and row.get("d")}
-    vals = {}
-    modes = []
-    missing = []
-    for key, sym in symbols.items():
-        data = by_symbol.get(sym)
-        if not data or data[0] is None:
-            missing.append(sym)
-            continue
-        vals[key] = float(data[0])
-        if len(data) > 1 and data[1] is not None:
-            modes.append(str(data[1]))
-    if missing:
-        raise RuntimeError(f"TradingView {market} breadth missing: {', '.join(missing)}; returned={list(by_symbol)}")
-    if min(vals.values()) <= 0:
-        raise RuntimeError(f"TradingView {market} breadth invalid: {vals}")
-    value = (vals["adv"] / vals["dec"]) / (vals["upvol"] / vals["dnvol"])
+    payload = r.json()
+    if not isinstance(payload, list) or len(payload) != 1 or not isinstance(payload[0], dict):
+        raise RuntimeError(f"StockCharts {symbol}: unexpected QuoteBrain payload {type(payload).__name__}: {str(payload)[:300]}")
+    row = payload[0]
+    value = row.get("close")
+    if value is None:
+        raise RuntimeError(f"StockCharts {symbol}: QuoteBrain missing close; keys={sorted(row)}")
+    value = float(value)
     if not (0.02 <= value <= 25):
-        raise RuntimeError(f"TradingView {market} Arms invalid: {value} from {vals}")
-    now = datetime.now(timezone.utc).isoformat()
-    mode = ",".join(sorted(set(modes))) if modes else "intraday"
-    source = f"TradingView USI {market.upper()} breadth components ({mode}); StockCharts {canonical} Arms definition"
-    return value, now, source, vals
+        raise RuntimeError(f"StockCharts {symbol}: invalid close {value}")
+    asof, raw_time = _quote_time(row)
+    print(f"{symbol} StockCharts QuoteBrain close={value}; time_meta={raw_time}; keys={sorted(row)}")
+    return value, asof, f"StockCharts QuoteBrain {symbol}", row
 
 
 def live_quote(symbol: str) -> tuple[float, str, str]:
-    market = "nyse" if symbol == "$TRIN" else "nasdaq"
-    value, asof, source, components = tradingview_components(market)
-    print(f"{symbol} live components: {components}; Arms={value:.4f}")
+    value, asof, source, _ = stockcharts_quotebrain(symbol)
     return value, asof, source
 
 
@@ -85,14 +86,15 @@ def live_trinq_value():
 def stamp_live_metadata():
     payload = json.loads(builder.OUT.read_text())
     now = datetime.now(timezone.utc).isoformat()
-    trin_v, trin_ts, trin_src = live_quote("$TRIN")
-    trinq_v, trinq_ts, trinq_src = live_quote("$TRINQ")
+    trin_v, trin_ts, trin_src, trin_raw = stockcharts_quotebrain("$TRIN")
+    trinq_v, trinq_ts, trinq_src, trinq_raw = stockcharts_quotebrain("$TRINQ")
     payload["signals"]["trin"].update({
         "value": round(trin_v, 3),
         "as_of_timestamp": trin_ts,
         "source": trin_src,
         "freshness": "intraday",
         "definition": "StockCharts $TRIN / classic NYSE Arms Index",
+        "quote_transport": "StockCharts QuoteBrain",
     })
     payload["signals"]["trinq"].update({
         "value": round(trinq_v, 3),
@@ -100,10 +102,11 @@ def stamp_live_metadata():
         "source": trinq_src,
         "freshness": "intraday",
         "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
+        "quote_transport": "StockCharts QuoteBrain",
     })
     payload["generated_at"] = now
     payload.setdefault("methodology", {})["live_data"] = (
-        "TRIN and TRINQ use the StockCharts classic Arms formula calculated from intraday exchange breadth components. Prior-session values are not accepted as current substitutes."
+        "TRIN and TRINQ are fetched from StockCharts QuoteBrain, the quote service used by its chart app. Prior-session values are not accepted as current substitutes."
     )
     builder.OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
