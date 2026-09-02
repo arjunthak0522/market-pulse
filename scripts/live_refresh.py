@@ -1,48 +1,86 @@
 #!/usr/bin/env python3
-"""Intraday Market Pulse refresh.
+"""Current-session Market Pulse refresh.
 
-TRIN and TRINQ are fetched from the same StockCharts QuoteBrain service used by
-its current chart application. Historical event studies remain history/EOD based.
-No prior-session quote is accepted as an intraday substitute.
+Current market-state inputs come from same-session sources. StockCharts QuoteBrain
+is used for its market-internal/index series; historical event studies remain
+EOD/history based. Published EOD-only series are explicitly labeled EOD rather
+than masquerading as live intraday readings.
 """
 from __future__ import annotations
 
+import io
 import json
+import math
 import time
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
+import pandas_market_calendars as mcal
+import yfinance as yf
 
 import run_refresh as base
 
 builder = base.builder
 ORIGINAL_MCOSCILLATOR = builder.mcoscillator_current
+ET = ZoneInfo("America/New_York")
 
 
-def _quote_time(row: dict) -> tuple[str, dict]:
-    """Return best available quote timestamp plus the raw time metadata."""
-    keys = ("timestamp", "quoteTimestamp", "lastTimestamp", "lastTime", "dateTime", "datetime", "date", "time")
-    raw = {k: row.get(k) for k in keys if row.get(k) not in (None, "")}
-    for k, value in raw.items():
+def market_clock():
+    now = datetime.now(timezone.utc)
+    cal = mcal.get_calendar("NYSE")
+    start = (now.astimezone(ET).date() - pd.Timedelta(days=5)).isoformat()
+    end = (now.astimezone(ET).date() + pd.Timedelta(days=1)).isoformat()
+    sched = cal.schedule(start_date=start, end_date=end)
+    active = None
+    last = None
+    for idx, row in sched.iterrows():
+        o = row["market_open"].to_pydatetime().astimezone(timezone.utc)
+        c = row["market_close"].to_pydatetime().astimezone(timezone.utc)
+        if o <= now <= c:
+            active = (idx.date(), o, c)
+        if c <= now:
+            last = (idx.date(), o, c)
+    if active:
+        return {"open": True, "session_date": str(active[0]), "now": now}
+    if last:
+        return {"open": False, "session_date": str(last[0]), "now": now}
+    return {"open": False, "session_date": str(now.astimezone(ET).date()), "now": now}
+
+
+def _quote_time(row: dict):
+    t = row.get("time")
+    if isinstance(t, dict):
+        ms = t.get("millis")
+        if ms is not None:
+            v = float(ms)
+            if v > 10_000_000_000:
+                v /= 1000
+            return datetime.fromtimestamp(v, timezone.utc).isoformat(), t
+        raw = t.get("time")
+        zone = t.get("zone") or "America/New_York"
+        if raw:
+            dt = pd.Timestamp(raw).to_pydatetime().replace(tzinfo=ZoneInfo(zone))
+            return dt.astimezone(timezone.utc).isoformat(), t
+    for key in ("timestamp", "quoteTimestamp", "lastTimestamp", "dateTime", "datetime"):
+        value = row.get(key)
+        if value in (None, ""):
+            continue
         try:
             if isinstance(value, (int, float)):
-                # tolerate seconds or milliseconds
                 v = float(value)
                 if v > 10_000_000_000:
                     v /= 1000
-                return datetime.fromtimestamp(v, timezone.utc).isoformat(), raw
+                return datetime.fromtimestamp(v, timezone.utc).isoformat(), {key: value}
             dt = pd.to_datetime(value, utc=True, errors="coerce")
             if not pd.isna(dt):
-                return dt.to_pydatetime().isoformat(), raw
+                return dt.to_pydatetime().isoformat(), {key: value}
         except Exception:
             pass
-    # QuoteBrain does not necessarily expose a timestamp field in all symbol
-    # payloads. In that case retain retrieval time but separately record that it
-    # is retrieval time, not an exchange timestamp.
-    return datetime.now(timezone.utc).isoformat(), raw
+    raise RuntimeError(f"StockCharts quote has no provider timestamp: {sorted(row)}")
 
 
-def stockcharts_quotebrain(symbol: str) -> tuple[float, str, str, dict]:
+def stockcharts_quotebrain(symbol: str):
     url = "https://stockcharts.com/quotebrain/quotes"
     params = {"s": symbol, "f": "json", "randomNumber": str(int(time.time() * 1000))}
     headers = dict(builder.UA)
@@ -51,20 +89,17 @@ def stockcharts_quotebrain(symbol: str) -> tuple[float, str, str, dict]:
     r.raise_for_status()
     payload = r.json()
     if not isinstance(payload, list) or len(payload) != 1 or not isinstance(payload[0], dict):
-        raise RuntimeError(f"StockCharts {symbol}: unexpected QuoteBrain payload {type(payload).__name__}: {str(payload)[:300]}")
+        raise RuntimeError(f"StockCharts {symbol}: unexpected QuoteBrain payload")
     row = payload[0]
-    value = row.get("close")
-    if value is None:
-        raise RuntimeError(f"StockCharts {symbol}: QuoteBrain missing close; keys={sorted(row)}")
-    value = float(value)
-    if not (0.02 <= value <= 25):
-        raise RuntimeError(f"StockCharts {symbol}: invalid close {value}")
+    value = builder.safe(row.get("close"))
+    if value is None or not math.isfinite(value):
+        raise RuntimeError(f"StockCharts {symbol}: missing/invalid close")
     asof, raw_time = _quote_time(row)
-    print(f"{symbol} StockCharts QuoteBrain close={value}; time_meta={raw_time}; keys={sorted(row)}")
+    print(f"{symbol}={value}; provider_time={raw_time}; realtime={row.get('realtime')}; source={row.get('source')}")
     return value, asof, f"StockCharts QuoteBrain {symbol}", row
 
 
-def live_quote(symbol: str) -> tuple[float, str, str]:
+def live_quote(symbol: str):
     value, asof, source, _ = stockcharts_quotebrain(symbol)
     return value, asof, source
 
@@ -83,31 +118,137 @@ def live_trinq_value():
     return value
 
 
-def stamp_live_metadata():
+def current_mcclellan(market: str, adv: float, dec: float, session_date: str):
+    links = builder.discover_unicorn_series()
+    hist = builder.unicorn_market(market, links)[["adv", "dec"]].copy()
+    d = pd.Timestamp(session_date)
+    hist = hist[hist.index < d]
+    hist.loc[d, ["adv", "dec"]] = [adv, dec]
+    return float(builder.mcclellan_from_ad(hist).iloc[-1]), builder.mcclellan_from_ad(hist)
+
+
+def sp500_live_5d():
+    html = builder.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", timeout=30).text
+    table = pd.read_html(io.StringIO(html))[0]
+    tickers = table["Symbol"].astype(str).str.replace(".", "-", regex=False).tolist()
+    px = yf.download(tickers, period="10d", interval="1d", auto_adjust=False, progress=False, threads=True, timeout=35)
+    close = px["Close"] if isinstance(px.columns, pd.MultiIndex) else px[["Close"]]
+    close = close.dropna(how="all")
+    if len(close) < 5:
+        raise RuntimeError("S&P 500 live 5-day breadth price history too short")
+    tail = close.tail(5)
+    valid = tail.count() >= 5
+    if int(valid.sum()) < 450:
+        raise RuntimeError(f"S&P 500 live 5-day breadth has only {int(valid.sum())} valid constituents")
+    latest = tail.iloc[-1]
+    ma5 = tail.mean()
+    return round(100 * float((latest[valid] > ma5[valid]).mean()), 2)
+
+
+def overlay_current_session():
     payload = json.loads(builder.OUT.read_text())
-    now = datetime.now(timezone.utc).isoformat()
-    trin_v, trin_ts, trin_src, trin_raw = stockcharts_quotebrain("$TRIN")
-    trinq_v, trinq_ts, trinq_src, trinq_raw = stockcharts_quotebrain("$TRINQ")
-    payload["signals"]["trin"].update({
-        "value": round(trin_v, 3),
-        "as_of_timestamp": trin_ts,
-        "source": trin_src,
-        "freshness": "intraday",
-        "definition": "StockCharts $TRIN / classic NYSE Arms Index",
-        "quote_transport": "StockCharts QuoteBrain",
+    clock = market_clock()
+    session = clock["session_date"]
+    sig = payload["signals"]
+
+    q = {}
+    for symbol in (
+        "$CPCE","$NYADV","$NYDEC","$NYHGH","$NYLOW","$NYTOT","$NYMO","$TRIN",
+        "$NAADV","$NADEC","$NAHGH","$NALOW","$NATOT","$NAMO","$TRINQ",
+        "$SPXA20R","$SPXA50R","$SPXA200R","$VIX","$VIX3M","$VVIX","$SKEW"
+    ):
+        q[symbol] = stockcharts_quotebrain(symbol)
+
+    def stamp(row, symbol, *, frequency="intraday"):
+        _v, ts, src, raw = q[symbol]
+        row.update({
+            "as_of": session,
+            "as_of_timestamp": ts,
+            "source": src,
+            "freshness": "intraday" if frequency == "intraday" and clock["open"] else ("session_close" if frequency == "intraday" else "eod"),
+            "frequency": frequency,
+            "quote_transport": "StockCharts QuoteBrain",
+            "provider_realtime_flag": bool(raw.get("realtime")),
+        })
+
+    # CPCE is an EOD indicator on StockCharts. Always use the latest same-session
+    # publication, but never label it as intraday.
+    cpce = q["$CPCE"][0]
+    sig["cpce"]["value"] = round(cpce, 3)
+    stamp(sig["cpce"], "$CPCE", frequency="eod")
+
+    # TRIN / TRINQ are native intraday market internals.
+    sig["trin"]["value"] = round(q["$TRIN"][0], 3)
+    sig["trin"]["definition"] = "StockCharts $TRIN / classic NYSE Arms Index"
+    stamp(sig["trin"], "$TRIN")
+    sig["trinq"]["value"] = round(q["$TRINQ"][0], 3)
+    sig["trinq"]["definition"] = "StockCharts $TRINQ / classic Nasdaq Arms Index"
+    stamp(sig["trinq"], "$TRINQ")
+
+    # NYMO/NAMO are published EOD by StockCharts. During the cash session we
+    # calculate the same ratio-adjusted oscillator from live A/D counts; after
+    # the close we use the official published EOD values.
+    if clock["open"]:
+        nymo, nymo_hist = current_mcclellan("nyse", q["$NYADV"][0], q["$NYDEC"][0], session)
+        namo, namo_hist = current_mcclellan("nasdaq", q["$NAADV"][0], q["$NADEC"][0], session)
+        sig["nymo"].update({"value": round(nymo, 2), "percentile_252d": builder.pct_rank(nymo_hist.iloc[:-1], nymo), "as_of": session, "as_of_timestamp": q["$NYADV"][1], "source": "StockCharts intraday NYSE advances/declines; ratio-adjusted McClellan calculation", "freshness": "intraday", "frequency": "intraday_calculated"})
+        sig["namo"].update({"value": round(namo, 2), "percentile_252d": builder.pct_rank(namo_hist.iloc[:-1], namo), "as_of": session, "as_of_timestamp": q["$NAADV"][1], "source": "StockCharts intraday Nasdaq advances/declines; ratio-adjusted McClellan calculation", "freshness": "intraday", "frequency": "intraday_calculated"})
+    else:
+        sig["nymo"]["value"] = round(q["$NYMO"][0], 2)
+        stamp(sig["nymo"], "$NYMO", frequency="eod")
+        sig["namo"]["value"] = round(q["$NAMO"][0], 2)
+        stamp(sig["namo"], "$NAMO", frequency="eod")
+
+    # Structural internal damage: NYSE is the primary study universe; Nasdaq is
+    # carried alongside it as same-session context.
+    ny_lows, ny_highs, ny_tot = q["$NYLOW"][0], q["$NYHGH"][0], q["$NYTOT"][0]
+    na_lows, na_highs, na_tot = q["$NALOW"][0], q["$NAHGH"][0], q["$NATOT"][0]
+    ny_low_pct = 100 * ny_lows / ny_tot if ny_tot else None
+    sig["newlows"].update({
+        "value": round(ny_lows), "new_highs": round(ny_highs), "new_low_pct": round(ny_low_pct, 2),
+        "nasdaq_new_lows": round(na_lows), "nasdaq_new_highs": round(na_highs), "nasdaq_new_low_pct": round(100 * na_lows / na_tot, 2) if na_tot else None,
+        "as_of": session, "as_of_timestamp": q["$NYLOW"][1], "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows", "freshness": "intraday" if clock["open"] else "session_close", "frequency": "intraday"
     })
-    payload["signals"]["trinq"].update({
-        "value": round(trinq_v, 3),
-        "as_of_timestamp": trinq_ts,
-        "source": trinq_src,
-        "freshness": "intraday",
-        "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
-        "quote_transport": "StockCharts QuoteBrain",
+
+    # S&P 500 participation. 20/50/200 come from StockCharts current session;
+    # 5-day participation is computed from current constituent daily bars.
+    live5 = sp500_live_5d()
+    sig["breadth"].update({
+        "above_5d": live5,
+        "above_20d": round(q["$SPXA20R"][0], 2),
+        "above_50d": round(q["$SPXA50R"][0], 2),
+        "above_200d": round(q["$SPXA200R"][0], 2),
+        "as_of": session, "as_of_timestamp": q["$SPXA20R"][1],
+        "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
+        "freshness": "intraday" if clock["open"] else "session_close", "frequency": "intraday"
     })
-    payload["generated_at"] = now
+    hist = json.loads(builder.HISTORY.read_text())
+    br = pd.DataFrame(hist.get("breadth", []))
+    if not br.empty and "above_5d" in br:
+        sig["breadth"]["percentile_252d"] = builder.pct_rank(pd.to_numeric(br["above_5d"], errors="coerce"), live5)
+
+    # Volatility family. Term structure, VIX and VVIX use current-session quotes;
+    # SKEW is explicitly EOD on StockCharts and remains labeled as such.
+    vix, vix3m, vvix, skew = q["$VIX"][0], q["$VIX3M"][0], q["$VVIX"][0], q["$SKEW"][0]
+    term = vix / vix3m
+    vh = builder.cboe_series("VIX")
+    v3h = builder.cboe_series("VIX3M")
+    vvh = builder.cboe_series("VVIX")
+    skh = builder.cboe_series("SKEW")
+    termh = pd.concat([vh.rename("v"), v3h.rename("v3")], axis=1).dropna().eval("v/v3")
+    sig["vol"].update({
+        "vix": round(vix, 2), "vix3m": round(vix3m, 2), "term_ratio": round(term, 3), "vvix": round(vvix, 2), "skew": round(skew, 2),
+        "term_percentile_252d": builder.pct_rank(termh, term), "vvix_percentile_252d": builder.pct_rank(vvh, vvix), "skew_percentile_252d": builder.pct_rank(skh, skew),
+        "as_of": session, "as_of_timestamp": q["$VIX"][1], "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
+        "freshness": "intraday" if clock["open"] else "session_close", "frequency": "mixed_intraday_eod", "skew_freshness": "eod"
+    })
+
+    payload["market_date"] = session
+    payload["generated_at"] = datetime.now(timezone.utc).isoformat()
     payload.setdefault("methodology", {})["live_data"] = (
-        "TRIN and TRINQ are fetched from StockCharts QuoteBrain, the quote service used by its chart app. Prior-session values are not accepted as current substitutes."
+        "Market Pulse uses same-session current inputs. TRIN/TRINQ, exchange breadth, new highs/lows and VIX-family inputs refresh intraday; NYMO/NAMO are calculated intraday from live A/D counts; CPCE and SKEW are explicitly EOD publications and are never mislabeled as intraday."
     )
+    payload["data_status"] = {"session_date": session, "market_open": clock["open"], "generated_at": payload["generated_at"]}
     builder.OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
 
@@ -132,7 +273,7 @@ def main():
 
     builder.main()
     base.enrich_volatility_family()
-    stamp_live_metadata()
+    overlay_current_session()
     base.finalize_product_layer(previous_payload)
 
 
