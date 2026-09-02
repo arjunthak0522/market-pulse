@@ -6,6 +6,7 @@ on:
     branches: [signal-quality-review]
     paths:
       - 'scripts/update_extremes.py'
+      - 'scripts/run_refresh.py'
       - 'requirements.txt'
       - '.github/workflows/refresh-signals.yml'
 
@@ -32,7 +33,7 @@ jobs:
       - name: Build all seven current signals and studies
         run: |
           set -o pipefail
-          python -u scripts/update_extremes.py 2>&1 | tee refresh.log
+          python -u scripts/run_refresh.py 2>&1 | tee refresh.log
       - name: Hard data contract
         run: |
           python - <<'PY'
@@ -46,6 +47,7 @@ jobs:
               assert primary is not None, f'{name}: no current value'
               study=row.get('study')
               assert study and study.get('horizons'), f'{name}: no study'
+              assert all(str(h) in study['horizons'] for h in (5,10,21,60)), f'{name}: missing horizon'
               assert any(int(v.get('n',0)) >= 5 for v in study['horizons'].values()), f'{name}: thin study'
           print('all seven families have current data and studies')
           PY
