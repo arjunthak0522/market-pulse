@@ -16,6 +16,7 @@ import urllib3
 import update_extremes as builder
 
 _ORIGINAL_GET = builder.get
+_ORIGINAL_LOCAL_FRAMES = builder.local_frames
 _ORIGINAL_SERIES_SKEW = pd.Series.skew
 
 
@@ -94,6 +95,64 @@ def official_nasdaq_daily():
     return out
 
 
+def parse_put_call_csv(text):
+    """Parse Cboe put/call CSVs with preambles/header changes across eras."""
+    rows = []
+    for line in text.splitlines():
+        parts = [x.strip().strip('"') for x in line.split(",")]
+        if len(parts) < 2:
+            continue
+        date = pd.to_datetime(parts[0], errors="coerce")
+        if pd.isna(date):
+            continue
+        nums = []
+        for token in parts[1:]:
+            try:
+                nums.append(float(token.replace(",", "")))
+            except (TypeError, ValueError):
+                continue
+        # Cboe ratio is the final numeric field in both legacy and modern files.
+        if not nums:
+            continue
+        ratio = nums[-1]
+        if 0.05 <= ratio <= 10:
+            rows.append((date.normalize(), ratio))
+    if not rows:
+        raise RuntimeError("Cboe equity put/call CSV parsed no observations")
+    s = pd.Series({d: v for d, v in rows}, dtype="float64").sort_index()
+    return s[~s.index.duplicated(keep="last")]
+
+
+def cboe_equity_pc_history():
+    urls = [
+        "https://cdn.cboe.com/resources/options/volume_and_call_put_ratios/equitypc.csv",
+        "https://cdn.cboe.com/api/global/us_indices/daily_prices/EQUITY_PC_RATIOS.csv",
+    ]
+    pieces = []
+    for url in urls:
+        try:
+            pieces.append(parse_put_call_csv(source_get(url, timeout=45).text))
+        except Exception as exc:
+            print(f"CPCE history source warning: {url}: {exc}")
+    if not pieces:
+        raise RuntimeError("No Cboe equity put/call history source available")
+    s = pd.concat(pieces).sort_index()
+    s = s[~s.index.duplicated(keep="last")]
+    if len(s) < 1000:
+        raise RuntimeError(f"Cboe equity put/call history too short: {len(s)}")
+    return s
+
+
+def long_history_frames(hist):
+    br, market, local_pc = _ORIGINAL_LOCAL_FRAMES(hist)
+    pc = cboe_equity_pc_history()
+    if not local_pc.empty and "value" in local_pc:
+        tail = pd.to_numeric(local_pc["value"], errors="coerce").dropna()
+        pc = pd.concat([pc, tail]).sort_index()
+        pc = pc[~pc.index.duplicated(keep="last")]
+    return br, market, pd.DataFrame({"value": pc})
+
+
 def series_skew_column(self):
     """Allow builder row.skew to mean the Cboe SKEW column, not Series.skew()."""
     if "skew" in self.index:
@@ -106,5 +165,6 @@ if __name__ == "__main__":
     builder.get = source_get
     builder.read_unicorn_series = archive_series
     builder.nasdaq_daily = official_nasdaq_daily
+    builder.local_frames = long_history_frames
     pd.Series.skew = property(series_skew_column)
     builder.main()
