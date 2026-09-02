@@ -3,44 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f3f2ef">
+<meta name="theme-color" content="#0b1020">
 <title>Market Pulse</title>
-<link rel="stylesheet" href="pulse.css?v=3">
+<link rel="stylesheet" href="pulse.css?v=4">
 </head>
 <body>
-<div class="shell">
+<div class="app-shell">
 <header class="topbar">
   <div class="brand-lockup">
-    <div class="brand-mark"></div>
+    <div class="brand-orb" aria-hidden="true"></div>
     <div>
       <div class="brand">MARKET PULSE</div>
-      <div id="asOf" class="asof">Loading latest close…</div>
+      <div id="asOf" class="asof">Loading latest market close…</div>
     </div>
   </div>
   <button id="refresh" class="refresh" type="button" aria-label="Refresh market data">↻</button>
 </header>
+
 <main>
-<section class="hero">
-  <div class="kicker">MARKET INTERNALS</div>
-  <h1 id="heroTitle">Reading the pressure beneath the indexes…</h1>
-  <p id="heroSummary">Connecting positioning, breadth, capitulation, structural damage and volatility into one clear market read.</p>
-  <div class="hero-rule"><span></span><small>Latest completed market data</small></div>
-</section>
-<section class="section-head">
-  <div>
-    <div class="kicker">MARKET RADAR</div>
-    <h2>The market’s pressure points</h2>
-  </div>
-  <p>Each signal is shown against its own history. The farther a marker moves toward an edge, the more unusual the reading.</p>
-</section>
-<section id="signalBoard" class="signal-board" aria-live="polite"></section>
-<section id="historyPanel" class="history-panel" hidden>
-  <button id="historyClose" class="history-close" type="button" aria-label="Close historical outcomes">Close</button>
-  <div id="historyContent"></div>
-</section>
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">TODAY'S INTERNAL READ</div>
+      <h1 id="heroTitle">Reading what is happening beneath the indexes…</h1>
+      <p id="heroSummary">Seven market-internal signals, translated into plain English.</p>
+    </div>
+    <aside class="setup-panel" aria-label="What stands out today">
+      <div class="setup-label">WHAT STANDS OUT</div>
+      <div id="heroSignals" class="setup-list"></div>
+    </aside>
+  </section>
+
+  <section class="legend-strip" aria-label="How to read signal ranks">
+    <div class="legend-copy">
+      <strong>No percentile math required.</strong>
+      <span>We translate every historical rank into plain English: normal, elevated, extreme, washout or severe.</span>
+    </div>
+    <div class="legend-scale" aria-hidden="true">
+      <span>RARE LOW</span><i></i><span>NORMAL</span><i></i><span>RARE HIGH</span>
+    </div>
+  </section>
+
+  <section class="radar-intro">
+    <div>
+      <div class="eyebrow">MARKET RADAR</div>
+      <h2>Seven signals that matter</h2>
+    </div>
+    <p>The state is the headline. The raw reading and historical rank are supporting evidence.</p>
+  </section>
+
+  <div id="signalBoard" class="signal-groups" aria-live="polite"></div>
+
+  <section id="historyPanel" class="history-panel" hidden>
+    <button id="historyClose" class="history-close" type="button" aria-label="Close historical outcomes">Close</button>
+    <div id="historyContent"></div>
+  </section>
 </main>
-<footer>Historical precedent describes what followed similar conditions. It is context, not a forecast.</footer>
+
+<footer>Historical precedent shows what followed similar conditions. It is context, not a forecast.</footer>
 </div>
-<script src="pulse.js?v=3" defer></script>
+<script src="pulse.js?v=4" defer></script>
 </body>
 </html>
