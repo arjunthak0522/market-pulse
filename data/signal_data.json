@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T21:55:49.844202+00:00",
+  "generated_at": "2026-09-02T21:57:09.838632+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -290,7 +290,7 @@
           "2019-05-01"
         ]
       },
-      "as_of_timestamp": "2026-09-02T21:55:49.915335+00:00",
+      "as_of_timestamp": "2026-09-02T21:57:09.924855+00:00",
       "freshness": "intraday",
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
       "quote_transport": "StockCharts QuoteBrain"
@@ -364,7 +364,7 @@
           "2018-04-20"
         ]
       },
-      "as_of_timestamp": "2026-09-02T21:55:50.026666+00:00",
+      "as_of_timestamp": "2026-09-02T21:57:10.127952+00:00",
       "freshness": "intraday",
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
       "quote_transport": "StockCharts QuoteBrain"
