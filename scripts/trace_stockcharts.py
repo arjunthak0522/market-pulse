@@ -9,7 +9,7 @@ SYMBOLS=[
     "$CPCE",
     "$NYADV","$NYDEC","$NYUPV","$NYDNV","$NYHGH","$NYLOW","$NYTOT","$NYMO","$TRIN",
     "$NAADV","$NADEC","$NAUPV","$NADNV","$NAHGH","$NALOW","$NATOT","$NAMO","$TRINQ",
-    "$SPXA20R","$SPXA50R","$SPXA200R",
+    "$SPXA5R","$SPXA5","$SPXA10R","$SPXA20R","$SPXA50R","$SPXA200R",
     "$VIX","$VIX3M","$VVIX","$SKEW",
 ]
 
