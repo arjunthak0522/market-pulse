@@ -2,6 +2,10 @@ name: Smoke deployed Market Pulse
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/smoke-deployed.yml'
 
 permissions:
   contents: read
