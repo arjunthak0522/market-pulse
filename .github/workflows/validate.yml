@@ -73,10 +73,17 @@ jobs:
           from datetime import datetime, timezone
           from pathlib import Path
 
-          payload=json.loads(Path('/tmp/market-pulse-live.json').read_text())
-          headers=Path('/tmp/market-pulse-headers.txt').read_text().lower()
-          assert 'access-control-allow-origin: https://arjunthak0522.github.io' in headers, 'live endpoint CORS contract failed'
-          assert 'content-type: application/json' in headers, 'live endpoint did not return JSON'
+          body=Path('/tmp/market-pulse-live.json').read_text(errors='replace')
+          headers=Path('/tmp/market-pulse-headers.txt').read_text(errors='replace')
+          try:
+              payload=json.loads(body)
+          except Exception:
+              print('Cloudflare response headers:\n'+headers)
+              print('Cloudflare response body prefix:\n'+body[:1200])
+              raise
+          lower_headers=headers.lower()
+          assert 'access-control-allow-origin: https://arjunthak0522.github.io' in lower_headers, 'live endpoint CORS contract failed'
+          assert 'content-type: application/json' in lower_headers, 'live endpoint did not return JSON'
           assert payload.get('refresh_guidance_seconds') == 300, 'unexpected live refresh guidance'
           assert 'StockCharts QuoteBrain' in payload.get('source',''), 'unexpected live provider source'
           quotes=payload.get('quotes') or {}
