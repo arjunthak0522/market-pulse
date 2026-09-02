@@ -18,7 +18,7 @@ jobs:
         run: |
           node --check pulse-v5.js
           node --check live-ui.js
-          node --check netlify/functions/live-market.mts
+          node --check cloudflare/worker.js
       - name: Python syntax
         run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py tests/test_extremes.py
       - name: Unit tests
@@ -34,6 +34,7 @@ jobs:
           html=Path('index.html').read_text()
           assert html.count('<script ')==2, 'expected exactly the V5 app script and live-data overlay'
           assert 'pulse-v5.js' in html and 'live-ui.js' in html
+          assert 'market-pulse-live-endpoint' in html, 'missing configurable live endpoint'
           assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
           required=["TODAY'S MARKET STATE",'MARKET PRESSURE','What changed?','What matters underneath the market']
           for text in required:
@@ -44,10 +45,11 @@ jobs:
               assert text in js, f'missing V5 behavior: {text}'
           assert 'weight = {severe:0,extreme:1,watch:2,normal:3}' in js, 'signal priority ordering missing'
           live=Path('live-ui.js').read_text()
-          for text in ['setInterval(refresh, 60_000)','intraday_extreme_occurred','SESSION CLOSE','INTRADAY']:
+          for text in ['POLL_MS = 5 * 60_000','intraday_extreme_occurred','SESSION CLOSE','~5 MIN','market-pulse-live-endpoint']:
               assert text in live, f'missing live-data behavior: {text}'
-          relay=Path('netlify/functions/live-market.mts').read_text()
-          for text in ['$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','/api/live-market','no-store']:
-              assert text in relay, f'missing live relay contract: {text}'
-          print('clean final V5 live-data guard passed')
+          relay=Path('cloudflare/worker.js').read_text()
+          for text in ['$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','refresh_guidance_seconds','StockCharts QuoteBrain']:
+              assert text in relay, f'missing Cloudflare relay contract: {text}'
+          assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
+          print('clean final V5 Cloudflare live-data guard passed')
           PY
