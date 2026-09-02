@@ -55,11 +55,13 @@
     const d = structuredClone(data);
     const q = live.quotes;
     const sig = d.signals || {};
+    const marketOpen = Boolean(d.data_status?.market_open);
+    const quoteFreshness = marketOpen ? "intraday" : "session_close";
     const apply = (id, symbol) => {
       if (!sig[id] || !q[symbol]) return;
       sig[id].value = q[symbol].value;
-      sig[id].as_of_timestamp = q[symbol].provider_timestamp || live.generated_at;
-      sig[id].freshness = "intraday";
+      sig[id].as_of_timestamp = q[symbol].provider_timestamp || sig[id].as_of_timestamp || live.generated_at;
+      sig[id].freshness = quoteFreshness;
     };
 
     apply("trin", "$TRIN");
@@ -83,16 +85,16 @@
       if (q["$NYHGH"]) sig.newlows.new_highs = Math.round(q["$NYHGH"].value);
       if (q["$NALOW"]) sig.newlows.nasdaq_new_lows = Math.round(q["$NALOW"].value);
       if (q["$NAHGH"]) sig.newlows.nasdaq_new_highs = Math.round(q["$NAHGH"].value);
-      sig.newlows.as_of_timestamp = q["$NYLOW"]?.provider_timestamp || live.generated_at;
-      sig.newlows.freshness = "intraday";
+      sig.newlows.as_of_timestamp = q["$NYLOW"]?.provider_timestamp || sig.newlows.as_of_timestamp || live.generated_at;
+      sig.newlows.freshness = quoteFreshness;
     }
 
     if (sig.breadth) {
       if (q["$SPXA20R"]) sig.breadth.above_20d = q["$SPXA20R"].value;
       if (q["$SPXA50R"]) sig.breadth.above_50d = q["$SPXA50R"].value;
       if (q["$SPXA200R"]) sig.breadth.above_200d = q["$SPXA200R"].value;
-      sig.breadth.as_of_timestamp = q["$SPXA20R"]?.provider_timestamp || live.generated_at;
-      sig.breadth.freshness = "intraday";
+      sig.breadth.as_of_timestamp = q["$SPXA20R"]?.provider_timestamp || sig.breadth.as_of_timestamp || live.generated_at;
+      sig.breadth.freshness = quoteFreshness;
     }
 
     if (sig.vol) {
@@ -103,11 +105,17 @@
       if (Number.isFinite(vix3m)) sig.vol.vix3m = vix3m;
       if (Number.isFinite(vix) && Number.isFinite(vix3m) && vix3m !== 0) sig.vol.term_ratio = vix / vix3m;
       if (Number.isFinite(vvix)) sig.vol.vvix = vvix;
-      sig.vol.as_of_timestamp = q["$VIX"]?.provider_timestamp || live.generated_at;
-      sig.vol.freshness = "intraday";
+      sig.vol.as_of_timestamp = q["$VIX"]?.provider_timestamp || sig.vol.as_of_timestamp || live.generated_at;
+      sig.vol.freshness = quoteFreshness;
     }
 
-    d.data_status = {...(d.data_status || {}), generated_at: live.generated_at, live_relay: true};
+    const priorStatus = d.data_status || {};
+    d.data_status = {
+      ...priorStatus,
+      ...(marketOpen ? {generated_at: live.generated_at} : {}),
+      live_relay: true,
+      live_relay_generated_at: live.generated_at
+    };
     return d;
   };
 
@@ -117,7 +125,7 @@
     const status = data.data_status || {};
     const generated = fmtET(status.generated_at || data.generated_at);
     const session = status.session_date || data.market_date || "";
-    if (usingLive) {
+    if (status.market_open && usingLive) {
       el.textContent = `CURRENT MARKET READ · Updated ${generated || "now"} ET · ~5 min cadence`;
     } else if (status.market_open) {
       el.textContent = `INTRADAY MARKET READ · Refreshed ${generated || "now"} ET`;
