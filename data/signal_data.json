@@ -1,10 +1,11 @@
 {
-  "generated_at": "2026-09-02T18:39:18.567091+00:00",
+  "generated_at": "2026-09-02T19:21:50.846204+00:00",
   "market_date": "2026-09-01",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
     "breadth_archive": "Unicorn historical breadth archive supplies long-run NYSE/Nasdaq precedent; current readings use the current sources listed per signal.",
-    "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention."
+    "mcclellan": "Ratio-adjusted net advances multiplied by 1000; 10% EMA minus 5% EMA, the standard ratio-adjusted McClellan convention.",
+    "volatility_family": "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. Raw VIX is supporting context only."
   },
   "signals": {
     "cpce": {
@@ -253,8 +254,8 @@
       }
     },
     "trinq": {
-      "value": 0.58,
-      "percentile_252d": 2.8,
+      "value": 0.63,
+      "percentile_252d": 8.3,
       "as_of": "2026-08-31",
       "source": "Barchart $TRIQ current; Unicorn Nasdaq breadth history",
       "study": {
@@ -503,6 +504,174 @@
           "2026-03-09",
           "2026-03-06",
           "2026-03-05"
+        ]
+      },
+      "term_percentile_252d": 67.1,
+      "vvix_percentile_252d": 21.8,
+      "skew_percentile_252d": 79.8,
+      "term_study": {
+        "title": "VIX term-structure stress",
+        "rule": "VIX/VIX3M ratio in the top decile of history. Higher ratios mean near-term fear is unusually urgent; readings above 1.00 indicate inversion.",
+        "threshold": 0.9858,
+        "direction": "high",
+        "historical_sample": 426,
+        "horizons": {
+          "5": {
+            "n": 426,
+            "average": 0.886,
+            "median": 1.29,
+            "positive_rate": 65.0,
+            "best": 17.358,
+            "worst": -17.969
+          },
+          "10": {
+            "n": 426,
+            "average": 1.514,
+            "median": 2.353,
+            "positive_rate": 70.2,
+            "best": 18.798,
+            "worst": -23.288
+          },
+          "21": {
+            "n": 426,
+            "average": 2.959,
+            "median": 3.352,
+            "positive_rate": 73.7,
+            "best": 25.185,
+            "worst": -24.142
+          },
+          "60": {
+            "n": 426,
+            "average": 6.823,
+            "median": 6.506,
+            "positive_rate": 83.1,
+            "best": 39.789,
+            "worst": -13.218
+          }
+        },
+        "prior_dates": [
+          "2026-04-07",
+          "2026-04-01",
+          "2026-03-31",
+          "2026-03-30",
+          "2026-03-27",
+          "2026-03-26",
+          "2026-03-25",
+          "2026-03-24",
+          "2026-03-23",
+          "2026-03-13",
+          "2026-03-12",
+          "2026-03-09"
+        ]
+      },
+      "vvix_study": {
+        "title": "VVIX fear-of-fear extremes",
+        "rule": "VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
+        "threshold": 116.31,
+        "direction": "high",
+        "historical_sample": 426,
+        "horizons": {
+          "5": {
+            "n": 426,
+            "average": 0.578,
+            "median": 0.612,
+            "positive_rate": 60.8,
+            "best": 17.358,
+            "worst": -17.969
+          },
+          "10": {
+            "n": 426,
+            "average": 1.104,
+            "median": 1.315,
+            "positive_rate": 65.5,
+            "best": 18.798,
+            "worst": -22.63
+          },
+          "21": {
+            "n": 426,
+            "average": 2.654,
+            "median": 3.032,
+            "positive_rate": 74.2,
+            "best": 25.185,
+            "worst": -20.601
+          },
+          "60": {
+            "n": 426,
+            "average": 6.051,
+            "median": 6.408,
+            "positive_rate": 78.2,
+            "best": 39.789,
+            "worst": -11.956
+          }
+        },
+        "prior_dates": [
+          "2026-04-07",
+          "2026-03-30",
+          "2026-03-27",
+          "2026-03-26",
+          "2026-03-25",
+          "2026-03-24",
+          "2026-03-23",
+          "2026-03-20",
+          "2026-03-19",
+          "2026-03-18",
+          "2026-03-16",
+          "2026-03-13"
+        ]
+      },
+      "skew_study": {
+        "title": "SKEW tail-risk extremes",
+        "rule": "Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
+        "threshold": 147.962,
+        "direction": "high",
+        "historical_sample": 426,
+        "horizons": {
+          "5": {
+            "n": 421,
+            "average": 0.338,
+            "median": 0.4,
+            "positive_rate": 61.8,
+            "best": 5.346,
+            "worst": -9.834
+          },
+          "10": {
+            "n": 420,
+            "average": 0.538,
+            "median": 0.814,
+            "positive_rate": 69.0,
+            "best": 6.805,
+            "worst": -13.725
+          },
+          "21": {
+            "n": 416,
+            "average": 0.926,
+            "median": 1.689,
+            "positive_rate": 70.7,
+            "best": 11.318,
+            "worst": -9.569
+          },
+          "60": {
+            "n": 415,
+            "average": 1.645,
+            "median": 2.959,
+            "positive_rate": 67.5,
+            "best": 13.276,
+            "worst": -24.843
+          }
+        },
+        "prior_dates": [
+          "2026-06-05",
+          "2026-04-14",
+          "2026-04-13",
+          "2026-04-08",
+          "2026-04-07",
+          "2026-03-11",
+          "2026-03-10",
+          "2026-03-09",
+          "2026-03-06",
+          "2026-03-05",
+          "2026-03-04",
+          "2026-03-03"
         ]
       }
     }
