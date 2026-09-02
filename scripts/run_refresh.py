@@ -1,46 +1,37 @@
 #!/usr/bin/env python3
-"""Runtime adapter for the seven-signal builder.
+"""Stable benchmark-price adapter for the seven-signal builder.
 
-Yahoo's v8 chart endpoint is keyless and works in non-browser environments. It
-is used only for SPY forward-return history; all signal values keep their own
-market-specific sources.
+FRED publishes the S&P 500 daily close as a machine-readable CSV. The series is
+used only for forward-return event studies. Individual signal readings retain
+their own listed sources.
 """
-from datetime import datetime, timezone
+import io
 
 import pandas as pd
 
 import update_extremes as builder
 
 
-def yahoo_spy_history():
-    url = "https://query1.finance.yahoo.com/v8/finance/chart/SPY"
-    params = {
-        "period1": 728317800,  # 1993-01-29 UTC
-        "period2": int(datetime.now(timezone.utc).timestamp()) + 86400,
-        "interval": "1d",
-        "events": "div,splits",
-        "includeAdjustedClose": "true",
-    }
-    r = builder.requests.get(url, params=params, headers={
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-    }, timeout=45)
+def fred_sp500_history():
+    url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=SP500"
+    r = builder.requests.get(url, headers=builder.UA, timeout=45)
     r.raise_for_status()
-    payload = r.json()
-    result = (payload.get("chart", {}).get("result") or [None])[0]
-    if not result:
-        raise RuntimeError(f"Yahoo SPY chart unavailable: {payload.get('chart', {}).get('error')}")
-    ts = result.get("timestamp") or []
-    indicators = result.get("indicators") or {}
-    adj = (indicators.get("adjclose") or [{}])[0].get("adjclose")
-    close = (indicators.get("quote") or [{}])[0].get("close")
-    vals = adj or close or []
-    if len(ts) != len(vals) or len(ts) < 1000:
-        raise RuntimeError("Yahoo SPY history incomplete")
-    s = pd.Series(vals, index=pd.to_datetime(ts, unit="s", utc=True).tz_convert(None), dtype="float64").dropna()
-    s.index = s.index.normalize()
-    return s[~s.index.duplicated(keep="last")].sort_index()
+    df = pd.read_csv(io.BytesIO(r.content))
+    cols = {str(c).strip().lower(): c for c in df.columns}
+    date_col = cols.get("observation_date") or cols.get("date")
+    value_col = cols.get("sp500") or cols.get("value")
+    if date_col is None or value_col is None:
+        raise RuntimeError(f"FRED SP500 columns not recognized: {list(df.columns)}")
+    s = pd.Series(
+        pd.to_numeric(df[value_col], errors="coerce").values,
+        index=pd.to_datetime(df[date_col], errors="coerce"),
+        dtype="float64",
+    ).dropna().sort_index()
+    if len(s) < 1000:
+        raise RuntimeError("FRED SP500 history too short")
+    return s[~s.index.duplicated(keep="last")]
 
 
 if __name__ == "__main__":
-    builder.spy_history = yahoo_spy_history
+    builder.spy_history = fred_sp500_history
     builder.main()
