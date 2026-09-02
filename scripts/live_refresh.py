@@ -23,7 +23,6 @@ builder = base.builder
 
 
 def _extract_quote(text: str, symbol: str) -> float | None:
-    """Extract a quote from server-rendered/bootstrapped StockCharts markup."""
     patterns = [
         r'"lastPrice"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
         r'"last"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)',
@@ -55,22 +54,22 @@ def stockcharts_quote(symbol: str) -> tuple[float, str, str]:
             if value is not None:
                 now = datetime.now(timezone.utc).isoformat()
                 return value, now, f"StockCharts {symbol} intraday"
-            errors.append(f"{url}: no parseable quote; html={len(r.text)} bytes")
+            snippet = re.sub(r"\s+", " ", r.text[:1800])
+            errors.append(f"{url}: no parseable quote; html={len(r.text)} bytes; head={snippet}")
         except Exception as exc:
             errors.append(f"{url}: {exc}")
     raise RuntimeError(f"StockCharts {symbol} quote unavailable: {' | '.join(errors)}")
 
 
 def barchart_quote(symbol: str) -> tuple[float, str, str]:
-    # Current fallback using the same StockCharts/Arms definition. Never use a
-    # prior-session cached value as an intraday substitute.
     page_symbol = "%24TRIN" if symbol == "$TRIN" else "%24TRIQ"
     url = f"https://www.barchart.com/stocks/quotes/{page_symbol}"
     text = builder.get(url).text
     clean = " ".join(builder.BeautifulSoup(text, "html.parser").stripped_strings)
     m = re.search(r"Last Price\s+([0-9]+(?:\.[0-9]+)?)", clean, re.I)
     if not m:
-        raise RuntimeError(f"Barchart {symbol}: last price not found")
+        snippet = re.sub(r"\s+", " ", text[:1200])
+        raise RuntimeError(f"Barchart {symbol}: last price not found; head={snippet}")
     return float(m.group(1)), datetime.now(timezone.utc).isoformat(), f"Barchart {symbol} current; StockCharts Arms definition"
 
 
@@ -83,14 +82,7 @@ def live_quote(symbol: str) -> tuple[float, str, str]:
 
 
 def live_mcoscillator_current():
-    # Keep the official NYMO/current NYSE breadth parser, but replace only TRIN
-    # with an intraday canonical Arms quote.
-    row = base._ORIGINAL_GET  # sentinel proving base module initialized
-    del row
-    data = builder.mcoscillator_current_original() if hasattr(builder, "mcoscillator_current_original") else None
-    if data is None:
-        # original builder function saved below before monkeypatch
-        data = ORIGINAL_MCOSCILLATOR()
+    data = ORIGINAL_MCOSCILLATOR()
     value, asof, source = live_quote("$TRIN")
     data["trin"] = value
     data["trin_as_of"] = asof
@@ -148,8 +140,6 @@ def main():
     builder.event_study = base.episode_event_study
     pd.Series.skew = property(base.series_skew_column)
 
-    # Replace the two current Arms readings only; their historical studies stay
-    # based on the long-run underlying breadth/volume archive.
     builder.mcoscillator_current = live_mcoscillator_current
     builder.barchart_trinq = live_trinq_value
 
