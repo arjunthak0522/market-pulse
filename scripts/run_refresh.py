@@ -5,8 +5,13 @@ A versioned public SPY daily dataset is used for historical forward-return
 studies. The legacy Unicorn breadth archive currently presents an expired TLS
 certificate; certificate verification is disabled for that static archive only.
 All live market-data hosts retain normal TLS verification.
+
+The volatility family is intentionally decomposed into three independently
+explainable signals: VIX term structure, VVIX and SKEW. Each receives its own
+historical rank and forward-return study after the core dataset is built.
 """
 import io
+import json
 import warnings
 from datetime import datetime, timezone
 
@@ -111,7 +116,6 @@ def parse_put_call_csv(text):
                 nums.append(float(token.replace(",", "")))
             except (TypeError, ValueError):
                 continue
-        # Cboe ratio is the final numeric field in both legacy and modern files.
         if not nums:
             continue
         ratio = nums[-1]
@@ -154,10 +158,71 @@ def long_history_frames(hist):
 
 
 def series_skew_column(self):
-    """Allow builder row.skew to mean the Cboe SKEW column, not Series.skew()."""
     if "skew" in self.index:
         return self["skew"]
     return _ORIGINAL_SERIES_SKEW.__get__(self, pd.Series)
+
+
+def enrich_volatility_family():
+    """Attach separate ranks and studies for term structure, VVIX and SKEW."""
+    out = builder.OUT
+    payload = json.loads(out.read_text())
+    vol = payload["signals"]["vol"]
+    spy = github_spy_history()
+
+    vix = builder.cboe_series("VIX")
+    vix3m = builder.cboe_series("VIX3M")
+    vvix = builder.cboe_series("VVIX")
+    skew = builder.cboe_series("SKEW")
+    frame = pd.concat({"vix": vix, "vix3m": vix3m, "vvix": vvix, "skew": skew}, axis=1).dropna()
+    frame["term"] = frame.vix / frame.vix3m
+    latest = frame.iloc[-1]
+
+    term_study = builder.require_study(
+        "VIX term structure",
+        builder.event_study(
+            frame.term,
+            spy,
+            high=True,
+            title="VIX term-structure stress",
+            rule="VIX/VIX3M ratio in the top decile of history. Higher ratios mean near-term fear is unusually urgent; readings above 1.00 indicate inversion.",
+        ),
+    )
+    vvix_study = builder.require_study(
+        "VVIX",
+        builder.event_study(
+            frame.vvix,
+            spy,
+            high=True,
+            title="VVIX fear-of-fear extremes",
+            rule="VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
+        ),
+    )
+    skew_study = builder.require_study(
+        "SKEW",
+        builder.event_study(
+            frame.skew,
+            spy,
+            high=True,
+            title="SKEW tail-risk extremes",
+            rule="Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
+        ),
+    )
+
+    vol.update({
+        "term_ratio": round(float(latest.term), 3),
+        "term_percentile_252d": builder.pct_rank(frame.term, float(latest.term)),
+        "vvix_percentile_252d": builder.pct_rank(frame.vvix, float(latest.vvix)),
+        "skew_percentile_252d": builder.pct_rank(frame.skew, float(latest.skew)),
+        "term_study": term_study,
+        "vvix_study": vvix_study,
+        "skew_study": skew_study,
+    })
+    payload["methodology"]["volatility_family"] = (
+        "Volatility Regime uses VIX/VIX3M term structure, VVIX and SKEW as three separate signals. "
+        "Raw VIX is supporting context only."
+    )
+    out.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
 
 
 if __name__ == "__main__":
@@ -168,3 +233,4 @@ if __name__ == "__main__":
     builder.local_frames = long_history_frames
     pd.Series.skew = property(series_skew_column)
     builder.main()
+    enrich_volatility_family()
