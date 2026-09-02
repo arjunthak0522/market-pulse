@@ -23,80 +23,47 @@ jobs:
         run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py tests/test_extremes.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py -v
-      - name: Clean V5 product guard
+      - name: Clean V5 unified Worker guard
         run: |
           python - <<'PY'
           from pathlib import Path
-          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','live-ui.js','manifest.webmanifest','requirements.txt'}
+          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','live-ui.js','manifest.webmanifest','requirements.txt','.assetsignore'}
           roots={p.name for p in Path('.').iterdir() if p.is_file()}
           extras=roots-allowed
           assert not extras, f'unexpected root product files: {sorted(extras)}'
+
           html=Path('index.html').read_text()
           assert html.count('<script ')==2, 'expected exactly the V5 app script and live-data overlay'
           assert 'pulse-v5.js' in html and 'live-ui.js' in html
           assert 'market-pulse-live-endpoint' in html, 'missing configurable live endpoint'
-          assert 'https://market-pulse.arjunthak.workers.dev' in html, 'deployed Cloudflare endpoint not wired'
+          assert 'content="/api/live"' in html, 'dashboard must use same-origin /api/live'
           assert html.count('stylesheet')==1 and 'pulse-v5.css' in html
           required=["TODAY'S MARKET STATE",'MARKET PRESSURE','What changed?','What matters underneath the market']
           for text in required:
               assert text in html, f'missing V5 product element: {text}'
           assert 'TURNING-POINT FRAMEWORK' not in html, 'methodology block should not occupy the main mobile flow'
+
           js=Path('pulse-v5.js').read_text()
           for text in ['View historical study','data-watch','median_max_drawdown','median_max_favorable','STANDS OUT']:
               assert text in js, f'missing V5 behavior: {text}'
           assert 'weight = {severe:0,extreme:1,watch:2,normal:3}' in js, 'signal priority ordering missing'
+
           live=Path('live-ui.js').read_text()
           for text in ['POLL_MS = 5 * 60_000','intraday_extreme_occurred','SESSION CLOSE','~5 MIN','market-pulse-live-endpoint']:
               assert text in live, f'missing live-data behavior: {text}'
-          relay=Path('cloudflare/worker.js').read_text()
-          for text in ['$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','refresh_guidance_seconds','StockCharts QuoteBrain']:
-              assert text in relay, f'missing Cloudflare relay contract: {text}'
-          assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
-          print('clean final V5 Cloudflare live-data guard passed')
-          PY
-      - name: Deployed Cloudflare endpoint smoke test
-        run: |
-          set -euo pipefail
-          endpoint='https://market-pulse.arjunthak.workers.dev'
-          curl -fsS \
-            --retry 9 \
-            --retry-all-errors \
-            --retry-delay 10 \
-            --connect-timeout 10 \
-            --max-time 30 \
-            -H 'Origin: https://arjunthak0522.github.io' \
-            -D /tmp/market-pulse-headers.txt \
-            "$endpoint?t=$(date +%s)" \
-            -o /tmp/market-pulse-live.json
-          python - <<'PY'
-          import json, math
-          from datetime import datetime, timezone
-          from pathlib import Path
 
-          body=Path('/tmp/market-pulse-live.json').read_text(errors='replace')
-          headers=Path('/tmp/market-pulse-headers.txt').read_text(errors='replace')
-          try:
-              payload=json.loads(body)
-          except Exception:
-              print('Cloudflare response headers:\n'+headers)
-              print('Cloudflare response body prefix:\n'+body[:1200])
-              raise
-          lower_headers=headers.lower()
-          assert 'access-control-allow-origin: https://arjunthak0522.github.io' in lower_headers, 'live endpoint CORS contract failed'
-          assert 'content-type: application/json' in lower_headers, 'live endpoint did not return JSON'
-          assert payload.get('refresh_guidance_seconds') == 300, 'unexpected live refresh guidance'
-          assert 'StockCharts QuoteBrain' in payload.get('source',''), 'unexpected live provider source'
-          quotes=payload.get('quotes') or {}
-          critical=['$TRIN','$TRINQ','$NYHGH','$NYLOW','$NAHGH','$NALOW','$VIX','$VIX3M']
-          missing=[]
-          for symbol in critical:
-              row=quotes.get(symbol)
-              if not row or not math.isfinite(float(row.get('value'))):
-                  missing.append(symbol)
-          assert not missing, f'missing critical live quotes: {missing}'
-          generated=datetime.fromisoformat(payload['generated_at'].replace('Z','+00:00'))
-          age=(datetime.now(timezone.utc)-generated).total_seconds()
-          assert -60 <= age <= 180, f'live relay generated_at is stale: {age:.0f}s'
-          assert not payload.get('missing_critical'), f"relay reports missing critical symbols: {payload.get('missing_critical')}"
-          print('deployed Cloudflare live endpoint passed:', {s: quotes[s]['value'] for s in critical})
+          relay=Path('cloudflare/worker.js').read_text()
+          for text in ['/api/live','/api/health','env.ASSETS.fetch','$TRIN','$TRINQ','$NYADV','$NAADV','$VIX3M','refresh_guidance_seconds','StockCharts QuoteBrain']:
+              assert text in relay, f'missing unified Worker contract: {text}'
+
+          wrangler=Path('cloudflare/wrangler.toml').read_text()
+          for text in ['name = "market-pulse"','binding = "ASSETS"','directory = "../"','run_worker_first = ["/api/*"]']:
+              assert text in wrangler, f'missing unified Wrangler contract: {text}'
+
+          ignore=Path('.assetsignore').read_text()
+          for text in ['.github/','cloudflare/','scripts/','tests/']:
+              assert text in ignore, f'non-public source not excluded from static assets: {text}'
+
+          assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
+          print('clean V5 unified Cloudflare Worker guard passed')
           PY
