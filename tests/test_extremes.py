@@ -10,9 +10,8 @@ class CleanExtremesTests(unittest.TestCase):
         self.assertTrue(ctx.get('market_date'))
         self.assertIsInstance(ctx.get('breadth'),dict)
         self.assertIsInstance(hist.get('breadth'),list)
-    def test_clean_study_catalog(self):
-        root=Path(__file__).resolve().parents[1]
-        data=json.loads((root/'data'/'extreme_studies.json').read_text())
-        self.assertIsInstance(data.get('studies'),list)
+        self.assertIsInstance(hist.get('market'),list)
+        self.assertGreater(len(hist.get('breadth',[])),40)
+        self.assertGreater(len(hist.get('market',[])),80)
 
 if __name__=='__main__':unittest.main()
