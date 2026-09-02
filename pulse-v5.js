@@ -6,12 +6,27 @@
     p = num(p);
     if (p == null) return "History building";
     const q = Math.max(1, Math.min(99, Math.round(p)));
-    if (side === "low") return q <= 10 ? `Bottom ${q}% of the past year` : `Stronger than ${q}% of the past year`;
-    if (side === "two") {
-      if (q <= 10) return `Bottom ${q}% of the past year`;
-      if (q >= 90) return `Top ${Math.max(1, 100 - q)}% of the past year`;
+    if (side === "low") {
+      if (q <= 3) return `Severe washout · bottom ${q}%`;
+      if (q <= 10) return `Washout · bottom ${q}%`;
+      if (q <= 25) return "Weak versus the past year";
+      if (q >= 75) return `Strong · top ${Math.max(1,100-q)}%`;
+      return "Typical range";
     }
-    return q >= 90 ? `Top ${Math.max(1, 100 - q)}% of the past year` : `Higher than ${q}% of the past year`;
+    if (side === "two") {
+      if (q <= 3) return `Severe washout · bottom ${q}%`;
+      if (q <= 10) return `Washout · bottom ${q}%`;
+      if (q >= 97) return `Severe thrust · top ${Math.max(1,100-q)}%`;
+      if (q >= 90) return `Thrust · top ${Math.max(1,100-q)}%`;
+      if (q <= 25) return "Weak versus the past year";
+      if (q >= 75) return "Strong versus the past year";
+      return "Typical range";
+    }
+    if (q >= 97) return `Extreme · top ${Math.max(1,100-q)}%`;
+    if (q >= 90) return `Very high · top ${Math.max(1,100-q)}%`;
+    if (q >= 75) return `Elevated · top ${Math.max(1,100-q)}%`;
+    if (q <= 25) return "Low versus the past year";
+    return "Typical range";
   };
   const toneFromPct = (p, side = "high") => {
     p = num(p);
@@ -39,7 +54,6 @@
   function statePanel(data) {
     const m = data.market_state || {};
     const d = m.dimensions || {};
-    const setup = m.setup || {};
     const dim = (key,title,sub) => `<div class="pressure-dim"><div class="pressure-title">${title}</div><div class="pressure-value">${esc(d[key]?.label || "—")}</div><div class="pressure-sub">${sub}</div><div class="pressure-track"><span style="width:${Math.min(100,Math.max(3,num(d[key]?.score)||0))}%"></span></div></div>`;
     $("stateName").textContent = m.name || "Reading market state…";
     $("stateSummary").textContent = m.summary || "Synthesizing market internals.";
@@ -48,8 +62,6 @@
       dim("internals","INTERNALS","Breadth and participation"),
       dim("capitulation","CAPITULATION","Selling pressure and volume")
     ].join("");
-    const stage = (key,title) => `<div class="stage ${setup[key]?.confirmed?"confirmed":"pending"}"><span class="stage-dot"></span><div><strong>${title}</strong><small>${esc(setup[key]?.copy || "")}</small></div></div>`;
-    $("setupPath").innerHTML = stage("extreme","1. EXTREME") + stage("confirmation","2. CONFIRMATION") + stage("trigger","3. TRIGGER");
   }
 
   function changedPanel(data) {
@@ -69,7 +81,7 @@
   }
 
   function volVisual(v) {
-    const item = (name,question,value,pct,state) => `<div class="vol-cell"><div class="vol-cell-top"><span>${name}</span><strong>${value}</strong></div><p>${question}</p><div class="vol-state">${state}</div><small>${pctText(pct,"high")}</small></div>`;
+    const item = (name,question,value,pct,state) => `<div class="vol-cell"><div class="vol-cell-top"><span>${name}</span><strong>${value}</strong></div><div class="vol-copy"><p>${question}</p><div class="vol-state">${state}</div><small>${pctText(pct,"high")}</small></div></div>`;
     const termPct=num(v.term_percentile_252d), vvixPct=num(v.vvix_percentile_252d), skewPct=num(v.skew_percentile_252d);
     return `<div class="vol-cells">${item("TERM STRUCTURE","Is fear becoming urgent?",num(v.term_ratio)?.toFixed(2)??"—",termPct,num(v.term_ratio)>=1?"INVERTED":"Normal curve")}${item("VVIX","Are traders hedging volatility itself?",num(v.vvix)?.toFixed(1)??"—",vvixPct,vvixPct>=90?"Fear-of-fear extreme":vvixPct>=75?"Elevated":"Contained")}${item("SKEW","Are traders paying for crash protection?",num(v.skew)?.toFixed(0)??"—",skewPct,skewPct>=90?"Tail risk extreme":skewPct>=75?"Tail risk elevated":"Contained")}</div>`;
   }
