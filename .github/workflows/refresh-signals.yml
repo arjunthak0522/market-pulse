@@ -10,6 +10,7 @@ on:
       - 'scripts/update_extremes.py'
       - 'scripts/run_refresh.py'
       - 'scripts/live_refresh.py'
+      - 'scripts/market_regime.py'
       - 'scripts/trace_stockcharts.py'
       - 'requirements.txt'
       - '.github/workflows/refresh-signals.yml'
@@ -41,6 +42,10 @@ jobs:
         run: |
           set -o pipefail
           python -u scripts/live_refresh.py 2>&1 | tee refresh.log
+      - name: Build completed-session Market Regime
+        run: |
+          set -o pipefail
+          python -u scripts/market_regime.py 2>&1 | tee regime.log
       - name: Hard product data contract
         run: |
           set -o pipefail
@@ -73,8 +78,6 @@ jobs:
                   assert int(st.get('n',0)) >= 5, f'{name}: {h}d study too thin'
                   assert 'median_max_drawdown' in st and 'median_max_favorable' in st, f'{name}: path stats missing'
 
-          # During the open session, every natively intraday family must be same-session
-          # and recent. EOD-only CPCE/SKEW are explicitly labeled rather than faked live.
           intraday=('trin','trinq','namo','nymo','newlows','breadth','vol')
           if is_open:
               now=datetime.now(timezone.utc)
@@ -86,7 +89,6 @@ jobs:
                   assert -5 <= age <= 20, f'{name}: intraday input stale ({age:.1f}m)'
                   assert row.get('freshness') == 'intraday', f'{name}: not labeled intraday'
           else:
-              # After the bell, all primary readings must resolve to the latest completed session.
               for name,row in p['signals'].items():
                   assert row.get('as_of') == session, f'{name}: stale completed-session date {row.get("as_of")} != {session}'
 
@@ -99,7 +101,15 @@ jobs:
               assert st and st.get('episode_method'), f'vol: missing {key}'
               assert all(str(h) in st.get('horizons',{}) for h in (5,10,21,60)), f'vol: {key} missing horizon'
 
-          print('current-session Market Pulse contract passed', session, 'market_open=', is_open)
+          regime=p.get('market_regime') or {}
+          assert regime.get('name'), 'missing market regime'
+          assert regime.get('confidence') in {'HIGH','MODERATE','LOW'}, 'invalid regime confidence'
+          assert regime.get('coverage',{}).get('core_total') == 3, 'wrong Market Regime coverage contract'
+          assert set((regime.get('buckets') or {})) == {'trend','breadth','volatility'}, 'missing Market Regime bucket'
+          assert regime.get('stability',{}).get('rule'), 'missing Market Regime hysteresis rule'
+          assert Path('data/regime_history.json').exists(), 'missing Market Regime history'
+
+          print('current-session Market Pulse contract passed', session, 'market_open=', is_open, 'regime=', regime['name'])
           PY
       - name: Upload refresh diagnostic
         if: always()
@@ -109,15 +119,17 @@ jobs:
           path: |
             trace-stockcharts.log
             refresh.log
+            regime.log
             contract.log
             data/signal_data.json
+            data/regime_history.json
           retention-days: 3
           if-no-files-found: ignore
       - name: Commit refreshed static dataset
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/signal_data.json
+          git add data/signal_data.json data/regime_history.json
           git diff --cached --quiet && exit 0
           git commit -m 'Refresh current-session Market Pulse dataset'
           git pull --rebase origin signal-quality-review
