@@ -26,8 +26,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Install Wrangler
-        run: npm install --no-save wrangler@4.128.0
+      - name: Install Wrangler outside repository assets
+        run: |
+          mkdir -p /tmp/wrangler
+          cd /tmp/wrangler
+          npm init -y
+          npm install wrangler@4.128.0
       - name: Deploy isolated temporary CEO preview
         working-directory: cloudflare
-        run: npx wrangler deploy --config wrangler.preview.toml --temporary
+        run: |
+          rm -rf ../node_modules
+          /tmp/wrangler/node_modules/.bin/wrangler deploy --config wrangler.preview.toml --temporary
