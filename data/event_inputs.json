@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "generated_at": null,
+  "event_inputs": {},
+  "errors": {},
+  "source_registry": {},
+  "failure_rule": "A failed provider is omitted. Market Pulse never substitutes a synthetic score for an unavailable source."
+}
