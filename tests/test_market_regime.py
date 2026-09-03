@@ -1,3 +1,5 @@
+import unittest
+
 from scripts.market_regime import classify
 
 
@@ -24,44 +26,46 @@ def payload(date, trend=(75, 72, 70), breadth=(70, 68), nymo=70, namo=68, newlow
     }
 
 
-def test_risk_on_expansion():
-    result, _ = classify(payload("2026-09-01"), {"version": 1, "sessions": []})
-    assert result["name"] == "Risk-On Expansion"
-    assert result["coverage"]["core_available"] == 3
+class MarketRegimeTests(unittest.TestCase):
+    def test_risk_on_expansion(self):
+        result, _ = classify(payload("2026-09-01"), {"version": 1, "sessions": []})
+        self.assertEqual(result["name"], "Risk-On Expansion")
+        self.assertEqual(result["coverage"]["core_available"], 3)
+
+    def test_non_shock_switch_requires_two_sessions(self):
+        h = {"version": 1, "sessions": [{
+            "date": "2026-09-01",
+            "candidate": "Risk-On Expansion",
+            "official": "Risk-On Expansion",
+            "start_date": "2026-09-01",
+            "sessions_in_regime": 1,
+        }]}
+        weak = payload("2026-09-02", trend=(30, 28, 25), breadth=(25, 25), nymo=15, namo=20, newlows=85)
+        first, h2 = classify(weak, h)
+        self.assertEqual(first["candidate"], "Risk-Off")
+        self.assertEqual(first["name"], "Risk-On Expansion")
+        second, _ = classify({**weak, "market_date": "2026-09-03"}, h2)
+        self.assertEqual(second["name"], "Risk-Off")
+
+    def test_volatility_shock_can_trigger_immediately(self):
+        h = {"version": 1, "sessions": [{
+            "date": "2026-09-01",
+            "candidate": "Risk-On Expansion",
+            "official": "Risk-On Expansion",
+            "start_date": "2026-09-01",
+            "sessions_in_regime": 1,
+        }]}
+        shocked = payload("2026-09-02", term=1.08, term_pct=95, vvix=96, skew=94)
+        result, _ = classify(shocked, h)
+        self.assertEqual(result["candidate"], "Volatility Shock")
+        self.assertEqual(result["name"], "Volatility Shock")
+
+    def test_missing_data_does_not_fake_regime(self):
+        p = {"market_date": "2026-09-01", "signals": {"breadth": {}, "nymo": {}, "namo": {}, "newlows": {}, "vol": {}}}
+        result, _ = classify(p, {"version": 1, "sessions": []})
+        self.assertEqual(result["name"], "Unavailable")
+        self.assertEqual(result["confidence"], "LOW")
 
 
-def test_non_shock_switch_requires_two_sessions():
-    h = {"version": 1, "sessions": [{
-        "date": "2026-09-01",
-        "candidate": "Risk-On Expansion",
-        "official": "Risk-On Expansion",
-        "start_date": "2026-09-01",
-        "sessions_in_regime": 1,
-    }]}
-    weak = payload("2026-09-02", trend=(30, 28, 25), breadth=(25, 25), nymo=15, namo=20, newlows=85)
-    first, h2 = classify(weak, h)
-    assert first["candidate"] == "Risk-Off"
-    assert first["name"] == "Risk-On Expansion"
-    second, _ = classify({**weak, "market_date": "2026-09-03"}, h2)
-    assert second["name"] == "Risk-Off"
-
-
-def test_volatility_shock_can_trigger_immediately():
-    h = {"version": 1, "sessions": [{
-        "date": "2026-09-01",
-        "candidate": "Risk-On Expansion",
-        "official": "Risk-On Expansion",
-        "start_date": "2026-09-01",
-        "sessions_in_regime": 1,
-    }]}
-    shocked = payload("2026-09-02", term=1.08, term_pct=95, vvix=96, skew=94)
-    result, _ = classify(shocked, h)
-    assert result["candidate"] == "Volatility Shock"
-    assert result["name"] == "Volatility Shock"
-
-
-def test_missing_data_does_not_fake_regime():
-    p = {"market_date": "2026-09-01", "signals": {"breadth": {}, "nymo": {}, "namo": {}, "newlows": {}, "vol": {}}}
-    result, _ = classify(p, {"version": 1, "sessions": []})
-    assert result["name"] == "Unavailable"
-    assert result["confidence"] == "LOW"
+if __name__ == "__main__":
+    unittest.main()
