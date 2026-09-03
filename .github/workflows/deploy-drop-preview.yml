@@ -1,0 +1,71 @@
+name: Publish CEO review with Cloudflare Drop
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  drop-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build reviewed static bundle
+        run: |
+          mkdir -p /tmp/market-pulse-drop/data
+          cp index.html pulse-v5.css pulse-v5.js market-regime.css market-regime.js event-intelligence.css event-intelligence.js live-ui.js manifest.webmanifest /tmp/market-pulse-drop/
+          cp data/signal_data.json data/regime_snapshot.json data/event_snapshot.json data/history.json data/market_context.json /tmp/market-pulse-drop/data/
+      - name: Deploy through Cloudflare Drop
+        id: drop
+        run: |
+          mkdir -p /tmp/drop-client
+          cd /tmp/drop-client
+          go mod init market-pulse-drop-client
+          go get github.com/lib-x/cf-drop@latest
+          cat > main.go <<'GO'
+          package main
+
+          import (
+            "context"
+            "fmt"
+            "os"
+            "github.com/lib-x/cf-drop/dropclient"
+          )
+
+          func main() {
+            client, err := dropclient.New()
+            if err != nil { panic(err) }
+            result, err := client.Deploy(
+              context.Background(),
+              dropclient.FromDir("/tmp/market-pulse-drop"),
+              dropclient.AcceptTerms(),
+              dropclient.VerifyAccess(),
+            )
+            if err != nil { panic(err) }
+            fmt.Printf("CEO_PREVIEW_URL=%s\n", result.URL)
+            if out := os.Getenv("GITHUB_OUTPUT"); out != "" {
+              f, err := os.OpenFile(out, os.O_APPEND|os.O_WRONLY, 0600)
+              if err != nil { panic(err) }
+              defer f.Close()
+              fmt.Fprintf(f, "url=%s\n", result.URL)
+            }
+          }
+          GO
+          go run .
+      - name: Verify public CEO preview
+        env:
+          PREVIEW_URL: ${{ steps.drop.outputs.url }}
+        run: |
+          test -n "$PREVIEW_URL"
+          echo "Verifying $PREVIEW_URL"
+          for i in $(seq 1 12); do
+            body=$(curl -fsSL "$PREVIEW_URL" || true)
+            if printf '%s' "$body" | grep -q 'Event Intelligence' && printf '%s' "$body" | grep -q 'Signals lighting up'; then
+              echo "CEO preview verified: $PREVIEW_URL"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Preview did not serve the reviewed dashboard" >&2
+          exit 1
