@@ -21,12 +21,13 @@ jobs:
           node --check live-ui.js
           node --check cloudflare/worker.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/market_events.py scripts/event_sources.py scripts/event_sources_v2.py scripts/run_event_intelligence.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/market_events.py scripts/event_sources.py scripts/event_sources_v2.py scripts/market_context_sources.py scripts/run_event_intelligence.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py -v
       - name: Live free-source smoke test
         run: |
           python scripts/event_sources_v2.py
+          python scripts/market_context_sources.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -39,7 +40,12 @@ jobs:
               assert row.get('score') is not None, f'{name}: missing normalized score'
               assert row.get('source'), f'{name}: missing source provenance'
               assert row.get('as_of'), f'{name}: missing as_of'
-          print('all free event providers passed:', sorted(got))
+
+          m=json.loads(Path('data/event_market_context.json').read_text())
+          assert m.get('context',{}).get('market_date'), f'market context unavailable: {m.get("error")}'
+          assert m.get('context',{}).get('sector_leadership'), 'same-session sector leadership missing'
+          assert set((m.get('context',{}).get('etfs') or {})) == {'SPY','QQQ'}, 'SPY/QQQ technical context missing'
+          print('all free event providers passed:', sorted(got), 'market_context=', m['context']['market_date'])
           PY
       - name: Partial historical regime sanity
         run: python scripts/regime_history_sanity.py
@@ -63,12 +69,11 @@ jobs:
           expected={'trend','breadth','volatility','credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes'}
           assert set((e.get('families') or {})) == expected, 'event-family contract incomplete'
           assert e.get('coverage',{}).get('total') == len(expected), 'event coverage total incorrect'
+          assert e.get('coverage',{}).get('available') == len(expected), f'not all event families are live: {e.get("coverage")}'
           for name,row in e['families'].items():
-              assert row.get('status') in {'available','unavailable'}, f'{name}: invalid status'
-              if row['status'] == 'unavailable':
-                  assert row.get('score') is None and row.get('importance') == 0.0, f'{name}: unavailable data affected ranking'
-          for name in ('credit','rates','cross_asset','liquidity','macro_calendar','earnings'):
-              assert e['families'][name]['status']=='available', f'{name}: live public source failed to enter event engine'
+              assert row.get('status') == 'available', f'{name}: expected live provider but got {row.get("status")}'
+              assert row.get('score') is not None, f'{name}: available family missing score'
+              assert row.get('as_of'), f'{name}: available family missing as_of'
           assert Path('data/event_history.json').exists(), 'missing event history store'
           print('current dataset regime:', r['name'], r['confidence'])
           print('event coverage:', e['coverage']['available'], '/', e['coverage']['total'])
@@ -111,8 +116,8 @@ jobs:
           for text in ['credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes','Unavailable families never receive synthetic values']:
               assert text in events_py, f'missing event-intelligence foundation: {text}'
 
-          sources=(Path('scripts/event_sources.py').read_text()+Path('scripts/event_sources_v2.py').read_text())
-          for text in ['BAMLH0A0HYM2','BAMLC0A0CM','DGS2','DGS10','T10Y2Y','DTWEXBGS','DCOILWTICO','NASDAQQGLDI','NFCI','WALCL','RRPONTSYD','WTREGEN','ALFRED','NASDAQ_EARNINGS']:
+          sources=(Path('scripts/event_sources.py').read_text()+Path('scripts/event_sources_v2.py').read_text()+Path('scripts/market_context_sources.py').read_text())
+          for text in ['BAMLH0A0HYM2','BAMLC0A0CM','DGS2','DGS10','T10Y2Y','DTWEXBGS','DCOILWTICO','NASDAQQGLDI','NFCI','WALCL','RRPONTSYD','WTREGEN','ALFRED','NASDAQ_EARNINGS','SPY','QQQ','XLK','XLE']:
               assert text in sources, f'missing free source adapter: {text}'
 
           live=Path('live-ui.js').read_text()
