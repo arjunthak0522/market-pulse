@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Install browser
         run: |
           npm install --no-save playwright@1.55.0
@@ -42,18 +42,31 @@ jobs:
               await page.waitForFunction(() => document.querySelector('#regimeName')?.textContent?.includes('Transition / Mixed'));
               await page.waitForFunction(() => document.querySelector('#eventCoverage')?.textContent?.includes('13/13'));
               await page.waitForFunction(() => document.querySelectorAll('.signal-module').length >= 5);
-              const metrics = await page.evaluate(() => ({
+              await page.waitForFunction(() => document.querySelectorAll('.event-driver').length >= 5);
+              const before = await page.evaluate(() => ({
                 regime: document.querySelector('#regimeName')?.textContent,
                 eventCoverage: document.querySelector('#eventCoverage')?.textContent,
+                eventDrivers: document.querySelectorAll('.event-driver').length,
                 signals: document.querySelectorAll('.signal-module').length,
                 width: document.documentElement.scrollWidth,
                 viewport: window.innerWidth,
                 title: document.title
               }));
-              if (metrics.width > metrics.viewport + 1) throw new Error(`${c.name}: horizontal overflow ${metrics.width} > ${metrics.viewport}`);
-              if (pageErrors.length) throw new Error(`${c.name}: page errors: ${pageErrors.join(' | ')}`);
-              console.log(c.name, metrics);
+              if (before.width > before.viewport + 1) throw new Error(`${c.name}: horizontal overflow ${before.width} > ${before.viewport}`);
               await page.screenshot({path:`visual-qa/${c.name}.png`, fullPage:true});
+              await page.click('#eventExpand');
+              await page.waitForFunction(() => document.querySelectorAll('.event-family-card').length === 13 && !document.querySelector('#eventAllFamilies')?.hidden);
+              const expanded = await page.evaluate(() => ({
+                families: document.querySelectorAll('.event-family-card').length,
+                expanded: document.querySelector('#eventExpand')?.getAttribute('aria-expanded'),
+                width: document.documentElement.scrollWidth,
+                viewport: window.innerWidth
+              }));
+              if (expanded.families !== 13 || expanded.expanded !== 'true') throw new Error(`${c.name}: Event Intelligence did not expand to all 13 families`);
+              if (expanded.width > expanded.viewport + 1) throw new Error(`${c.name}: expanded horizontal overflow ${expanded.width} > ${expanded.viewport}`);
+              if (pageErrors.length) throw new Error(`${c.name}: page errors: ${pageErrors.join(' | ')}`);
+              console.log(c.name, before, expanded);
+              await page.screenshot({path:`visual-qa/${c.name}-events-expanded.png`, fullPage:true});
               await context.close();
             }
             await browser.close();
