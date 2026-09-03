@@ -70,7 +70,7 @@ jobs:
               assert text in regime_js, f'missing regime UI behavior: {text}'
 
           regime_py=Path('scripts/market_regime.py').read_text()
-          for text in ['Risk-On Expansion','Risk-On Narrowing','Transition / Mixed','Volatility Shock','Risk-Off','two completed sessions']:
+          for text in ['Risk-On Expansion','Risk-On Narrowing','Transition / Mixed','Volatility Shock','Risk-Off','Recovery / Re-Risking','two completed sessions']:
               assert text in regime_py, f'missing regime classifier behavior: {text}'
 
           live=Path('live-ui.js').read_text()
