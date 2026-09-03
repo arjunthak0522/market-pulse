@@ -5,4 +5,5 @@ scripts/
 tests/
 README.md
 requirements.txt
+wrangler.toml
 .assetsignore
