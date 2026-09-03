@@ -21,14 +21,15 @@ jobs:
           node --check live-ui.js
           node --check cloudflare/worker.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/market_events.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py
       - name: Unit tests
-        run: python -m unittest tests/test_extremes.py tests/test_market_regime.py -v
+        run: python -m unittest tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py -v
       - name: Partial historical regime sanity
         run: python scripts/regime_history_sanity.py
-      - name: Apply regime to current committed dataset
+      - name: Apply regime and event intelligence to current committed dataset
         run: |
           python scripts/market_regime.py
+          python scripts/market_events.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -40,7 +41,19 @@ jobs:
           assert set((r.get('buckets') or {})) == {'trend','breadth','volatility'}, 'missing regime bucket'
           assert r.get('stability',{}).get('rule'), 'missing hysteresis rule'
           assert r.get('sessions_in_regime',0) >= 1, 'invalid regime duration'
-          print('current dataset regime:', r['name'], r['confidence'], r['buckets'])
+
+          e=p.get('market_events') or {}
+          expected={'trend','breadth','volatility','credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes'}
+          assert set((e.get('families') or {})) == expected, 'event-family contract incomplete'
+          assert e.get('coverage',{}).get('total') == len(expected), 'event coverage total incorrect'
+          for name,row in e['families'].items():
+              assert row.get('status') in {'available','unavailable'}, f'{name}: invalid status'
+              if row['status'] == 'unavailable':
+                  assert row.get('score') is None and row.get('importance') == 0.0, f'{name}: unavailable data affected ranking'
+          assert Path('data/event_history.json').exists(), 'missing event history store'
+          print('current dataset regime:', r['name'], r['confidence'])
+          print('event coverage:', e['coverage']['available'], '/', e['coverage']['total'])
+          print('top events:', [(x['family'], x['importance']) for x in e.get('top_events',[])])
           PY
       - name: Clean V5 unified Worker guard
         run: |
@@ -75,6 +88,10 @@ jobs:
           for text in ['Risk-On Expansion','Risk-On Narrowing','Transition / Mixed','Volatility Shock','Risk-Off','Recovery / Re-Risking','two completed sessions']:
               assert text in regime_py, f'missing regime classifier behavior: {text}'
 
+          events_py=Path('scripts/market_events.py').read_text()
+          for text in ['credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes','Unavailable families never receive synthetic values']:
+              assert text in events_py, f'missing event-intelligence foundation: {text}'
+
           live=Path('live-ui.js').read_text()
           for text in ['POLL_MS = 5 * 60_000','intraday_extreme_occurred','SESSION CLOSE','~5 MIN','market-pulse-live-endpoint']:
               assert text in live, f'missing live-data behavior: {text}'
@@ -92,5 +109,5 @@ jobs:
               assert text in ignore, f'non-public source not excluded from static assets: {text}'
 
           assert not Path('netlify/functions/live-market.mts').exists(), 'Netlify relay must remain removed'
-          print('clean V5 Market Regime guard passed')
+          print('clean V5 Market Regime + Event Intelligence guard passed')
           PY
