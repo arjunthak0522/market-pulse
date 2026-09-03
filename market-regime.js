@@ -38,15 +38,29 @@
     $("regimeBuckets").innerHTML = [bucket("Trend", b.trend), bucket("Breadth", b.breadth), bucket("Volatility", b.volatility)].join("");
   }
 
+  async function fetchJson(url) {
+    const r = await fetch(`${url}?v=${Date.now()}`, {cache:"no-store"});
+    if (!r.ok) throw new Error(`${url} unavailable`);
+    return r.json();
+  }
+
   async function loadRegime() {
     try {
-      const r = await fetch(`data/signal_data.json?v=${Date.now()}`, {cache:"no-store"});
-      if (!r.ok) throw new Error("regime dataset unavailable");
-      const data = await r.json();
-      render(data.market_regime);
+      const data = await fetchJson("data/signal_data.json");
+      if (data.market_regime?.name) {
+        render(data.market_regime);
+        return;
+      }
+      const snapshot = await fetchJson("data/regime_snapshot.json");
+      render(snapshot.market_regime);
     } catch (err) {
-      render(null);
-      console.warn(err);
+      try {
+        const snapshot = await fetchJson("data/regime_snapshot.json");
+        render(snapshot.market_regime);
+      } catch (snapshotErr) {
+        render(null);
+        console.warn(err, snapshotErr);
+      }
     }
   }
 
