@@ -9,12 +9,16 @@ historical backtest of the production regime model.
 from __future__ import annotations
 
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts.market_regime import classify
 
-ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data" / "history.json"
 
 
@@ -60,14 +64,12 @@ def run(path: Path = SOURCE) -> dict:
         "Unavailable",
     }
     assert all(x.get("name") in allowed for x in outputs), "unknown regime emitted"
-
-    # With volatility absent, no historical observation may fabricate a volatility shock.
     assert not any(x.get("candidate") == "Volatility Shock" for x in outputs), "volatility shock fabricated without volatility data"
 
     official = [x["name"] for x in outputs]
     transitions = sum(1 for a, b in zip(official, official[1:]) if a != b)
     counts = Counter(official)
-    report = {
+    return {
         "sessions": len(outputs),
         "first_date": rows[0].get("date"),
         "last_date": rows[-1].get("date"),
@@ -75,7 +77,6 @@ def run(path: Path = SOURCE) -> dict:
         "regime_counts": dict(sorted(counts.items())),
         "limitation": "Breadth-history-only sanity check. The archive lacks the full V1 volatility history, so this is not a predictive backtest or a complete historical regime reconstruction.",
     }
-    return report
 
 
 if __name__ == "__main__":
