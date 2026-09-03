@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T21:49:54.801850+00:00",
+  "generated_at": "2026-09-03T21:59:10.458058+00:00",
   "market_date": "2026-09-03",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -825,7 +825,7 @@
   "data_status": {
     "session_date": "2026-09-03",
     "market_open": false,
-    "generated_at": "2026-09-03T21:49:54.801850+00:00"
+    "generated_at": "2026-09-03T21:59:10.458058+00:00"
   },
   "market_state": {
     "name": "Early Stress",
@@ -861,22 +861,10 @@
   },
   "what_changed": [
     {
-      "signal": "nymo",
-      "headline": "NYSE breadth",
-      "detail": "NYSE breadth fell from 7.13 to -14.64.",
-      "magnitude": 21.77
-    },
-    {
-      "signal": "namo",
-      "headline": "Nasdaq breadth",
-      "detail": "Nasdaq breadth fell from 12.16 to -6.67.",
-      "magnitude": 18.83
-    },
-    {
-      "signal": "newlows",
-      "headline": "New-low pressure",
-      "detail": "New-low pressure rose from 80.00 to 86.00.",
-      "magnitude": 6.0
+      "signal": "market",
+      "headline": "No major state change",
+      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
+      "magnitude": 0
     }
   ]
 }
