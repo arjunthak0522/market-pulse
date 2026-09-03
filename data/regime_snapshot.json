@@ -1,0 +1,36 @@
+{
+  "market_date": "2026-09-02",
+  "market_regime": {
+    "name": "Transition / Mixed",
+    "candidate": "Transition / Mixed",
+    "confidence": "MODERATE",
+    "interpretation": "Major regime inputs are not aligned strongly enough for a clear risk-on or risk-off environment. Breadth is weak and volatility is stressed, while the broader trend remains mixed.",
+    "transition": "No confirmed regime change",
+    "previous_regime": null,
+    "start_date": "2026-09-02",
+    "sessions_in_regime": 1,
+    "candidate_persistence_sessions": 1,
+    "coverage": {
+      "core_available": 3,
+      "core_total": 3
+    },
+    "buckets": {
+      "trend": {
+        "label": "Mixed",
+        "score": 51.0
+      },
+      "breadth": {
+        "label": "Weak",
+        "score": 22.9
+      },
+      "volatility": {
+        "label": "Stressed",
+        "score": 20.2
+      }
+    },
+    "stability": {
+      "rule": "Non-shock regime changes require two completed sessions of confirmation."
+    },
+    "boundary_margin": 8.0
+  }
+}
