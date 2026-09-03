@@ -7,8 +7,8 @@
 <meta name="market-pulse-live-endpoint" content="/api/live">
 <title>Market Pulse</title>
 <link rel="stylesheet" href="pulse-v5.css?v=5">
-<link rel="stylesheet" href="market-regime.css?v=3">
-<link rel="stylesheet" href="event-intelligence.css?v=1">
+<link rel="stylesheet" href="market-regime.css?v=4">
+<link rel="stylesheet" href="event-intelligence.css?v=2">
 </head>
 <body>
 <div class="shell">
@@ -62,10 +62,16 @@
         <h2>Event Intelligence</h2>
         <span id="eventCoverage" class="event-coverage">Loading 13-family scan…</span>
       </div>
-      <p>The engine scans broad market conditions, then surfaces only the families unusual enough to matter now.</p>
+      <p>Ranks the market conditions that stand out most right now. Higher unusualness means farther from a normal backdrop - it is not a return forecast.</p>
+    </div>
+    <div class="event-scale" aria-label="Event Intelligence unusualness scale">
+      <span>QUIET</span><i></i><span>WATCH</span><i></i><span>ELEVATED</span><i></i><span>HIGH</span><i></i><span>EXTREME</span>
     </div>
     <div id="eventDrivers" class="event-drivers"></div>
-    <div id="eventFamilyLine" class="event-family-line"></div>
+    <button id="eventExpand" class="event-expand" type="button" aria-expanded="false" aria-controls="eventAllFamilies">
+      <span>View all 13 market drivers</span><b>↓</b>
+    </button>
+    <div id="eventAllFamilies" class="event-all" hidden></div>
     <div id="eventNote" class="event-note"></div>
   </section>
 
@@ -82,8 +88,8 @@
 <footer>Historical precedent is context, not a forecast.</footer>
 </div>
 <script src="pulse-v5.js?v=4" defer></script>
-<script src="market-regime.js?v=3" defer></script>
-<script src="event-intelligence.js?v=1" defer></script>
+<script src="market-regime.js?v=4" defer></script>
+<script src="event-intelligence.js?v=2" defer></script>
 <script src="live-ui.js?v=2" defer></script>
 </body>
 </html>
