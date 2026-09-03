@@ -3,12 +3,23 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   const clamp = (v) => Math.max(0, Math.min(100, Number(v) || 0));
 
+  const bucketCopy = {
+    Trend: {left:'Weak', mid:'Mixed', right:'Strong'},
+    Breadth: {left:'Narrow', mid:'Mixed', right:'Broad'},
+    Volatility: {left:'Stressed', mid:'Elevated', right:'Contained'}
+  };
+
   function bucket(name, row) {
     const score = row?.score;
     if (score == null) {
       return `<div class="regime-bucket"><span>${esc(name)}</span><strong>Unavailable</strong><small>No reliable input</small></div>`;
     }
-    return `<div class="regime-bucket"><span>${esc(name)}</span><strong>${esc(row.label || "—")}</strong><small>${Number(score).toFixed(0)}/100</small><div class="regime-bucket-meter"><i style="width:${clamp(score)}%"></i></div></div>`;
+    const copy = bucketCopy[name] || {left:'Weak',mid:'Mixed',right:'Strong'};
+    return `<div class="regime-bucket">
+      <div class="regime-bucket-head"><span>${esc(name)}</span><strong>${esc(row.label || "—")}</strong></div>
+      <div class="regime-bucket-meter"><i style="width:${clamp(score)}%"></i><b style="left:${clamp(score)}%"></b></div>
+      <div class="regime-bucket-scale"><span>${copy.left}</span><span>${copy.mid}</span><span>${copy.right}</span></div>
+    </div>`;
   }
 
   function render(regime) {
