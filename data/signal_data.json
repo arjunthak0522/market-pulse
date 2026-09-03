@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T13:08:56.223850+00:00",
+  "generated_at": "2026-09-03T13:24:19.514574+00:00",
   "market_date": "2026-09-02",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -825,7 +825,7 @@
   "data_status": {
     "session_date": "2026-09-02",
     "market_open": false,
-    "generated_at": "2026-09-03T13:08:56.223850+00:00"
+    "generated_at": "2026-09-03T13:24:19.514574+00:00"
   },
   "market_state": {
     "name": "Breadth Washout",
@@ -861,22 +861,10 @@
   },
   "what_changed": [
     {
-      "signal": "breadth",
-      "headline": "Short-term participation",
-      "detail": "Short-term participation fell from 39% to 36% above the 5-day trend.",
-      "magnitude": 3.47
-    },
-    {
-      "signal": "newlows",
-      "headline": "New-low pressure",
-      "detail": "New-low pressure rose from 115.00 to 117.00.",
-      "magnitude": 2.0
-    },
-    {
-      "signal": "cpce",
-      "headline": "Options fear",
-      "detail": "Options fear fell from 0.71 to 0.56.",
-      "magnitude": 0.15
+      "signal": "market",
+      "headline": "No major state change",
+      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
+      "magnitude": 0
     }
   ]
 }
