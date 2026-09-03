@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy isolated CEO preview Worker + static assets
-        uses: cloudflare/wrangler-action@v3
+      - uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: 50e5695a83f3f9da7c0f0ab12ec0a4cd
-          wranglerVersion: '4.128.0'
-          workingDirectory: cloudflare
-          command: deploy --config wrangler.preview.toml
+          node-version: '20'
+      - name: Install Wrangler
+        run: npm install --no-save wrangler@4.128.0
+      - name: Deploy isolated temporary CEO preview
+        working-directory: cloudflare
+        run: npx wrangler deploy --config wrangler.preview.toml --temporary
