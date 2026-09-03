@@ -4,6 +4,17 @@ on:
   push:
     branches: [market-pulse-clean-review]
     paths:
+      - 'index.html'
+      - 'pulse-v5.css'
+      - 'pulse-v5.js'
+      - 'market-regime.css'
+      - 'market-regime.js'
+      - 'event-intelligence.css'
+      - 'event-intelligence.js'
+      - 'live-ui.js'
+      - 'data/signal_data.json'
+      - 'data/regime_snapshot.json'
+      - 'data/event_snapshot.json'
       - '.github/workflows/deploy-drop-preview.yml'
 permissions:
   contents: read
@@ -65,7 +76,7 @@ jobs:
           echo "Verifying $PREVIEW_URL"
           for i in $(seq 1 12); do
             body=$(curl -fsSL "$PREVIEW_URL" || true)
-            if printf '%s' "$body" | grep -q 'Event Intelligence' && printf '%s' "$body" | grep -q 'Signals lighting up'; then
+            if printf '%s' "$body" | grep -q 'Event Intelligence' && printf '%s' "$body" | grep -q 'View all 13 market drivers' && printf '%s' "$body" | grep -q 'Signals lighting up'; then
               echo "CEO preview verified: $PREVIEW_URL"
               exit 0
             fi
