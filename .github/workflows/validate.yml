@@ -21,9 +21,11 @@ jobs:
           node --check live-ui.js
           node --check cloudflare/worker.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py tests/test_extremes.py tests/test_market_regime.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py tests/test_market_regime.py -v
+      - name: Partial historical regime sanity
+        run: python scripts/regime_history_sanity.py
       - name: Apply regime to current committed dataset
         run: |
           python scripts/market_regime.py
