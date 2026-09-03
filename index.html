@@ -7,6 +7,7 @@
 <meta name="market-pulse-live-endpoint" content="/api/live">
 <title>Market Pulse</title>
 <link rel="stylesheet" href="pulse-v5.css?v=3">
+<link rel="stylesheet" href="market-regime.css?v=1">
 </head>
 <body>
 <div class="shell">
@@ -32,6 +33,19 @@
       <div class="core-map-head"><span>MARKET PRESSURE</span><small>CALM → STRESS</small></div>
       <div id="pressureMap" class="pressure-map"></div>
     </div>
+  </section>
+
+  <section id="regimePanel" class="regime-panel" aria-live="polite">
+    <div class="regime-main">
+      <div class="kicker">MARKET REGIME</div>
+      <div class="regime-title-row">
+        <h2 id="regimeName">Classifying environment…</h2>
+        <span id="regimeConfidence" class="regime-confidence">—</span>
+      </div>
+      <p id="regimeInterpretation">Using completed-session trend, breadth and volatility.</p>
+      <div id="regimeMeta" class="regime-meta"></div>
+    </div>
+    <div id="regimeBuckets" class="regime-buckets"></div>
   </section>
 
   <section class="change-section">
@@ -61,6 +75,7 @@
 <footer>Historical precedent is context, not a forecast.</footer>
 </div>
 <script src="pulse-v5.js?v=3" defer></script>
+<script src="market-regime.js?v=1" defer></script>
 <script src="live-ui.js?v=2" defer></script>
 </body>
 </html>
