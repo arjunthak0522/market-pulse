@@ -21,12 +21,12 @@ jobs:
           node --check live-ui.js
           node --check cloudflare/worker.js
       - name: Python syntax
-        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/market_events.py scripts/event_sources.py scripts/run_event_intelligence.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py
+        run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py scripts/market_events.py scripts/event_sources.py scripts/event_sources_v2.py scripts/run_event_intelligence.py scripts/regime_history_sanity.py tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py tests/test_market_regime.py tests/test_market_events.py tests/test_event_sources.py -v
       - name: Live free-source smoke test
         run: |
-          python scripts/event_sources.py
+          python scripts/event_sources_v2.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -111,8 +111,8 @@ jobs:
           for text in ['credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes','Unavailable families never receive synthetic values']:
               assert text in events_py, f'missing event-intelligence foundation: {text}'
 
-          sources=Path('scripts/event_sources.py').read_text()
-          for text in ['BAMLH0A0HYM2','BAMLC0A0CM','DGS2','DGS10','T10Y2Y','DTWEXBGS','DCOILWTICO','NFCI','WALCL','RRPONTSYD','WTREGEN','ALFRED','NASDAQ_EARNINGS']:
+          sources=(Path('scripts/event_sources.py').read_text()+Path('scripts/event_sources_v2.py').read_text())
+          for text in ['BAMLH0A0HYM2','BAMLC0A0CM','DGS2','DGS10','T10Y2Y','DTWEXBGS','DCOILWTICO','NASDAQQGLDI','NFCI','WALCL','RRPONTSYD','WTREGEN','ALFRED','NASDAQ_EARNINGS']:
               assert text in sources, f'missing free source adapter: {text}'
 
           live=Path('live-ui.js').read_text()
