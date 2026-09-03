@@ -28,7 +28,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','market-regime.css','market-regime.js','live-ui.js','manifest.webmanifest','requirements.txt','.assetsignore'}
+          allowed={'README.md','index.html','pulse-v5.css','pulse-v5.js','market-regime.css','market-regime.js','live-ui.js','manifest.webmanifest','requirements.txt','.assetsignore','wrangler.toml'}
           roots={p.name for p in Path('.').iterdir() if p.is_file()}
           extras=roots-allowed
           assert not extras, f'unexpected root product files: {sorted(extras)}'
