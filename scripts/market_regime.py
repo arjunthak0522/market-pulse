@@ -75,7 +75,7 @@ def bucket_scores(payload: dict) -> dict:
         vol_stress = max(vol_stress or 0, 90 + min(10, (term_ratio - 1.0) * 100))
     volatility = None if vol_stress is None else 100 - _clamp(vol_stress)
 
-    buckets = {
+    return {
         "trend": {
             "score": None if trend is None else round(_clamp(trend), 1),
             "label": _label(trend),
@@ -92,10 +92,31 @@ def bucket_scores(payload: dict) -> dict:
             "detail": "VIX term structure, VVIX, and SKEW. Higher score means calmer conditions.",
         },
     }
-    return buckets
 
 
-def candidate_regime(buckets: dict, payload: dict) -> tuple[str, str, float]:
+def _recovery_candidate(buckets: dict, previous: dict | None) -> tuple[str, str, float] | None:
+    if not previous or previous.get("official") not in {"Risk-Off", "Volatility Shock"}:
+        return None
+    scores = previous.get("scores") or {}
+    b = buckets["breadth"]["score"]
+    v = buckets["volatility"]["score"]
+    old_b = _num(scores.get("breadth"))
+    old_v = _num(scores.get("volatility"))
+    if b is None or v is None or old_b is None or old_v is None:
+        return None
+    breadth_gain = b - old_b
+    vol_gain = v - old_v
+    if breadth_gain >= 10 and vol_gain >= 8 and b >= 35:
+        margin = min(breadth_gain - 10, vol_gain - 8) + 6
+        return (
+            "Recovery / Re-Risking",
+            "Breadth is repairing and volatility is easing after a defensive regime, but the recovery still needs persistence.",
+            max(6.0, margin),
+        )
+    return None
+
+
+def candidate_regime(buckets: dict, payload: dict, previous: dict | None = None) -> tuple[str, str, float]:
     t = buckets["trend"]["score"]
     b = buckets["breadth"]["score"]
     v = buckets["volatility"]["score"]
@@ -108,6 +129,9 @@ def candidate_regime(buckets: dict, payload: dict) -> tuple[str, str, float]:
 
     if vol_stress is not None and (vol_stress >= 92 or ((term_ratio or 0) >= 1.0 and vol_stress >= 80)):
         return "Volatility Shock", "Near-term volatility stress is dominating the market environment.", max(0.0, vol_stress - 80)
+    recovery = _recovery_candidate(buckets, previous)
+    if recovery:
+        return recovery
     if t is not None and b is not None and t < 40 and b < 40:
         return "Risk-Off", "Trend and market participation are both weak, indicating broad defensive conditions.", min(40 - t, 40 - b)
     if t is not None and b is not None and t >= 60 and b >= 60 and (v is None or v >= 50):
@@ -146,8 +170,8 @@ def classify(payload: dict, history: dict | None = None) -> tuple[dict, dict]:
     history = history or {"version": 1, "sessions": []}
     market_date = str(payload.get("market_date") or "")
     buckets = bucket_scores(payload)
-    candidate, interpretation, margin = candidate_regime(buckets, payload)
     previous = _previous_session(history, market_date)
+    candidate, interpretation, margin = candidate_regime(buckets, payload, previous)
     persistence = _candidate_persistence(history, market_date, candidate)
 
     prev_official = previous.get("official") if previous else None
@@ -176,6 +200,8 @@ def classify(payload: dict, history: dict | None = None) -> tuple[dict, dict]:
         aligned = sum((buckets[k]["score"] or 100) < 40 for k in CORE_BUCKETS)
     elif official == "Risk-On Narrowing":
         aligned = int((buckets["trend"]["score"] or 0) >= 60) + int((buckets["breadth"]["score"] or 100) < 50)
+    elif official == "Recovery / Re-Risking":
+        aligned = int((buckets["breadth"]["score"] or 0) >= 35) + int((buckets["volatility"]["score"] or 0) >= 35)
     else:
         aligned = 1
 
