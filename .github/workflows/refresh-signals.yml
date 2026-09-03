@@ -14,6 +14,7 @@ on:
       - 'scripts/market_events.py'
       - 'scripts/event_sources.py'
       - 'scripts/event_sources_v2.py'
+      - 'scripts/market_context_sources.py'
       - 'scripts/run_event_intelligence.py'
       - 'scripts/trace_stockcharts.py'
       - 'requirements.txt'
@@ -67,6 +68,10 @@ jobs:
           else:
               print('event source cache still fresh; reusing data/event_inputs.json')
           PY
+      - name: Refresh same-session ETF leadership and technical context
+        run: |
+          set -o pipefail
+          python -u scripts/market_context_sources.py 2>&1 | tee market-context.log
       - name: Build completed-session Market Regime
         run: |
           set -o pipefail
@@ -141,16 +146,16 @@ jobs:
           public_expected={'credit','rates','cross_asset','liquidity','macro_calendar','earnings'}
           assert public_expected <= set(source_cache.get('event_inputs') or {}), f'public event source cache incomplete: {source_cache.get("errors")}'
 
+          market_cache=json.loads(Path('data/event_market_context.json').read_text())
+          assert market_cache.get('context',{}).get('market_date') == session, f'ETF context not current session: {market_cache}'
+
           events=p.get('market_events') or {}
           expected={'trend','breadth','volatility','credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes'}
           assert set((events.get('families') or {})) == expected, 'event-intelligence family contract incomplete'
-          assert events.get('coverage',{}).get('total') == len(expected), 'wrong event coverage total'
+          assert events.get('coverage',{}).get('available') == len(expected), f'event coverage incomplete: {events.get("coverage")}'
           for name,row in events['families'].items():
-              assert row.get('status') in {'available','unavailable'}, f'{name}: invalid event status'
-              if row['status'] == 'unavailable':
-                  assert row.get('score') is None and row.get('importance') == 0.0, f'{name}: unavailable event affected ranking'
-          for name in public_expected:
-              assert events['families'][name]['status']=='available', f'{name}: public provider missing from event engine'
+              assert row.get('status') == 'available', f'{name}: expected available event family'
+              assert row.get('score') is not None and row.get('as_of'), f'{name}: incomplete available event row'
           assert Path('data/event_history.json').exists(), 'missing event intelligence history'
 
           print('current-session Market Pulse contract passed', session, 'market_open=', is_open, 'regime=', regime['name'], 'event_coverage=', events['coverage']['available'])
@@ -163,6 +168,7 @@ jobs:
           path: |
             trace-stockcharts.log
             refresh.log
+            market-context.log
             regime.log
             events.log
             contract.log
@@ -170,13 +176,14 @@ jobs:
             data/regime_history.json
             data/event_history.json
             data/event_inputs.json
+            data/event_market_context.json
           retention-days: 3
           if-no-files-found: ignore
       - name: Commit refreshed static dataset
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/signal_data.json data/regime_history.json data/event_history.json data/event_inputs.json
+          git add data/signal_data.json data/regime_history.json data/event_history.json data/event_inputs.json data/event_market_context.json
           git diff --cached --quiet && exit 0
           git commit -m 'Refresh current-session Market Pulse dataset'
           git pull --rebase origin signal-quality-review
