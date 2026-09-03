@@ -104,6 +104,18 @@ def _recovery_candidate(buckets: dict, previous: dict | None) -> tuple[str, str,
     old_v = _num(scores.get("volatility"))
     if b is None or v is None or old_b is None or old_v is None:
         return None
+
+    # Once a recovery candidate has appeared, a second session confirms it by
+    # holding the repaired zone rather than requiring another equally large jump.
+    if previous.get("candidate") == "Recovery / Re-Risking":
+        if b >= 35 and v >= 35 and b >= old_b - 5 and v >= old_v - 5:
+            return (
+                "Recovery / Re-Risking",
+                "Breadth repair and calmer volatility are holding after a defensive regime, supporting a measured re-risking phase.",
+                10.0,
+            )
+        return None
+
     breadth_gain = b - old_b
     vol_gain = v - old_v
     if breadth_gain >= 10 and vol_gain >= 8 and b >= 35:
