@@ -1,0 +1,33 @@
+name: Deploy Market Pulse CEO preview
+on:
+  workflow_dispatch:
+  push:
+    branches: [market-pulse-clean-review]
+    paths:
+      - 'cloudflare/**'
+      - 'index.html'
+      - 'pulse-v5.css'
+      - 'pulse-v5.js'
+      - 'market-regime.css'
+      - 'market-regime.js'
+      - 'event-intelligence.css'
+      - 'event-intelligence.js'
+      - 'live-ui.js'
+      - 'data/**'
+      - '.assetsignore'
+      - '.github/workflows/deploy-ceo-preview.yml'
+permissions:
+  contents: read
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy isolated CEO preview Worker + static assets
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 50e5695a83f3f9da7c0f0ab12ec0a4cd
+          wranglerVersion: '4.128.0'
+          workingDirectory: cloudflare
+          command: deploy --config wrangler.preview.toml
