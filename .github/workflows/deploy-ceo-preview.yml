@@ -36,4 +36,12 @@ jobs:
         working-directory: cloudflare
         run: |
           rm -rf ../node_modules
+          set +e
           /tmp/wrangler/node_modules/.bin/wrangler deploy --config wrangler.preview.toml --temporary
+          first_rc=$?
+          set -e
+          if [ "$first_rc" -ne 0 ]; then
+            echo "Initial temporary route creation failed; retrying after propagation delay."
+            sleep 12
+            /tmp/wrangler/node_modules/.bin/wrangler deploy --config wrangler.preview.toml --temporary
+          fi
