@@ -1,0 +1,68 @@
+name: Visual QA Market Pulse review
+on:
+  workflow_dispatch:
+  push:
+    branches: [market-pulse-clean-review]
+permissions:
+  contents: read
+jobs:
+  visual-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start static review server
+        run: |
+          python3 -m http.server 4173 > /tmp/market-pulse-server.log 2>&1 &
+          echo $! > /tmp/market-pulse-server.pid
+          sleep 2
+      - name: Render desktop and mobile
+        run: |
+          mkdir -p visual-qa
+          cat > /tmp/visual-qa.cjs <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const cases = [
+              {name:'desktop', width:1440, height:1100, scale:1},
+              {name:'iphone', width:390, height:844, scale:3}
+            ];
+            for (const c of cases) {
+              const context = await browser.newContext({viewport:{width:c.width,height:c.height}, deviceScaleFactor:c.scale});
+              const page = await context.newPage();
+              const consoleErrors=[];
+              page.on('pageerror', e => consoleErrors.push(String(e)));
+              await page.goto('http://127.0.0.1:4173/', {waitUntil:'networkidle'});
+              await page.waitForFunction(() => document.querySelector('#regimeName')?.textContent?.includes('Transition / Mixed'));
+              await page.waitForFunction(() => document.querySelector('#eventCoverage')?.textContent?.includes('13/13'));
+              await page.waitForFunction(() => document.querySelectorAll('.signal-module').length >= 5);
+              const metrics = await page.evaluate(() => ({
+                regime: document.querySelector('#regimeName')?.textContent,
+                eventCoverage: document.querySelector('#eventCoverage')?.textContent,
+                signals: document.querySelectorAll('.signal-module').length,
+                width: document.documentElement.scrollWidth,
+                viewport: window.innerWidth,
+                title: document.title
+              }));
+              if (metrics.width > metrics.viewport + 1) throw new Error(`${c.name}: horizontal overflow ${metrics.width} > ${metrics.viewport}`);
+              if (consoleErrors.length) console.log(`${c.name} page errors:`, consoleErrors);
+              console.log(c.name, metrics);
+              await page.screenshot({path:`visual-qa/${c.name}.png`, fullPage:true});
+              await context.close();
+            }
+            await browser.close();
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
+          node /tmp/visual-qa.cjs
+      - name: Upload visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-pulse-visual-qa
+          path: visual-qa/*.png
+          retention-days: 14

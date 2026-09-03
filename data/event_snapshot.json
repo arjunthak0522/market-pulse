@@ -1,0 +1,14 @@
+{
+  "market_date": "2026-09-02",
+  "source_validation_run": 33764543940,
+  "coverage": {"available": 13, "total": 13},
+  "note": "Importance measures current extremeness, not historical predictive edge.",
+  "top_events": [
+    {"family":"rates","label":"Rates","importance":42.9,"status":"available","summary":"Rates are one of the more unusual active conditions in the current 13-family scan."},
+    {"family":"volatility","label":"Volatility","importance":41.7,"status":"available","summary":"Volatility structure is elevated enough to matter, but it is not a standalone forecast."},
+    {"family":"positioning_options","label":"Positioning / Options","importance":30.8,"status":"available","summary":"Options hedging and positioning proxies are showing above-normal stress."},
+    {"family":"macro_calendar","label":"Macro Calendar","importance":30.4,"status":"available","summary":"Scheduled macro-event density is high enough to be part of the current market setup."},
+    {"family":"sentiment","label":"Sentiment","importance":24.8,"status":"available","summary":"Equity put/call sentiment is elevated enough to stay on the watch list."}
+  ],
+  "families": ["trend","breadth","volatility","credit","rates","leadership","cross_asset","sentiment","positioning_options","macro_calendar","liquidity","earnings","technical_extremes"]
+}

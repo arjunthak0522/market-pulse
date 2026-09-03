@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080c14">
+<meta name="theme-color" content="#070a0f">
 <meta name="market-pulse-live-endpoint" content="/api/live">
 <title>Market Pulse</title>
-<link rel="stylesheet" href="pulse-v5.css?v=3">
+<link rel="stylesheet" href="pulse-v5.css?v=5">
+<link rel="stylesheet" href="market-regime.css?v=3">
+<link rel="stylesheet" href="event-intelligence.css?v=1">
 </head>
 <body>
 <div class="shell">
@@ -20,47 +22,68 @@
   </div>
   <button id="refresh" class="refresh" type="button" aria-label="Refresh market data">↻</button>
 </header>
-
 <main>
-  <section class="market-core">
-    <div class="core-copy">
-      <div class="kicker">TODAY'S MARKET STATE</div>
-      <h1 id="stateName" class="state-name">Reading market internals…</h1>
-      <p id="stateSummary" class="state-summary">Synthesizing fear, breadth and selling pressure.</p>
+  <section class="command-center" aria-label="Market Pulse command center">
+    <div class="command-copy">
+      <div class="command-eyebrow-row">
+        <div class="kicker">MARKET PULSE</div>
+        <span id="regimeConfidence" class="regime-confidence">—</span>
+      </div>
+      <h1 id="regimeName" class="command-title">Classifying environment…</h1>
+      <div class="command-state-row">
+        <span id="stateName" class="state-pill">Reading market state…</span>
+        <span class="state-divider" aria-hidden="true"></span>
+        <span id="stateSummary" class="command-summary">Synthesizing market internals.</span>
+      </div>
+      <p id="regimeInterpretation" class="command-interpretation">Using completed-session trend, breadth and volatility.</p>
+      <div id="regimeMeta" class="regime-meta"></div>
     </div>
-    <div class="core-map-wrap">
-      <div class="core-map-head"><span>MARKET PRESSURE</span><small>CALM → STRESS</small></div>
-      <div id="pressureMap" class="pressure-map"></div>
+    <div class="command-pressure">
+      <div class="command-pressure-head"><span>MARKET PRESSURE</span><small>CALM → STRESS</small></div>
+      <div id="pressureMap" class="pressure-map pulse-strip"></div>
+    </div>
+    <div class="command-buckets-wrap">
+      <div class="command-section-label">CORE READ</div>
+      <div id="regimeBuckets" class="regime-buckets"></div>
+    </div>
+    <div class="command-change-wrap">
+      <div class="command-change-head">
+        <div><div class="command-section-label">SINCE THE LAST READ</div><h2>What changed</h2></div>
+        <span>The moves that matter most now</span>
+      </div>
+      <div id="changedList" class="change-list"></div>
     </div>
   </section>
 
-  <section class="change-section">
-    <div class="section-head compact-head">
-      <div><div class="kicker">SINCE THE LAST READ</div><h2>What changed?</h2></div>
-      <p>The three moves that matter most now.</p>
+  <section class="event-intel" aria-label="Event Intelligence">
+    <div class="event-intel-head">
+      <div>
+        <div class="kicker">WHAT'S DRIVING THE MARKET</div>
+        <h2>Event Intelligence</h2>
+        <span id="eventCoverage" class="event-coverage">Loading 13-family scan…</span>
+      </div>
+      <p>The engine scans broad market conditions, then surfaces only the families unusual enough to matter now.</p>
     </div>
-    <div id="changedList" class="change-list"></div>
+    <div id="eventDrivers" class="event-drivers"></div>
+    <div id="eventFamilyLine" class="event-family-line"></div>
+    <div id="eventNote" class="event-note"></div>
   </section>
 
   <section class="signals-head">
-    <div>
-      <div class="kicker">THE EVIDENCE</div>
-      <h2>What matters underneath the market</h2>
-    </div>
-    <p>Most unusual signals appear first. Historical precedent is shown only where it adds context.</p>
+    <div><div class="kicker">WHAT MATTERS NOW</div><h2>Signals lighting up</h2></div>
+    <p>Only the unusual readings should fight for your attention. Quiet signals stay visually quiet.</p>
   </section>
-
   <section id="signalBoard" class="signal-board" aria-live="polite"></section>
-
   <section id="historyDrawer" class="history-drawer" hidden>
     <button id="historyClose" class="history-close" type="button" aria-label="Close historical study">×</button>
     <div class="history-sheet" id="historyContent"></div>
   </section>
 </main>
-
 <footer>Historical precedent is context, not a forecast.</footer>
 </div>
-<script src="pulse-v5.js?v=3" defer></script>
+<script src="pulse-v5.js?v=4" defer></script>
+<script src="market-regime.js?v=3" defer></script>
+<script src="event-intelligence.js?v=1" defer></script>
 <script src="live-ui.js?v=2" defer></script>
 </body>
 </html>
