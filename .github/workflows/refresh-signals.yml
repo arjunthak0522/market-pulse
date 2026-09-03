@@ -12,6 +12,9 @@ on:
       - 'scripts/live_refresh.py'
       - 'scripts/market_regime.py'
       - 'scripts/market_events.py'
+      - 'scripts/event_sources.py'
+      - 'scripts/event_sources_v2.py'
+      - 'scripts/run_event_intelligence.py'
       - 'scripts/trace_stockcharts.py'
       - 'requirements.txt'
       - '.github/workflows/refresh-signals.yml'
@@ -43,14 +46,35 @@ jobs:
         run: |
           set -o pipefail
           python -u scripts/live_refresh.py 2>&1 | tee refresh.log
+      - name: Refresh free public event sources when cache is older than 30 minutes
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          from datetime import datetime, timezone
+          from pathlib import Path
+          path=Path('data/event_inputs.json')
+          refresh=True
+          try:
+              p=json.loads(path.read_text())
+              ts=p.get('generated_at')
+              if ts:
+                  age=(datetime.now(timezone.utc)-datetime.fromisoformat(ts.replace('Z','+00:00'))).total_seconds()/60
+                  refresh=age >= 30
+          except Exception:
+              refresh=True
+          if refresh:
+              subprocess.run(['python','-u','scripts/event_sources_v2.py'], check=True)
+          else:
+              print('event source cache still fresh; reusing data/event_inputs.json')
+          PY
       - name: Build completed-session Market Regime
         run: |
           set -o pipefail
           python -u scripts/market_regime.py 2>&1 | tee regime.log
-      - name: Build market event intelligence
+      - name: Build freshness-safe market event intelligence
         run: |
           set -o pipefail
-          python -u scripts/market_events.py 2>&1 | tee events.log
+          python -u scripts/run_event_intelligence.py 2>&1 | tee events.log
       - name: Hard product data contract
         run: |
           set -o pipefail
@@ -58,7 +82,6 @@ jobs:
           import json
           from datetime import datetime, timezone
           from pathlib import Path
-          import pandas_market_calendars as mcal
 
           p=json.loads(Path('data/signal_data.json').read_text())
           required={'cpce','namo','nymo','trin','trinq','newlows','breadth','vol'}
@@ -114,6 +137,10 @@ jobs:
           assert regime.get('stability',{}).get('rule'), 'missing Market Regime hysteresis rule'
           assert Path('data/regime_history.json').exists(), 'missing Market Regime history'
 
+          source_cache=json.loads(Path('data/event_inputs.json').read_text())
+          public_expected={'credit','rates','cross_asset','liquidity','macro_calendar','earnings'}
+          assert public_expected <= set(source_cache.get('event_inputs') or {}), f'public event source cache incomplete: {source_cache.get("errors")}'
+
           events=p.get('market_events') or {}
           expected={'trend','breadth','volatility','credit','rates','leadership','cross_asset','sentiment','positioning_options','macro_calendar','liquidity','earnings','technical_extremes'}
           assert set((events.get('families') or {})) == expected, 'event-intelligence family contract incomplete'
@@ -122,6 +149,8 @@ jobs:
               assert row.get('status') in {'available','unavailable'}, f'{name}: invalid event status'
               if row['status'] == 'unavailable':
                   assert row.get('score') is None and row.get('importance') == 0.0, f'{name}: unavailable event affected ranking'
+          for name in public_expected:
+              assert events['families'][name]['status']=='available', f'{name}: public provider missing from event engine'
           assert Path('data/event_history.json').exists(), 'missing event intelligence history'
 
           print('current-session Market Pulse contract passed', session, 'market_open=', is_open, 'regime=', regime['name'], 'event_coverage=', events['coverage']['available'])
@@ -140,13 +169,14 @@ jobs:
             data/signal_data.json
             data/regime_history.json
             data/event_history.json
+            data/event_inputs.json
           retention-days: 3
           if-no-files-found: ignore
       - name: Commit refreshed static dataset
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/signal_data.json data/regime_history.json data/event_history.json
+          git add data/signal_data.json data/regime_history.json data/event_history.json data/event_inputs.json
           git diff --cached --quiet && exit 0
           git commit -m 'Refresh current-session Market Pulse dataset'
           git pull --rebase origin signal-quality-review
