@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T22:14:29.888269+00:00",
+  "generated_at": "2026-09-03T13:08:56.223850+00:00",
   "market_date": "2026-09-02",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -11,9 +11,9 @@
   },
   "signals": {
     "cpce": {
-      "value": 0.71,
-      "average_5d": 0.6,
-      "percentile_252d": 74.6,
+      "value": 0.56,
+      "average_5d": 0.578,
+      "percentile_252d": 18.7,
       "as_of": "2026-09-02",
       "source": "StockCharts QuoteBrain $CPCE",
       "study": {
@@ -237,8 +237,8 @@
       "provider_realtime_flag": false
     },
     "trin": {
-      "value": 0.837,
-      "percentile_252d": 23.8,
+      "value": 0.84,
+      "percentile_252d": 24.6,
       "as_of": "2026-09-02",
       "source": "StockCharts QuoteBrain $TRIN",
       "study": {
@@ -317,8 +317,8 @@
       "provider_realtime_flag": false
     },
     "trinq": {
-      "value": 0.578,
-      "percentile_252d": 2.8,
+      "value": 0.55,
+      "percentile_252d": 1.2,
       "as_of": "2026-09-02",
       "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
@@ -387,7 +387,7 @@
       },
       "session_open": 0.7166,
       "session_high": 0.9887,
-      "session_low": 0.5736,
+      "session_low": 0.55,
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
       "intraday_extreme_occurred": false,
       "as_of_timestamp": "2026-09-02T20:00:00+00:00",
@@ -397,9 +397,9 @@
       "provider_realtime_flag": false
     },
     "newlows": {
-      "value": 115,
-      "new_highs": 58,
-      "new_low_pct": 4.08,
+      "value": 117,
+      "new_highs": 59,
+      "new_low_pct": 4.12,
       "percentile_252d": 84.5,
       "as_of": "2026-09-02",
       "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows",
@@ -467,19 +467,19 @@
           "2018-10-29"
         ]
       },
-      "nasdaq_new_lows": 235,
-      "nasdaq_new_highs": 86,
-      "nasdaq_new_low_pct": 4.76,
+      "nasdaq_new_lows": 240,
+      "nasdaq_new_highs": 98,
+      "nasdaq_new_low_pct": 4.72,
       "as_of_timestamp": "2026-09-02T20:00:00+00:00",
       "freshness": "session_close",
       "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 39.39,
+      "above_5d": 35.92,
       "above_20d": 38.6,
       "above_50d": 48.4,
       "above_200d": 66.0,
-      "percentile_252d": 18.4,
+      "percentile_252d": 13.4,
       "as_of": "2026-09-02",
       "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
@@ -550,9 +550,9 @@
       "vix3m": 17.73,
       "term_ratio": 0.857,
       "vvix": 86.25,
-      "skew": 149.23,
-      "stress_score": 32.7,
-      "percentile_252d": 36.9,
+      "skew": 144.12,
+      "stress_score": 14.3,
+      "percentile_252d": 11.5,
       "as_of": "2026-09-02",
       "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
       "study": {
@@ -619,9 +619,9 @@
           "2025-03-06"
         ]
       },
-      "term_percentile_252d": 47.2,
+      "term_percentile_252d": 47.6,
       "vvix_percentile_252d": 5.2,
-      "skew_percentile_252d": 79.8,
+      "skew_percentile_252d": 49.6,
       "term_study": {
         "title": "VIX term-structure stress",
         "rule": "VIX/VIX3M ratio in the top decile of history. Higher ratios mean near-term fear is unusually urgent; readings above 1.00 indicate inversion.",
@@ -689,7 +689,7 @@
       "vvix_study": {
         "title": "VVIX fear-of-fear extremes",
         "rule": "VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
-        "threshold": 116.31,
+        "threshold": 116.3,
         "direction": "high",
         "historical_sample": 127,
         "episode_method": "Independent episodes separated by at least 5 signal sessions.",
@@ -753,7 +753,7 @@
       "skew_study": {
         "title": "SKEW tail-risk extremes",
         "rule": "Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
-        "threshold": 147.962,
+        "threshold": 147.959,
         "direction": "high",
         "historical_sample": 118,
         "episode_method": "Independent episodes separated by at least 5 signal sessions.",
@@ -825,15 +825,15 @@
   "data_status": {
     "session_date": "2026-09-02",
     "market_open": false,
-    "generated_at": "2026-09-02T22:14:29.888269+00:00"
+    "generated_at": "2026-09-03T13:08:56.223850+00:00"
   },
   "market_state": {
     "name": "Breadth Washout",
     "summary": "Market internals are severely stretched, but a reversal trigger has not been confirmed yet.",
     "dimensions": {
       "fear": {
-        "label": "Elevated",
-        "score": 79.8
+        "label": "Contained",
+        "score": 49.6
       },
       "internals": {
         "label": "Severe washout",
@@ -841,7 +841,7 @@
       },
       "capitulation": {
         "label": "Not confirmed",
-        "score": 23.8
+        "score": 24.6
       }
     },
     "setup": {
@@ -863,8 +863,20 @@
     {
       "signal": "breadth",
       "headline": "Short-term participation",
-      "detail": "Short-term participation rose from 36% to 39% above the 5-day trend.",
-      "magnitude": 3.27
+      "detail": "Short-term participation fell from 39% to 36% above the 5-day trend.",
+      "magnitude": 3.47
+    },
+    {
+      "signal": "newlows",
+      "headline": "New-low pressure",
+      "detail": "New-low pressure rose from 115.00 to 117.00.",
+      "magnitude": 2.0
+    },
+    {
+      "signal": "cpce",
+      "headline": "Options fear",
+      "detail": "Options fear fell from 0.71 to 0.56.",
+      "magnitude": 0.15
     }
   ]
 }
