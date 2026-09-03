@@ -1,6 +1,10 @@
 name: Publish CEO review with Cloudflare Drop
 on:
   workflow_dispatch:
+  push:
+    branches: [market-pulse-clean-review]
+    paths:
+      - '.github/workflows/deploy-drop-preview.yml'
 permissions:
   contents: read
 jobs:
