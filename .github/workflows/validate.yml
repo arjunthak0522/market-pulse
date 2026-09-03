@@ -24,6 +24,22 @@ jobs:
         run: python -m py_compile scripts/update_extremes.py scripts/run_refresh.py scripts/live_refresh.py scripts/trace_stockcharts.py scripts/market_regime.py tests/test_extremes.py tests/test_market_regime.py
       - name: Unit tests
         run: python -m unittest tests/test_extremes.py tests/test_market_regime.py -v
+      - name: Apply regime to current committed dataset
+        run: |
+          python scripts/market_regime.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('data/signal_data.json').read_text())
+          r=p.get('market_regime') or {}
+          assert r.get('name'), 'missing official regime'
+          assert r.get('confidence') in {'HIGH','MODERATE','LOW'}, 'invalid confidence'
+          assert r.get('coverage',{}).get('core_total') == 3, 'unexpected core coverage contract'
+          assert set((r.get('buckets') or {})) == {'trend','breadth','volatility'}, 'missing regime bucket'
+          assert r.get('stability',{}).get('rule'), 'missing hysteresis rule'
+          assert r.get('sessions_in_regime',0) >= 1, 'invalid regime duration'
+          print('current dataset regime:', r['name'], r['confidence'], r['buckets'])
+          PY
       - name: Clean V5 unified Worker guard
         run: |
           python - <<'PY'
