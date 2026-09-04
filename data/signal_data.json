@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T13:48:39.537532+00:00",
+  "generated_at": "2026-09-04T13:58:11.610374+00:00",
   "market_date": "2026-09-04",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -87,8 +87,8 @@
       "provider_realtime_flag": false
     },
     "namo": {
-      "value": -33.36,
-      "percentile_252d": 13.9,
+      "value": -22.79,
+      "percentile_252d": 21.8,
       "as_of": "2026-09-04",
       "source": "StockCharts intraday Nasdaq advances/declines; ratio-adjusted McClellan calculation",
       "study": {
@@ -155,13 +155,13 @@
           "2018-12-21"
         ]
       },
-      "as_of_timestamp": "2026-09-04T13:30:00+00:00",
+      "as_of_timestamp": "2026-09-04T13:41:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday_calculated"
     },
     "nymo": {
-      "value": -47.64,
-      "percentile_252d": 6.3,
+      "value": -33.84,
+      "percentile_252d": 14.3,
       "as_of": "2026-09-04",
       "source": "StockCharts intraday NYSE advances/declines; ratio-adjusted McClellan calculation",
       "study": {
@@ -228,13 +228,13 @@
           "2018-10-11"
         ]
       },
-      "as_of_timestamp": "2026-09-04T13:30:00+00:00",
+      "as_of_timestamp": "2026-09-04T13:41:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday_calculated"
     },
     "trin": {
-      "value": 0.662,
-      "percentile_252d": 7.5,
+      "value": 0.933,
+      "percentile_252d": 15.9,
       "as_of": "2026-09-04",
       "source": "StockCharts QuoteBrain $TRIN",
       "study": {
@@ -302,19 +302,19 @@
         ]
       },
       "session_open": 0.6618292326753598,
-      "session_high": 0.6618292326753598,
+      "session_high": 1.0222824535053936,
       "session_low": 0.6252678859755215,
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
       "intraday_extreme_occurred": false,
-      "as_of_timestamp": "2026-09-04T13:30:00+00:00",
+      "as_of_timestamp": "2026-09-04T13:41:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday",
       "quote_transport": "StockCharts QuoteBrain",
       "provider_realtime_flag": true
     },
     "trinq": {
-      "value": 0.337,
-      "percentile_252d": 0.0,
+      "value": 0.536,
+      "percentile_252d": 1.2,
       "as_of": "2026-09-04",
       "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
@@ -382,20 +382,20 @@
         ]
       },
       "session_open": 0.3366999660843483,
-      "session_high": 0.3366999660843483,
+      "session_high": 0.5504193691686686,
       "session_low": 0.2942916267727607,
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
       "intraday_extreme_occurred": false,
-      "as_of_timestamp": "2026-09-04T13:30:00+00:00",
+      "as_of_timestamp": "2026-09-04T13:40:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday",
       "quote_transport": "StockCharts QuoteBrain",
       "provider_realtime_flag": true
     },
     "newlows": {
-      "value": 18,
-      "new_highs": 12,
-      "new_low_pct": 0.77,
+      "value": 28,
+      "new_highs": 24,
+      "new_low_pct": 1.1,
       "percentile_252d": 84.5,
       "as_of": "2026-09-04",
       "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows",
@@ -463,19 +463,19 @@
           "2018-10-29"
         ]
       },
-      "nasdaq_new_lows": 27,
-      "nasdaq_new_highs": 11,
-      "nasdaq_new_low_pct": 0.74,
-      "as_of_timestamp": "2026-09-04T13:30:00+00:00",
+      "nasdaq_new_lows": 56,
+      "nasdaq_new_highs": 20,
+      "nasdaq_new_low_pct": 1.42,
+      "as_of_timestamp": "2026-09-04T13:41:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 53.47,
-      "above_20d": 37.4,
-      "above_50d": 48.4,
-      "above_200d": 66.6,
-      "percentile_252d": 49.7,
+      "above_5d": 52.86,
+      "above_20d": 36.4,
+      "above_50d": 48.0,
+      "above_200d": 66.2,
+      "percentile_252d": 48.0,
       "as_of": "2026-09-04",
       "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
@@ -537,15 +537,15 @@
           "2025-12-31"
         ]
       },
-      "as_of_timestamp": "2026-09-04T13:46:30.073000+00:00",
+      "as_of_timestamp": "2026-09-04T13:57:00.075000+00:00",
       "freshness": "intraday",
       "frequency": "intraday"
     },
     "vol": {
-      "vix": 14.14,
-      "vix3m": 17.38,
-      "term_ratio": 0.814,
-      "vvix": 82.61,
+      "vix": 14.05,
+      "vix3m": 17.33,
+      "term_ratio": 0.811,
+      "vvix": 82.85,
       "skew": 150.63,
       "stress_score": 14.4,
       "percentile_252d": 11.9,
@@ -615,7 +615,7 @@
           "2025-03-06"
         ]
       },
-      "term_percentile_252d": 9.9,
+      "term_percentile_252d": 8.7,
       "vvix_percentile_252d": 0.4,
       "skew_percentile_252d": 85.7,
       "term_study": {
@@ -810,7 +810,7 @@
           "2025-11-21"
         ]
       },
-      "as_of_timestamp": "2026-09-04T13:46:46+00:00",
+      "as_of_timestamp": "2026-09-04T13:56:46+00:00",
       "freshness": "intraday",
       "frequency": "mixed_intraday_eod",
       "skew_freshness": "eod",
@@ -821,7 +821,7 @@
   "data_status": {
     "session_date": "2026-09-04",
     "market_open": true,
-    "generated_at": "2026-09-04T13:48:39.537532+00:00"
+    "generated_at": "2026-09-04T13:58:11.610374+00:00"
   },
   "market_state": {
     "name": "Early Stress",
@@ -832,18 +832,18 @@
         "score": 85.7
       },
       "internals": {
-        "label": "Washout",
-        "score": 93.7
+        "label": "Weak",
+        "score": 85.7
       },
       "capitulation": {
         "label": "Not confirmed",
-        "score": 7.5
+        "score": 15.9
       }
     },
     "setup": {
       "extreme": {
-        "confirmed": true,
-        "copy": "A historically unusual condition is present."
+        "confirmed": false,
+        "copy": "No major historical extreme is present."
       },
       "confirmation": {
         "confirmed": true,
@@ -857,22 +857,22 @@
   },
   "what_changed": [
     {
-      "signal": "newlows",
-      "headline": "New-low pressure",
-      "detail": "New-low pressure fell from 87.00 to 18.00.",
-      "magnitude": 69.0
-    },
-    {
       "signal": "nymo",
       "headline": "NYSE breadth",
-      "detail": "NYSE breadth fell from -14.64 to -47.64.",
-      "magnitude": 33.0
+      "detail": "NYSE breadth rose from -47.64 to -33.84.",
+      "magnitude": 13.8
     },
     {
       "signal": "namo",
       "headline": "Nasdaq breadth",
-      "detail": "Nasdaq breadth fell from -6.67 to -33.36.",
-      "magnitude": 26.69
+      "detail": "Nasdaq breadth rose from -33.36 to -22.79.",
+      "magnitude": 10.57
+    },
+    {
+      "signal": "newlows",
+      "headline": "New-low pressure",
+      "detail": "New-low pressure rose from 18.00 to 28.00.",
+      "magnitude": 10.0
     }
   ]
 }
