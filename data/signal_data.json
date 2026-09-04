@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T19:45:25.501494+00:00",
+  "generated_at": "2026-09-04T19:54:31.677170+00:00",
   "market_date": "2026-09-04",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -87,7 +87,7 @@
       "provider_realtime_flag": false
     },
     "namo": {
-      "value": -5.56,
+      "value": -5.87,
       "percentile_252d": 45.6,
       "as_of": "2026-09-04",
       "source": "StockCharts intraday Nasdaq advances/declines; ratio-adjusted McClellan calculation",
@@ -155,13 +155,13 @@
           "2018-12-21"
         ]
       },
-      "as_of_timestamp": "2026-09-04T19:27:00+00:00",
+      "as_of_timestamp": "2026-09-04T19:36:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday_calculated"
     },
     "nymo": {
-      "value": -13.36,
-      "percentile_252d": 33.7,
+      "value": -13.86,
+      "percentile_252d": 32.9,
       "as_of": "2026-09-04",
       "source": "StockCharts intraday NYSE advances/declines; ratio-adjusted McClellan calculation",
       "study": {
@@ -228,13 +228,13 @@
           "2018-10-11"
         ]
       },
-      "as_of_timestamp": "2026-09-04T19:27:00+00:00",
+      "as_of_timestamp": "2026-09-04T19:36:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday_calculated"
     },
     "trin": {
-      "value": 1.228,
-      "percentile_252d": 67.9,
+      "value": 1.303,
+      "percentile_252d": 75.0,
       "as_of": "2026-09-04",
       "source": "StockCharts QuoteBrain $TRIN",
       "study": {
@@ -306,15 +306,15 @@
       "session_low": 0.6252678859755215,
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
       "intraday_extreme_occurred": false,
-      "as_of_timestamp": "2026-09-04T19:27:00+00:00",
+      "as_of_timestamp": "2026-09-04T19:36:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday",
       "quote_transport": "StockCharts QuoteBrain",
       "provider_realtime_flag": true
     },
     "trinq": {
-      "value": 0.8,
-      "percentile_252d": 36.9,
+      "value": 0.85,
+      "percentile_252d": 47.2,
       "as_of": "2026-09-04",
       "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
@@ -386,7 +386,7 @@
       "session_low": 0.2942916267727607,
       "definition": "StockCharts $TRINQ / classic Nasdaq Arms Index",
       "intraday_extreme_occurred": false,
-      "as_of_timestamp": "2026-09-04T19:27:00+00:00",
+      "as_of_timestamp": "2026-09-04T19:36:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday",
       "quote_transport": "StockCharts QuoteBrain",
@@ -463,19 +463,19 @@
           "2018-10-29"
         ]
       },
-      "nasdaq_new_lows": 131,
-      "nasdaq_new_highs": 75,
-      "nasdaq_new_low_pct": 2.7,
-      "as_of_timestamp": "2026-09-04T19:27:00+00:00",
+      "nasdaq_new_lows": 133,
+      "nasdaq_new_highs": 76,
+      "nasdaq_new_low_pct": 2.73,
+      "as_of_timestamp": "2026-09-04T19:36:00+00:00",
       "freshness": "intraday",
       "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 52.86,
-      "above_20d": 36.2,
-      "above_50d": 48.4,
-      "above_200d": 66.8,
-      "percentile_252d": 48.0,
+      "above_5d": 49.8,
+      "above_20d": 35.8,
+      "above_50d": 48.0,
+      "above_200d": 66.6,
+      "percentile_252d": 41.3,
       "as_of": "2026-09-04",
       "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
@@ -537,15 +537,15 @@
           "2025-12-31"
         ]
       },
-      "as_of_timestamp": "2026-09-04T19:44:00.218000+00:00",
+      "as_of_timestamp": "2026-09-04T19:52:30.010000+00:00",
       "freshness": "intraday",
       "frequency": "intraday"
     },
     "vol": {
-      "vix": 14.3,
-      "vix3m": 17.52,
-      "term_ratio": 0.816,
-      "vvix": 84.07,
+      "vix": 14.4,
+      "vix3m": 17.57,
+      "term_ratio": 0.82,
+      "vvix": 84.38,
       "skew": 150.63,
       "stress_score": 14.4,
       "percentile_252d": 11.9,
@@ -615,8 +615,8 @@
           "2025-03-06"
         ]
       },
-      "term_percentile_252d": 11.5,
-      "vvix_percentile_252d": 1.6,
+      "term_percentile_252d": 13.1,
+      "vvix_percentile_252d": 2.0,
       "skew_percentile_252d": 85.7,
       "term_study": {
         "title": "VIX term-structure stress",
@@ -810,7 +810,7 @@
           "2025-11-21"
         ]
       },
-      "as_of_timestamp": "2026-09-04T19:44:01+00:00",
+      "as_of_timestamp": "2026-09-04T19:52:46+00:00",
       "freshness": "intraday",
       "frequency": "mixed_intraday_eod",
       "skew_freshness": "eod",
@@ -821,7 +821,7 @@
   "data_status": {
     "session_date": "2026-09-04",
     "market_open": true,
-    "generated_at": "2026-09-04T19:45:25.501494+00:00"
+    "generated_at": "2026-09-04T19:54:31.677170+00:00"
   },
   "market_state": {
     "name": "Early Stress",
@@ -836,8 +836,8 @@
         "score": 84.5
       },
       "capitulation": {
-        "label": "Not confirmed",
-        "score": 67.9
+        "label": "Building",
+        "score": 75.0
       }
     },
     "setup": {
@@ -857,22 +857,22 @@
   },
   "what_changed": [
     {
-      "signal": "nymo",
-      "headline": "NYSE breadth",
-      "detail": "NYSE breadth rose from -16.68 to -13.36.",
-      "magnitude": 3.32
-    },
-    {
-      "signal": "namo",
-      "headline": "Nasdaq breadth",
-      "detail": "Nasdaq breadth rose from -6.65 to -5.56.",
-      "magnitude": 1.09
-    },
-    {
       "signal": "breadth",
       "headline": "Short-term participation",
-      "detail": "Short-term participation rose from 52% to 53% above the 5-day trend.",
-      "magnitude": 1.02
+      "detail": "Short-term participation fell from 53% to 50% above the 5-day trend.",
+      "magnitude": 3.06
+    },
+    {
+      "signal": "trin",
+      "headline": "NYSE selling pressure",
+      "detail": "NYSE selling pressure rose from 1.23 to 1.30.",
+      "magnitude": 0.075
+    },
+    {
+      "signal": "trinq",
+      "headline": "Nasdaq selling pressure",
+      "detail": "Nasdaq selling pressure rose from 0.80 to 0.85.",
+      "magnitude": 0.05
     }
   ]
 }
