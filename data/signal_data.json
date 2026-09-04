@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T21:59:10.458058+00:00",
+  "generated_at": "2026-09-04T13:09:54.526147+00:00",
   "market_date": "2026-09-03",
   "methodology": {
     "forward_returns": "SPY close-to-close forward returns at 5, 10, 21 and 60 trading sessions.",
@@ -11,9 +11,9 @@
   },
   "signals": {
     "cpce": {
-      "value": 0.67,
-      "average_5d": 0.578,
-      "percentile_252d": 18.7,
+      "value": 0.47,
+      "average_5d": 0.56,
+      "percentile_252d": 2.0,
       "as_of": "2026-09-03",
       "source": "StockCharts QuoteBrain $CPCE",
       "study": {
@@ -237,8 +237,8 @@
       "provider_realtime_flag": false
     },
     "trin": {
-      "value": 0.831,
-      "percentile_252d": 23.0,
+      "value": 0.78,
+      "percentile_252d": 15.5,
       "as_of": "2026-09-03",
       "source": "StockCharts QuoteBrain $TRIN",
       "study": {
@@ -307,7 +307,7 @@
       },
       "session_open": 1.6033,
       "session_high": 1.6033,
-      "session_low": 0.8122,
+      "session_low": 0.78,
       "definition": "StockCharts $TRIN / classic NYSE Arms Index",
       "intraday_extreme_occurred": true,
       "as_of_timestamp": "2026-09-03T20:00:00+00:00",
@@ -317,8 +317,8 @@
       "provider_realtime_flag": false
     },
     "trinq": {
-      "value": 0.805,
-      "percentile_252d": 38.9,
+      "value": 0.81,
+      "percentile_252d": 40.9,
       "as_of": "2026-09-03",
       "source": "StockCharts QuoteBrain $TRINQ",
       "study": {
@@ -397,9 +397,9 @@
       "provider_realtime_flag": false
     },
     "newlows": {
-      "value": 86,
+      "value": 87,
       "new_highs": 77,
-      "new_low_pct": 3.05,
+      "new_low_pct": 3.07,
       "percentile_252d": 84.5,
       "as_of": "2026-09-03",
       "source": "StockCharts NYSE/Nasdaq intraday 52-week highs/lows",
@@ -467,19 +467,19 @@
           "2018-10-29"
         ]
       },
-      "nasdaq_new_lows": 153,
-      "nasdaq_new_highs": 135,
-      "nasdaq_new_low_pct": 3.12,
+      "nasdaq_new_lows": 160,
+      "nasdaq_new_highs": 155,
+      "nasdaq_new_low_pct": 3.16,
       "as_of_timestamp": "2026-09-03T20:00:00+00:00",
       "freshness": "session_close",
       "frequency": "intraday"
     },
     "breadth": {
-      "above_5d": 59.18,
+      "above_5d": 58.98,
       "above_20d": 47.0,
       "above_50d": 51.0,
       "above_200d": 68.2,
-      "percentile_252d": 65.4,
+      "percentile_252d": 64.2,
       "as_of": "2026-09-03",
       "source": "Current S&P 500 constituent 5-day breadth + StockCharts 20/50/200-day participation",
       "study": {
@@ -551,8 +551,8 @@
       "term_ratio": 0.822,
       "vvix": 83.8,
       "skew": 150.63,
-      "stress_score": 14.3,
-      "percentile_252d": 11.5,
+      "stress_score": 14.4,
+      "percentile_252d": 11.9,
       "as_of": "2026-09-03",
       "source": "StockCharts current VIX/VIX3M/VVIX; StockCharts SKEW EOD",
       "study": {
@@ -619,8 +619,8 @@
           "2025-03-06"
         ]
       },
-      "term_percentile_252d": 13.9,
-      "vvix_percentile_252d": 0.8,
+      "term_percentile_252d": 14.3,
+      "vvix_percentile_252d": 1.2,
       "skew_percentile_252d": 85.7,
       "term_study": {
         "title": "VIX term-structure stress",
@@ -689,7 +689,7 @@
       "vvix_study": {
         "title": "VVIX fear-of-fear extremes",
         "rule": "VVIX in the top decile of history, indicating unusually expensive volatility hedging.",
-        "threshold": 116.3,
+        "threshold": 116.29,
         "direction": "high",
         "historical_sample": 127,
         "episode_method": "Independent episodes separated by at least 5 signal sessions.",
@@ -753,50 +753,50 @@
       "skew_study": {
         "title": "SKEW tail-risk extremes",
         "rule": "Cboe SKEW in the top decile of history, indicating unusually elevated pricing for large downside moves.",
-        "threshold": 147.959,
+        "threshold": 147.988,
         "direction": "high",
         "historical_sample": 118,
         "episode_method": "Independent episodes separated by at least 5 signal sessions.",
         "horizons": {
           "5": {
             "n": 116,
-            "average": 0.429,
-            "median": 0.457,
-            "positive_rate": 62.1,
+            "average": 0.435,
+            "median": 0.513,
+            "positive_rate": 61.2,
             "best": 5.346,
-            "worst": -3.972,
-            "median_max_drawdown": -0.317,
-            "median_max_favorable": 0.869
+            "worst": -3.63,
+            "median_max_drawdown": -0.253,
+            "median_max_favorable": 0.951
           },
           "10": {
             "n": 115,
-            "average": 0.695,
+            "average": 0.688,
             "median": 1.03,
-            "positive_rate": 71.3,
+            "positive_rate": 73.0,
             "best": 6.805,
             "worst": -13.725,
-            "median_max_drawdown": -0.663,
+            "median_max_drawdown": -0.492,
             "median_max_favorable": 1.477
           },
           "21": {
             "n": 113,
-            "average": 1.261,
+            "average": 1.358,
             "median": 1.88,
-            "positive_rate": 71.7,
+            "positive_rate": 72.6,
             "best": 11.318,
-            "worst": -7.984,
-            "median_max_drawdown": -1.067,
-            "median_max_favorable": 2.512
+            "worst": -7.677,
+            "median_max_drawdown": -1.006,
+            "median_max_favorable": 2.536
           },
           "60": {
             "n": 112,
-            "average": 2.099,
-            "median": 3.5,
+            "average": 2.1,
+            "median": 3.706,
             "positive_rate": 72.3,
             "best": 13.27,
             "worst": -24.843,
             "median_max_drawdown": -2.371,
-            "median_max_favorable": 5.095
+            "median_max_favorable": 5.098
           }
         },
         "prior_dates": [
@@ -825,7 +825,7 @@
   "data_status": {
     "session_date": "2026-09-03",
     "market_open": false,
-    "generated_at": "2026-09-03T21:59:10.458058+00:00"
+    "generated_at": "2026-09-04T13:09:54.526147+00:00"
   },
   "market_state": {
     "name": "Early Stress",
@@ -841,7 +841,7 @@
       },
       "capitulation": {
         "label": "Not confirmed",
-        "score": 38.9
+        "score": 40.9
       }
     },
     "setup": {
@@ -861,10 +861,22 @@
   },
   "what_changed": [
     {
-      "signal": "market",
-      "headline": "No major state change",
-      "detail": "The core signal set is broadly unchanged from the prior completed snapshot.",
-      "magnitude": 0
+      "signal": "newlows",
+      "headline": "New-low pressure",
+      "detail": "New-low pressure rose from 86.00 to 87.00.",
+      "magnitude": 1.0
+    },
+    {
+      "signal": "cpce",
+      "headline": "Options fear",
+      "detail": "Options fear fell from 0.67 to 0.47.",
+      "magnitude": 0.2
+    },
+    {
+      "signal": "trin",
+      "headline": "NYSE selling pressure",
+      "detail": "NYSE selling pressure fell from 0.83 to 0.78.",
+      "magnitude": 0.051
     }
   ]
 }
