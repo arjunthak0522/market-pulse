@@ -2,8 +2,6 @@ name: Refresh seven signals
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 13-21 * * 1-5'
   push:
     branches: [signal-quality-review]
     paths:
@@ -73,8 +71,6 @@ jobs:
                   assert int(st.get('n',0)) >= 5, f'{name}: {h}d study too thin'
                   assert 'median_max_drawdown' in st and 'median_max_favorable' in st, f'{name}: path stats missing'
 
-          # During the open session, every natively intraday family must be same-session
-          # and recent. EOD-only CPCE/SKEW are explicitly labeled rather than faked live.
           intraday=('trin','trinq','namo','nymo','newlows','breadth','vol')
           if is_open:
               now=datetime.now(timezone.utc)
@@ -86,10 +82,6 @@ jobs:
                   assert -5 <= age <= 20, f'{name}: intraday input stale ({age:.1f}m)'
                   assert row.get('freshness') == 'intraday', f'{name}: not labeled intraday'
           else:
-              # After the bell, same-session data is required for signals that can update
-              # with the completed session. CPCE is an EOD-only source that can legitimately
-              # publish after this workflow's first post-close runs, so do not fail the
-              # whole refresh merely because CPCE is still on the prior completed session.
               for name,row in p['signals'].items():
                   if name == 'cpce':
                       continue
