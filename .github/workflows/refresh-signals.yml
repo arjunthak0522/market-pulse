@@ -86,8 +86,13 @@ jobs:
                   assert -5 <= age <= 20, f'{name}: intraday input stale ({age:.1f}m)'
                   assert row.get('freshness') == 'intraday', f'{name}: not labeled intraday'
           else:
-              # After the bell, all primary readings must resolve to the latest completed session.
+              # After the bell, same-session data is required for signals that can update
+              # with the completed session. CPCE is an EOD-only source that can legitimately
+              # publish after this workflow's first post-close runs, so do not fail the
+              # whole refresh merely because CPCE is still on the prior completed session.
               for name,row in p['signals'].items():
+                  if name == 'cpce':
+                      continue
                   assert row.get('as_of') == session, f'{name}: stale completed-session date {row.get("as_of")} != {session}'
 
           for name in ('trin','trinq'):
